@@ -50,12 +50,13 @@ requires
 contains
   uBaseFormExport in 'uBaseFormExport.pas',
   uFrmParent in 'uFrmParent.pas' {frmParent},
-  uFrmMDIBase in 'uFrmMDIBase.pas' {frmMDIBase},
+  uFrmMDI in 'uFrmMDI.pas' {frmMDI},
   uFrmMDIBaseType in 'uFrmMDIBaseType.pas' {frmMDIBaseType},
   uFrmBaseInput in 'uFrmBaseInput.pas' {frmBaseInput},
   uBaseFormPlugin in 'uBaseFormPlugin.pas',
   uBaseForm in 'uBaseForm.pas',
   uDBComConfig in 'uDBComConfig.pas',
-  uFrmApp in 'uFrmApp.pas';
+  uFrmApp in 'uFrmApp.pas',
+  uFrmMDIBill in 'uFrmMDIBill.pas' {frmMDIBill};
 
 end.

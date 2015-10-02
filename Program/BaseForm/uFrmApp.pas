@@ -21,6 +21,7 @@ type
   end;
 
 procedure LoadBaseTVData(AMode: string; ATVClass: TcxTreeView); //根据类型加载树节点
+procedure FreeBaseTVData(ATVClass: TcxTreeView); //释放树节点保存的对象
 
 implementation
 
@@ -48,6 +49,7 @@ begin
     (SysService as IDBAccess).QuerySQL(aSQLStr, aCdsTemp);
 
     ATVClass.Items.Clear;
+    ATVClass.Items.BeginUpdate;
     aCdsTemp.First;
     while not aCdsTemp.Eof do
     begin
@@ -66,6 +68,7 @@ begin
           if aParNodeData.Typeid = aNodeData.Parid then
           begin
             ATVClass.Items.AddChildObject(aNode, aNodeData.Fullname, aNodeData);
+            Break;
           end;
         end;
         aNode := aNode.GetNext;
@@ -78,7 +81,25 @@ begin
       aCdsTemp.Next;
     end;
   finally
+    ATVClass.Items.EndUpdate;
     aCdsTemp.Free;
+  end;
+end;
+
+procedure FreeBaseTVData(ATVClass: TcxTreeView);
+var
+  aNode: TTreeNode;
+  aNodeData: PNodeData;
+begin
+  aNode := ATVClass.Items.GetFirstNode;
+  while Assigned(aNode) do
+  begin
+    aNodeData := aNode.Data;
+    if Assigned(aNodeData) then
+    begin
+      Dispose(aNodeData);
+    end;
+    aNode := aNode.GetNext;
   end;
 end;
 

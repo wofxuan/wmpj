@@ -1,6 +1,6 @@
-inherited frmMDIBase: TfrmMDIBase
+inherited frmMDI: TfrmMDI
   BorderStyle = bsNone
-  Caption = 'frmMDIBase'
+  Caption = 'frmMDI'
   FormStyle = fsMDIChild
   OnClose = FormClose
   PixelsPerInch = 96
@@ -45,15 +45,14 @@ inherited frmMDIBase: TfrmMDIBase
     Height = 235
     Align = alClient
     TabOrder = 2
-    object gridDTVMainShow: TcxGridDBTableView
+    object gridTVMainShow: TcxGridTableView
       NavigatorButtons.ConfirmDelete = False
-      DataController.DataSource = dsMainShow
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>
     end
     object gridLVMainShow: TcxGridLevel
-      GridView = gridDTVMainShow
+      GridView = gridTVMainShow
     end
   end
   object dsMainShow: TDataSource [4]

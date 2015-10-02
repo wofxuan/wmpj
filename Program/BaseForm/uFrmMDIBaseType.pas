@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, uFrmMDIBase, cxStyles, cxCustomData, cxGraphics, cxFilter,
+  Dialogs, uFrmMDI, cxStyles, cxCustomData, cxGraphics, cxFilter,
   cxData, cxDataStorage, cxEdit, DB, cxDBData, cxGridLevel, cxClasses,
   cxControls, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
   cxGridDBTableView, cxGrid, ExtCtrls, DBClient, Menus, uParamObject,
@@ -13,7 +13,7 @@ uses
   dxBar, ImgList, dxBarExtItems;
 
 type
-  TfrmMDIBaseType = class(TfrmMDIBase)
+  TfrmMDIBaseType = class(TfrmMDI)
     actAdd: TAction;
     actModify: TAction;
     actDelete: TAction;
@@ -33,13 +33,14 @@ type
     procedure actAddExecute(Sender: TObject);
     procedure actModifyExecute(Sender: TObject);
     procedure actDeleteExecute(Sender: TObject);
-    procedure gridDTVMainShowCellDblClick(Sender: TcxCustomGridTableView;
-      ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
-      AShift: TShiftState; var AHandled: Boolean);
     procedure actClassExecute(Sender: TObject);
     procedure actCopyAddExecute(Sender: TObject);
     procedure actListExecute(Sender: TObject);
     procedure actQueryExecute(Sender: TObject);
+    procedure gridTVMainShowCellDblClick(Sender: TcxCustomGridTableView;
+      ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+      AShift: TShiftState; var AHandled: Boolean);
+    procedure tvClassChange(Sender: TObject; Node: TTreeNode);
   private
     { Private declarations }
 
@@ -56,6 +57,7 @@ type
     function GetBaseInputClass: TDlgInputBaseClass; virtual;            //基本信息录入视图
     function OpenInPutBase(AParam: TParamObject = nil): Boolean; virtual; //弹出窗口编辑纪录
     procedure BeforeFormShow; override;
+    procedure BeforeFormDestroy; override;
     function GetCurTypeId: string; virtual;                 //获取当前表格选中行的ID
     procedure LoadGridData(ATypeid: string = ''); override;
     function LoadParGridData: Boolean; override;
@@ -99,9 +101,12 @@ begin
   FGridItem.BasicType := FModelBaseList.GetBasicType;
   IniGridField();
   LoadGridData(ROOT_ID);
-  
+
   if TVVisble then
+  begin
     LoadBaseTVData(GetBaseTypeTable(FModelBaseList.GetBasicType), tvClass);
+    tvClass.FullExpand;
+  end;
 end;
 
 procedure TfrmMDIBaseType.AddNewRec;
@@ -132,7 +137,7 @@ var
 begin
   if StringEmpty(CurTypeId) then Exit;
   
-  aOldRowIndex := gridDTVMainShow.Controller.FocusedRowIndex;
+  aOldRowIndex := gridTVMainShow.Controller.FocusedRowIndex;
   aParam := TParamObject.Create;
   try
     aParam.Add('cMode', GetEnumValue(TypeInfo(TDataChangeType), 'dctModif'));
@@ -143,7 +148,7 @@ begin
     if OpenInPutBase(aParam) then
     begin
       LoadGridData(Self.ParamList.AsString('ParId_Cur'));
-      gridDTVMainShow.Controller.FocusedRowIndex := aOldRowIndex;
+      gridTVMainShow.Controller.FocusedRowIndex := aOldRowIndex;
     end;
   finally
     aParam.Free;
@@ -224,7 +229,7 @@ var
   aRowIndex: Integer;
 begin
   Result := '';
-  aRowIndex := gridDTVMainShow.Controller.FocusedRowIndex;
+  aRowIndex := gridTVMainShow.Controller.FocusedRowIndex;
   if (aRowIndex < FGridItem.GetFirstRow) or (aRowIndex > FGridItem.GetLastRow) then
     Exit;
   if FModelBaseList.GetBasicType <> btNo then
@@ -238,7 +243,7 @@ begin
   inherited;
   Self.ParamList.Add('ParId_Cur', ATypeid);
   FModelBaseList.LoadGridData(ATypeid, '', cdsMainShow);
-  FGridItem.ReClassList;
+  FGridItem.LoadData(cdsMainShow);
 end;
 
 procedure TfrmMDIBaseType.InitParamList;
@@ -246,26 +251,6 @@ begin
   inherited;
   ParamList.Add(ReportMode, ReportMode_Node);
   Self.ParamList.Add('ParId', ROOT_ID);
-end;
-
-procedure TfrmMDIBaseType.gridDTVMainShowCellDblClick(
-  Sender: TcxCustomGridTableView;
-  ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
-  AShift: TShiftState; var AHandled: Boolean);
-var
-  aSonnum: string;
-begin
-  inherited;
-  aSonnum := FModelFun.GetLocalValue(FModelBaseList.GetBasicType, GetBaseTypeSonnumStr(FModelBaseList.GetBasicType), CurTypeId);
-  if StrToIntDef(aSonnum, 0) > 0 then
-  begin
-    LoadGridData(CurTypeId);
-    actReturn.Enabled := True;
-  end
-  else
-  begin
-    ModifyRec();
-  end;
 end;
 
 procedure TfrmMDIBaseType.actClassExecute(Sender: TObject);
@@ -307,6 +292,45 @@ begin
     actReturn.Enabled := False;
   end;
   Result := True;
+end;
+
+procedure TfrmMDIBaseType.gridTVMainShowCellDblClick(
+  Sender: TcxCustomGridTableView;
+  ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+  AShift: TShiftState; var AHandled: Boolean);
+var
+  aSonnum: string;
+begin
+  inherited;
+  aSonnum := FModelFun.GetLocalValue(FModelBaseList.GetBasicType, GetBaseTypeSonnumStr(FModelBaseList.GetBasicType), CurTypeId);
+  if StrToIntDef(aSonnum, 0) > 0 then
+  begin
+    LoadGridData(CurTypeId);
+    actReturn.Enabled := True;
+  end
+  else
+  begin
+    ModifyRec();
+  end;
+end;
+
+procedure TfrmMDIBaseType.BeforeFormDestroy;
+begin
+  if TVVisble then
+    FreeBaseTVData(tvClass);
+  inherited;
+end;
+
+procedure TfrmMDIBaseType.tvClassChange(Sender: TObject; Node: TTreeNode);
+var
+  aNodeData: PNodeData;
+begin
+  inherited;
+  aNodeData := Node.Data;
+  if Assigned(aNodeData) then
+  begin
+    LoadGridData(aNodeData.Typeid);
+  end;
 end;
 
 end.

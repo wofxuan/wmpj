@@ -1,4 +1,4 @@
-unit uFrmMDIBase;
+unit uFrmMDI;
 
 interface
 
@@ -13,10 +13,9 @@ uses
   cxButtons, uDefCom, dxBar, ImgList, dxBarExtItems, uModelFunIntf;
 
 type
-  TfrmMDIBase = class(TfrmParent)
+  TfrmMDI = class(TfrmParent)
     pnlTop: TPanel;
     pnlTV: TPanel;
-    gridDTVMainShow: TcxGridDBTableView;
     gridLVMainShow: TcxGridLevel;
     gridMainShow: TcxGrid;
     dsMainShow: TDataSource;
@@ -30,6 +29,7 @@ type
     barTool: TdxBar;
     btnReturn: TdxBarLargeButton;
     btnClose: TdxBarLargeButton;
+    gridTVMainShow: TcxGridTableView;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure actCloseExecute(Sender: TObject);
     procedure actReturnExecute(Sender: TObject);
@@ -56,7 +56,7 @@ type
   end;
 
 var
-  frmMDIBase: TfrmMDIBase;
+  frmMDI: TfrmMDI;
 
 implementation
 
@@ -66,66 +66,64 @@ uses uSysSvc, uMoudleNoDef, uBaseInfoDef, uFrmApp, uMainFormIntf;
 
 { TfrmMDIBase }
 
-procedure TfrmMDIBase.BeforeFormDestroy;
+procedure TfrmMDI.BeforeFormDestroy;
 begin
   inherited;
+
   FGridItem.Free;
 end;
 
-procedure TfrmMDIBase.BeforeFormShow;
+procedure TfrmMDI.BeforeFormShow;
 begin
   inherited;
-  FGridItem := TGridItem.Create(MoudleNo, gridMainShow, gridDTVMainShow);
+  FGridItem := TGridItem.Create(MoudleNo, gridMainShow, gridTVMainShow);
   FDBAC := SysService as IDBAccess;
   FModelFun := SysService as IModelFun;
 end;
 
-function TfrmMDIBase.GetTVVisble: Boolean;
+function TfrmMDI.GetTVVisble: Boolean;
 begin
   Result := pnlTV.Visible;
 end;
 
-procedure TfrmMDIBase.IniGridField;
+procedure TfrmMDI.IniGridField;
 begin
 
 end;
 
-procedure TfrmMDIBase.InitParamList;
+procedure TfrmMDI.InitParamList;
 begin
   inherited;
 
 end;
 
-procedure TfrmMDIBase.LoadGridData(ATypeid: string);
+procedure TfrmMDI.LoadGridData(ATypeid: string);
 begin
-//  if ATypeid <> ROOT_ID then
-//    btnClose.Caption := '·µ»Ø(&C)'
-//  else
-//    btnClose.Caption := '¹Ø±Õ(&C)';
+
 end;
 
-procedure TfrmMDIBase.SetTVVisble(const Value: Boolean);
+procedure TfrmMDI.SetTVVisble(const Value: Boolean);
 begin
   pnlTV.Visible := Value;
 end;
 
-function TfrmMDIBase.LoadParGridData: Boolean;
+function TfrmMDI.LoadParGridData: Boolean;
 begin
   Result := True;
 end;
 
-procedure TfrmMDIBase.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TfrmMDI.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   inherited;
   Action := caFree;
 end;
 
-function TfrmMDIBase.FrmShowStyle: TShowStyle;
+function TfrmMDI.FrmShowStyle: TShowStyle;
 begin
   Result := fssShow;
 end;
 
-procedure TfrmMDIBase.actCloseExecute(Sender: TObject);
+procedure TfrmMDI.actCloseExecute(Sender: TObject);
 var
   aMainForm: IMainForm;
   aCanClose: Boolean;
@@ -136,7 +134,7 @@ begin
   aMainForm.CloseFom(Self, aCanClose);
 end;
 
-procedure TfrmMDIBase.actReturnExecute(Sender: TObject);
+procedure TfrmMDI.actReturnExecute(Sender: TObject);
 begin
   inherited;
   if (not LoadParGridData()) then Close;

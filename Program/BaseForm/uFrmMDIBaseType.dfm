@@ -15,14 +15,15 @@ inherited frmMDIBaseType: TfrmMDIBaseType
     inherited tvClass: TcxTreeView
       Width = 111
       Height = 230
+      OnChange = tvClassChange
     end
   end
   inherited gridMainShow: TcxGrid
     Left = 116
     Width = 620
     Height = 232
-    inherited gridDTVMainShow: TcxGridDBTableView
-      OnCellDblClick = gridDTVMainShowCellDblClick
+    inherited gridTVMainShow: TcxGridTableView
+      OnCellDblClick = gridTVMainShowCellDblClick
     end
   end
   inherited actlstEvent: TActionList

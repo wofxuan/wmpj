@@ -8,10 +8,10 @@ uses
   cxGraphics, cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData,
   cxGridLevel, cxClasses, cxControls, cxGridCustomView,
   cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGrid,
-  uFrmMDIBase, ActnList, DBClient;
+  uFrmMDI, ActnList, DBClient;
 
 type
-  TFrmTest = class(TfrmMDIBase)
+  TFrmTest = class(TfrmMDI)
     procedure btn1Click(Sender: TObject);
   private
     { Private declarations }
