@@ -1,0 +1,61 @@
+package BaseForm;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  rtl,
+  vcl,
+  Core,
+  vcljpg,
+  vcldb,
+  dxGDIPlusD7,
+  cxLibraryVCLD7,
+  dxThemeD7,
+  cxEditorsVCLD7,
+  cxDataD7,
+  cxExtEditorsVCLD7,
+  cxPageControlVCLD7,
+  cxGridD7,
+  dxBarD7,
+  dxPSCoreD7,
+  Other,
+  BusinessIntf,
+  dbrtl,
+  dsnap,
+  dxBarExtItemsD7;
+
+contains
+  uBaseFormExport in 'uBaseFormExport.pas',
+  uFrmParent in 'uFrmParent.pas' {frmParent},
+  uFrmMDIBase in 'uFrmMDIBase.pas' {frmMDIBase},
+  uFrmMDIBaseType in 'uFrmMDIBaseType.pas' {frmMDIBaseType},
+  uFrmBaseInput in 'uFrmBaseInput.pas' {frmBaseInput},
+  uBaseFormPlugin in 'uBaseFormPlugin.pas',
+  uBaseForm in 'uBaseForm.pas',
+  uDBComConfig in 'uDBComConfig.pas',
+  uFrmApp in 'uFrmApp.pas';
+
+end.

@@ -1,0 +1,45 @@
+package BusinessLayer;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  rtl,
+  dsnap,
+  dbrtl,
+  vcl,
+  vcldb,
+  BusinessIntf;
+
+contains
+  uBusinessLayerExport in 'uBusinessLayerExport.pas',
+  uModelFunCom in 'uModelFunCom.pas',
+  uBasicDataLocalClass in 'uBasicDataLocalClass.pas',
+  uModelParent in 'uModelParent.pas',
+  uModelBaseType in 'uModelBaseType.pas',
+  uModelBaseList in 'uModelBaseList.pas',
+  uBusinessLayer in 'uBusinessLayer.pas';
+
+end.

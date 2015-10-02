@@ -1,0 +1,2 @@
+在程序中引用metelese单元。编译后cxgrid的表头就为中文版。
+superobject，对json字符串处理

@@ -1,0 +1,24 @@
+尽量用cx的按钮和输入框
+窗体单元名称用uFrmXX，单元里面的船体名称用TfrmXXX
+
+控件前缀
+按钮:btn
+标签:lbl
+表格:grid
+TPanel:pnl
+TDataSource:ds
+TClientDataSet:cds
+TCheckBox:chk
+
+新建一个BPL包的时候注意设置路径和选择包的option->Description->Usage options->Runtime only,因为这样才是一个运行时的包，让用户不能安装,还有注意要添加导出函数
+procedure InstallPackage;                                   //安装包
+procedure UnInstallPackage;                                 //卸载包
+procedure RegisterPlugIn(Reg: IRegPlugin);                  //注册插件
+如果要在注册的时候初始化一些东西，可以继承TPlugin，在其中可以调用接口Sys
+初始化数据最好都在加载完成后继承TPlugin对象中的Init函数中初始化
+
+在对下拉列表赋值取值判断的时候，不要直接用index与数字对比，要与定义的常量对比
+
+少用系统函数，用封装了的系统函数
+
+在事件中不应该存放任何业务逻辑，业务逻辑都应该以单独的方法或函数进行封装，而在事件中应该只是调用并检测返回值，而不应该在事件中直接写业务逻辑

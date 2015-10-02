@@ -1,0 +1,55 @@
+#------------------------------------------------------------------------------
+VERSION = BWS.01
+#------------------------------------------------------------------------------
+!ifndef ROOT
+ROOT = $(MAKEDIR)\..
+!endif
+#------------------------------------------------------------------------------
+MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
+DCC = $(ROOT)\bin\dcc32.exe $**
+BRCC = $(ROOT)\bin\brcc32.exe $**
+#------------------------------------------------------------------------------
+PROJECTS = WMServer.exe Core.bpl Other.bpl DBAccess.bpl BusinessIntf.bpl \
+  BusinessLayer.bpl BaseForm.bpl BaseInfo.bpl SysConfig.bpl TestBpl.bpl \
+  Testdll.dll WMPJ.exe
+#------------------------------------------------------------------------------
+default: $(PROJECTS)
+#------------------------------------------------------------------------------
+
+Core.bpl: Core\Core.dpk
+  $(DCC)
+
+BaseForm.bpl: BaseForm\BaseForm.dpk
+  $(DCC)
+
+TestBpl.bpl: testbpl\TestBpl.dpk
+  $(DCC)
+
+WMPJ.exe: MainAPP\WMPJ.dpr
+  $(DCC)
+
+DBAccess.bpl: DBAccess\DBAccess.dpk
+  $(DCC)
+
+WMServer.exe: WMServer\WMServer.dpr
+  $(DCC)
+
+SysConfig.bpl: SysConfig\SysConfig.dpk
+  $(DCC)
+
+BusinessLayer.bpl: BusinessLayer\BusinessLayer.dpk
+  $(DCC)
+
+Other.bpl: Other\Other.dpk
+  $(DCC)
+
+Testdll.dll: testdll\Testdll.dpr
+  $(DCC)
+
+BaseInfo.bpl: BusinessForm\BaseInfo\BaseInfo.dpk
+  $(DCC)
+
+BusinessIntf.bpl: BusinessIntf\BusinessIntf.dpk
+  $(DCC)
+
+
