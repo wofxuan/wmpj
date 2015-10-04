@@ -17,7 +17,7 @@ CREATE      PROCEDURE pbx_Base_InsertD
       --上面是基本信息必须的参数
       @IsStop INT ,
       --下面面是基本信息必须的参数
-      @RltTypeID VARCHAR(25) OUTPUT , --返回创建的ID
+      @RltTypeID VARCHAR(50) OUTPUT , --返回创建的ID
       @errorValue VARCHAR(500) OUTPUT ,--返回错误信息
       @uErueMode INT = 0 --数据插入标识 0 为程序插入  1为excel导入
     )

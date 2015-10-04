@@ -13,8 +13,8 @@ uses
 type
   TfrmBaseTbxCfg = class(TfrmMDI)
     btnUnDefTbx: TdxBarLargeButton;
-    actUnDefTbx: TAction;
-    procedure actUnDefTbxExecute(Sender: TObject);
+    actCheckDefTbx: TAction;
+    procedure actCheckDefTbxExecute(Sender: TObject);
   private
     FModelTbxCfg: IModelTbxCfg;
     { Private declarations }
@@ -33,7 +33,7 @@ var
 implementation
 
 uses uBaseFormPlugin, uSysSvc, uDBIntf, uGridConfig, uMoudleNoDef, uBaseInfoDef,
-     uModelBaseListIntf, uModelControlIntf, uFrmBaseTbxUnDef;
+     uModelBaseListIntf, uModelControlIntf, uFrmBaseTbxCheckDef;
 {$R *.dfm}
 
 { TfrmMDI1 }
@@ -52,12 +52,15 @@ begin
 end;
 
 procedure TfrmBaseTbxCfg.IniGridField;
+var
+  aCol: TColInfo;
 begin
   inherited;
   FGridItem.ClearField();
   FGridItem.AddFiled('tbxId', 'ITypeId', -1);
   FGridItem.AddFiled('tbxName', '表格名称', 200);
-  FGridItem.AddFiled('tbxType', '表格类型', 200);
+  aCol := FGridItem.AddFiled('tbxType', '表格类型', 200);
+  aCol.SetDisplayText('-1', '未定义');
   FGridItem.AddFiled('tbxComment', '备注', 200);
   FGridItem.InitGridData;
 end;
@@ -71,14 +74,14 @@ end;
 procedure TfrmBaseTbxCfg.LoadGridData(ATypeid: string);
 begin
   inherited;
-  FModelTbxCfg.LoadGridData('D', cdsMainShow);
+  FModelTbxCfg.LoadGridData('L', cdsMainShow);
   FGridItem.LoadData(cdsMainShow);
 end;
 
-procedure TfrmBaseTbxCfg.actUnDefTbxExecute(Sender: TObject);
+procedure TfrmBaseTbxCfg.actCheckDefTbxExecute(Sender: TObject);
 begin
   inherited;
-  if CallTfrmBaseTbxUnDef(FModelTbxCfg, Self) = MROK then
+  if CallTfrmBaseTbxCheckDef(FModelTbxCfg, Self) = MROK then
     LoadGridData('');
 end;
 

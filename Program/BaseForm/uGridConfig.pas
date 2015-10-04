@@ -24,7 +24,11 @@ type
   private
     FGridColumn: TcxGridColumn;
     FFieldName: string;
+
+    FDataToDisplay: TStringList;//字段显示与查询数据对应列表
+    procedure  GetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: String);
   public
+    procedure SetDisplayText(ADataText, DisplayText: string);//设置查询数据与显示数据的对应关系
     constructor Create(AGridColumn: TcxGridColumn; AFieldName: string);
     destructor Destroy; override;
   end;
@@ -311,8 +315,31 @@ end;
 
 destructor TColInfo.Destroy;
 begin
-
+  if Assigned(FDataToDisplay) then FDataToDisplay.Free;
   inherited;
+end;
+
+procedure TColInfo.GetDisplayText(Sender: TcxCustomGridTableItem;
+  ARecord: TcxCustomGridRecord; var AText: String);
+var
+  aDataIndex: Integer;
+begin
+  aDataIndex := FDataToDisplay.IndexOfName(AText);
+  if aDataIndex <> -1 then
+  begin
+    AText := FDataToDisplay.ValueFromIndex[aDataIndex];
+  end;
+end;
+
+procedure TColInfo.SetDisplayText(ADataText, DisplayText: string);
+begin
+  if not Assigned(FDataToDisplay) then
+  begin
+    FDataToDisplay := TStringList.Create;
+    FGridColumn.OnGetDisplayText := GetDisplayText;
+  end;
+
+  FDataToDisplay.Add(ADataText + '=' + DisplayText);
 end;
 
 initialization

@@ -1,6 +1,6 @@
 [Closed Files]
-File_0=SourceModule,'E:\code\delphi\wmpj\Program\BaseForm\uFrmParent.pas',0,1,41,1,49,0,0
-File_1=SourceModule,'E:\code\delphi\wmpj\Program\BaseForm\uFrmDialog.pas',0,1,1,1,11,1,0
+File_0=SourceModule,'E:\code\delphi\wmpj\Program\Interfaces\uOtherIntf.pas',0,1,34,16,6,0,0
+File_1=SourceModule,'E:\code\delphi\wmpj\Program\Pub\uBaseInfoDef.pas',0,1,1,1,12,0,0
 File_2=SourceModule,'E:\code\delphi\wmpj\Program\Interfaces\uFactoryFormIntf.pas',0,1,10,1,15,0,0
 File_3=SourceModule,'E:\code\delphi\wmpj\Program\SysConfig\uFrmLoadItemSetInput.pas',0,1,4,37,12,1,0
 File_4=SourceModule,'E:\code\delphi\wmpj\Program\SysConfig\uFrmLoadItemSet.pas',0,1,16,71,27,1,0
@@ -12,52 +12,28 @@ File_9=SourceModule,'E:\code\delphi\wmpj\Program\Pub\uMoudleNoDef.pas',0,1,34,18
 
 [Modules]
 Module0=E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxCfg.pas
-Module1=E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxUnDef.pas
-Module2=E:\code\delphi\wmpj\Program\BaseForm\uFrmDialog.pas
-Module3=E:\code\delphi\wmpj\Program\MainAPP\uFrmWMPG.pas
-Module4=E:\code\delphi\wmpj\Program\BusinessLayer\uModelSys.pas
-Module5=E:\code\delphi\wmpj\Program\BusinessLayer\uModelParent.pas
-Module6=E:\code\delphi\wmpj\Program\BaseForm\uFrmBaseInput.pas
-Module7=E:\code\delphi\wmpj\Program\BusinessIntf\uModelSysIntf.pas
-Module8=E:\code\delphi\wmpj\Program\BaseForm\uFrmMDI.pas
-Module9=E:\code\delphi\wmpj\Program\BaseForm\uFrmMDIBaseType.pas
-Count=10
+Module1=E:\code\delphi\wmpj\Program\BaseForm\uGridConfig.pas
+Module2=E:\code\delphi\wmpj\Program\BusinessIntf\uModelSysIntf.pas
+Module3=E:\code\delphi\wmpj\Program\BusinessLayer\uModelSys.pas
+Module4=E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxCheckDef.pas
+Module5=E:\code\delphi\wmpj\Program\BaseForm\uFrmMDIBaseType.pas
+Module6=E:\code\delphi\wmpj\Program\BaseForm\uFrmDialog.pas
+Module7=E:\code\delphi\wmpj\Program\BaseForm\uFrmMDI.pas
+Module8=E:\code\delphi\wmpj\Program\BaseForm\uFrmBaseInput.pas
+Module9=E:\code\delphi\wmpj\Program\MainAPP\uFrmWMPG.pas
+Module10=E:\code\delphi\wmpj\Program\BusinessLayer\uModelParent.pas
+Count=11
 EditWindowCount=1
 PackageWindowCount=10
 
 [E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxCfg.pas]
 ModuleType=SourceModule
 FormState=1
-FormOnTop=1
-
-[E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxUnDef.pas]
-ModuleType=SourceModule
-FormState=1
 FormOnTop=0
 
-[E:\code\delphi\wmpj\Program\BaseForm\uFrmDialog.pas]
-ModuleType=SourceModule
-FormState=1
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\MainAPP\uFrmWMPG.pas]
-ModuleType=SourceModule
-FormState=1
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BusinessLayer\uModelSys.pas]
+[E:\code\delphi\wmpj\Program\BaseForm\uGridConfig.pas]
 ModuleType=SourceModule
 FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BusinessLayer\uModelParent.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BaseForm\uFrmBaseInput.pas]
-ModuleType=SourceModule
-FormState=1
 FormOnTop=0
 
 [E:\code\delphi\wmpj\Program\BusinessIntf\uModelSysIntf.pas]
@@ -65,7 +41,12 @@ ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[E:\code\delphi\wmpj\Program\BaseForm\uFrmMDI.pas]
+[E:\code\delphi\wmpj\Program\BusinessLayer\uModelSys.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxCheckDef.pas]
 ModuleType=SourceModule
 FormState=1
 FormOnTop=0
@@ -75,11 +56,28 @@ ModuleType=SourceModule
 FormState=1
 FormOnTop=0
 
-[E:\code\delphi\wmpj\Program\BaseForm\uFrmParent.pas]
-FormState=0
+[E:\code\delphi\wmpj\Program\BaseForm\uFrmDialog.pas]
+ModuleType=SourceModule
+FormState=1
 FormOnTop=0
 
-[E:\code\delphi\wmpj\Program\BaseForm\BaseForm.dpk]
+[E:\code\delphi\wmpj\Program\BaseForm\uFrmMDI.pas]
+ModuleType=SourceModule
+FormState=1
+FormOnTop=0
+
+[E:\code\delphi\wmpj\Program\BaseForm\uFrmBaseInput.pas]
+ModuleType=SourceModule
+FormState=1
+FormOnTop=0
+
+[E:\code\delphi\wmpj\Program\MainAPP\uFrmWMPG.pas]
+ModuleType=SourceModule
+FormState=1
+FormOnTop=0
+
+[E:\code\delphi\wmpj\Program\BusinessLayer\uModelParent.pas]
+ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
@@ -111,6 +109,10 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
+[E:\code\delphi\wmpj\Program\BaseForm\BaseForm.dpk]
+FormState=0
+FormOnTop=0
+
 [E:\code\delphi\wmpj\Program\BusinessForm\BaseInfo\BaseInfo.dpk]
 FormState=0
 FormOnTop=0
@@ -131,12 +133,16 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
+[E:\code\delphi\wmpj\Program\BaseForm\uFrmParent.pas]
+FormState=0
+FormOnTop=0
+
 [D:\delphiCommpoent\DevExpress\ExpressDataController\Packages\cxDataD7.dpk]
 FormState=0
 FormOnTop=0
 
 [EditWindow0]
-ViewCount=10
+ViewCount=11
 CurrentView=4
 View0=0
 View1=1
@@ -148,6 +154,7 @@ View6=6
 View7=7
 View8=8
 View9=9
+View10=10
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
@@ -158,23 +165,23 @@ Top=122
 Width=1038
 Height=505
 MaxLeft=-8
-MaxTop=113
+MaxTop=120
 MaxWidth=1296
-MaxHeight=578
+MaxHeight=571
 ClientWidth=1280
-ClientHeight=539
+ClientHeight=532
 LeftPanelSize=76
 LeftPanelClients=CodeExplorer@EditWindow0
-LeftPanelData=00000400000000004C00000000000000028F010000000000000100000000460000000000000001000000009A0000000000000001000000004C0000000C000000436F64654578706C6F726572FFFFFFFF
+LeftPanelData=00000400000000004C0000000000000002B0010000000000000100000000460000000000000001000000009A0000000000000001000000004C0000000C000000436F64654578706C6F726572FFFFFFFF
 RightPanelSize=0
-BottomPanelSize=137
+BottomPanelSize=97
 BottomPanelClients=MessageView@EditWindow0,CallStackWindow
-BottomPanelData=00000400000000000005000000000000028900000000000000010000000171030000000000000200000000890000000B0000004D6573736167655669657702000000008C000000000000000100000000000500000F00000043616C6C537461636B57696E646F77FFFFFFFF
+BottomPanelData=00000400000000000005000000000000026100000000000000010000000171030000000000000200000000610000000B0000004D6573736167655669657702000000008C000000000000000100000000000500000F00000043616C6C537461636B57696E646F77FFFFFFFF
 
 [View0]
 Module=E:\code\delphi\wmpj\Program\MainAPP\uFrmWMPG.pas
-CursorX=131
-CursorY=141
+CursorX=84
+CursorY=146
 TopLine=139
 LeftCol=1
 
@@ -187,8 +194,8 @@ LeftCol=1
 
 [View2]
 Module=E:\code\delphi\wmpj\Program\BaseForm\uFrmMDIBaseType.pas
-CursorX=1
-CursorY=240
+CursorX=18
+CursorY=241
 TopLine=231
 LeftCol=1
 
@@ -201,44 +208,51 @@ LeftCol=1
 
 [View4]
 Module=E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxCfg.pas
-CursorX=40
-CursorY=81
-TopLine=67
+CursorX=125
+CursorY=61
+TopLine=52
 LeftCol=1
 
 [View5]
-Module=E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxUnDef.pas
-CursorX=15
-CursorY=83
-TopLine=86
+Module=E:\code\delphi\wmpj\Program\BaseForm\uGridConfig.pas
+CursorX=31
+CursorY=29
+TopLine=17
 LeftCol=1
 
 [View6]
-Module=E:\code\delphi\wmpj\Program\BaseForm\uFrmDialog.pas
-CursorX=29
-CursorY=39
-TopLine=36
+Module=E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxCheckDef.pas
+CursorX=88
+CursorY=73
+TopLine=71
 LeftCol=1
 
 [View7]
-Module=E:\code\delphi\wmpj\Program\BusinessIntf\uModelSysIntf.pas
-CursorX=14
-CursorY=5
-TopLine=1
+Module=E:\code\delphi\wmpj\Program\BaseForm\uFrmDialog.pas
+CursorX=29
+CursorY=39
+TopLine=27
 LeftCol=1
 
 [View8]
-Module=E:\code\delphi\wmpj\Program\BusinessLayer\uModelSys.pas
-CursorX=99
-CursorY=39
-TopLine=33
+Module=E:\code\delphi\wmpj\Program\BusinessIntf\uModelSysIntf.pas
+CursorX=1
+CursorY=10
+TopLine=1
 LeftCol=1
 
 [View9]
+Module=E:\code\delphi\wmpj\Program\BusinessLayer\uModelSys.pas
+CursorX=27
+CursorY=68
+TopLine=1
+LeftCol=1
+
+[View10]
 Module=E:\code\delphi\wmpj\Program\BusinessLayer\uModelParent.pas
 CursorX=1
-CursorY=3
-TopLine=49
+CursorY=83
+TopLine=73
 LeftCol=1
 
 [PackageWindow0]
@@ -261,7 +275,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\BaseForm\BaseForm.dpk
+Module=E:\code\delphi\wmpj\Program\Core\Core.dpk
 
 [PackageWindow1]
 Create=1
@@ -283,7 +297,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\Core\Core.dpk
+Module=E:\code\delphi\wmpj\Program\Other\Other.dpk
 
 [PackageWindow2]
 Create=1
@@ -305,7 +319,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\Other\Other.dpk
+Module=E:\code\delphi\wmpj\Program\DBAccess\DBAccess.dpk
 
 [PackageWindow3]
 Create=1
@@ -327,7 +341,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\DBAccess\DBAccess.dpk
+Module=E:\code\delphi\wmpj\Program\BusinessIntf\BusinessIntf.dpk
 
 [PackageWindow4]
 Create=1
@@ -349,7 +363,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\BusinessIntf\BusinessIntf.dpk
+Module=E:\code\delphi\wmpj\Program\BusinessLayer\BusinessLayer.dpk
 
 [PackageWindow5]
 Create=1
@@ -371,7 +385,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\BusinessLayer\BusinessLayer.dpk
+Module=E:\code\delphi\wmpj\Program\BaseForm\BaseForm.dpk
 
 [PackageWindow6]
 Create=1
@@ -583,7 +597,7 @@ LRDockWidth=190
 Dockable=1
 SplitPos=126
 ArrangeBy=Name
-SelectedItem=Caption
+SelectedItem=DataController.Options
 ExpandedItems=DataBinding,DataController,ImageOptions
 HiddenCategories=
 
@@ -616,12 +630,12 @@ State=0
 Left=893
 Top=0
 Width=387
-Height=137
+Height=97
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=387
-ClientHeight=137
-TBDockHeight=137
+ClientHeight=97
+TBDockHeight=97
 LRDockWidth=99
 Dockable=1
 
@@ -756,12 +770,12 @@ State=0
 Left=0
 Top=12
 Width=76
-Height=387
+Height=427
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=76
-ClientHeight=387
-TBDockHeight=387
+ClientHeight=427
+TBDockHeight=427
 LRDockWidth=66
 Dockable=1
 
@@ -772,12 +786,12 @@ State=0
 Left=12
 Top=0
 Width=865
-Height=137
+Height=97
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=865
-ClientHeight=137
-TBDockHeight=137
+ClientHeight=97
+TBDockHeight=97
 LRDockWidth=443
 Dockable=1
 
@@ -785,5 +799,5 @@ Dockable=1
 DockHostCount=0
 
 [ActiveProject]
-ActiveProject=6
+ActiveProject=9
 

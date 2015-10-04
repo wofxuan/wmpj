@@ -100,7 +100,7 @@ var
   aSQL: string;
 begin
   Result := '';
-  aSQL := 'SELECT a.SQLStr FROM dbo.tbx_DefSQLList a WHERE a.SQLNo = ' + IntToStr(AMoudleNo);
+  aSQL := 'SELECT a.SQLStr FROM dbo.tbx_Sys_DefSQL a WHERE a.SQLNo = ' + IntToStr(AMoudleNo);
   aCdsTemp := TClientDataSet.Create(nil);
   try
     QuerySQL(aSQL, aCdsTemp);

@@ -9,6 +9,7 @@ inherited frmBaseTbxCfg: TfrmBaseTbxCfg
   end
   inherited pnlTop: TPanel
     Top = 48
+    Visible = False
   end
   inherited pnlTV: TPanel
     Top = 86
@@ -26,9 +27,9 @@ inherited frmBaseTbxCfg: TfrmBaseTbxCfg
     Height = 231
   end
   inherited actlstEvent: TActionList
-    object actUnDefTbx: TAction
-      Caption = #26410#37197#32622#30340#34920#26684
-      OnExecute = actUnDefTbxExecute
+    object actCheckDefTbx: TAction
+      Caption = #26816#26597#37197#32622
+      OnExecute = actCheckDefTbxExecute
     end
   end
   inherited imglstBtn: TcxImageList
@@ -60,7 +61,7 @@ inherited frmBaseTbxCfg: TfrmBaseTbxCfg
         end>
     end
     object btnUnDefTbx: TdxBarLargeButton
-      Action = actUnDefTbx
+      Action = actCheckDefTbx
       Category = 0
     end
   end

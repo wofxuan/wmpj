@@ -1,9 +1,11 @@
 -----------------------清空数据
 --DROP TABLE tbx_Base_PackageInfo
 --GO
---DROP TABLE tbx_FrmMoudleNoParams
+--DROP TABLE tbx_Sys_FrmParams
 --GO 
---DROP TABLE tbx_DefSQLList
+--DROP TABLE tbx_Sys_DefSQL
+--GO 
+--DROP TABLE tbx_Sys_TbxCfg
 --GO 
 --DROP TABLE tbx_Base_Ptype
 --GO 
@@ -217,8 +219,8 @@ END
 GO 
 
 --所有用户表格定义的相关信息
-IF OBJECT_ID('dbo.tbx_tbx_Sys_TbxCfg') IS NULL 
-    CREATE TABLE [dbo].[tbx_TbxCfg]
+IF OBJECT_ID('dbo.tbx_Sys_TbxCfg') IS NULL 
+    CREATE TABLE [dbo].[tbx_Sys_TbxCfg]
         (
           [TbxId] INT NOT NULL , --表格在SysObjects表的系统ID
           [TbxName] VARCHAR(50) NOT NULL DEFAULT '' ,
@@ -231,8 +233,8 @@ IF OBJECT_ID('dbo.tbx_tbx_Sys_TbxCfg') IS NULL
 GO
 
 --记录MoudleNo对应的窗体和默认参数
-IF OBJECT_ID('dbo.tbx_FrmMoudleNoParams') IS NULL 
-    CREATE TABLE [dbo].[tbx_FrmMoudleNoParams]
+IF OBJECT_ID('dbo.tbx_Sys_FrmParams') IS NULL 
+    CREATE TABLE [dbo].[tbx_Sys_FrmParams]
         (
           [FMPID] INT IDENTITY(1, 1) ,
           [MoudleNo] INT NOT NULL DEFAULT 0 ,
@@ -242,14 +244,14 @@ IF OBJECT_ID('dbo.tbx_FrmMoudleNoParams') IS NULL
           [ClassName] VARCHAR(50) NOT NULL ,
           [ParamList] VARCHAR(200) NOT NULL DEFAULT '' ,
           [DefaultParams] VARCHAR(200) NOT NULL DEFAULT '' 
-          CONSTRAINT PK_tbx_FrmMoudleNoParams PRIMARY KEY ( FMPID )
+          CONSTRAINT PK_tbx_Sys_FrmParams PRIMARY KEY ( FMPID )
         )
         
 GO
 
 --记录定义的SQL语句
-IF OBJECT_ID('dbo.tbx_DefSQLList') IS NULL 
-    CREATE TABLE [dbo].[tbx_DefSQLList]
+IF OBJECT_ID('dbo.tbx_Sys_DefSQL') IS NULL 
+    CREATE TABLE [dbo].[tbx_Sys_DefSQL]
         (
           [DSLID] INT IDENTITY(1, 1) ,
           [SQLNo] INT NOT NULL DEFAULT 0 ,
@@ -258,7 +260,7 @@ IF OBJECT_ID('dbo.tbx_DefSQLList') IS NULL
           [DSLRemark] VARCHAR(200) NOT NULL DEFAULT '' , 
           [DSLCreateTime] DATETIME NOT NULL DEFAULT 0 ,
           [DSLUpdateTime] DATETIME NOT NULL DEFAULT 0 
-          CONSTRAINT PK_tbx_DefSQLList PRIMARY KEY ( DSLID )
+          CONSTRAINT PK_tbx_Sys_DefSQL PRIMARY KEY ( DSLID )
         )
         
 GO
@@ -286,20 +288,20 @@ INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUs
 VALUES  ( '00008' ,'00000' ,0 ,0 ,1 ,'Testdll.dll' ,'Testdll.dll' ,'Testdll.dll' ,'测试DLL' ,0, 7)
 GO 
 
-DELETE dbo.tbx_FrmMoudleNoParams
+DELETE dbo.tbx_Sys_FrmParams
 GO 
 --初始化窗体和对应的模块编号参数, MoudleNo要与uMoudleNoDef的对应
-INSERT INTO dbo.tbx_FrmMoudleNoParams ( MoudleNo ,FMPKey ,DefaultCaption ,ShowCaption ,ClassName ,ParamList , DefaultParams )
+INSERT INTO dbo.tbx_Sys_FrmParams ( MoudleNo ,FMPKey ,DefaultCaption ,ShowCaption ,ClassName ,ParamList , DefaultParams )
 VALUES  (101, '{1382E20F-642F-4662-A863-7F90F6E04CC7}' , '系统加载模块' , '系统加载模块' , 'TfrmLoadItemSet' , '' , '' )
 GO
 
-DELETE tbx_DefSQLList
+DELETE tbx_Sys_DefSQL
 GO
 --初始化定义的SQL语句
-INSERT INTO dbo.tbx_DefSQLList ( SQLNo ,DSLKey ,SQLStr ,DSLRemark ,DSLCreateTime ,DSLUpdateTime)
+INSERT INTO dbo.tbx_Sys_DefSQL ( SQLNo ,DSLKey ,SQLStr ,DSLRemark ,DSLCreateTime ,DSLUpdateTime)
 VALUES  (4001 ,'{DF1C4EA1-D1F2-4150-99CB-317DF61FB17E}' ,'select * from tbx_Base_PackageInfo' ,'查询要加载的包' , GETDATE() ,GETDATE())
 GO
 --初始化定义的SQL语句
-INSERT INTO dbo.tbx_DefSQLList ( SQLNo ,DSLKey ,SQLStr ,DSLRemark ,DSLCreateTime ,DSLUpdateTime)
+INSERT INTO dbo.tbx_Sys_DefSQL ( SQLNo ,DSLKey ,SQLStr ,DSLRemark ,DSLCreateTime ,DSLUpdateTime)
 VALUES  (1001 ,'{968FCBAC-74E3-43BA-80D3-21248ED828E1}' ,'select * from tbx_Base_Ptype where' ,'商品信息' , GETDATE() ,GETDATE())
 GO

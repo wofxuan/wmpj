@@ -1,2 +1,7 @@
+表格名定义
 基本信息类表格命名为 tbx_Base_XXX
 系统类表格命名为 tbx_Sys_XXX
+
+存储过程名定义
+基本信息类表格命名为 pbx_Base_XXX
+系统类表格命名为 pbx_Sys_XXX

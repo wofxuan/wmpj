@@ -37,6 +37,7 @@ procedure TfrmDialog.SetTitle(const Value: string);
 begin
   inherited;
   lblTitle.Caption := Value;
+  Caption := Value;
 end;
 
 end.
