@@ -102,7 +102,7 @@ constructor TfrmParent.CreateFrmParamList(AOwner: TComponent;
   AParam: TParamObject);
 begin
   ParamList := TParamObject.Create;
-  ParamList.Params := AParam.Params;
+  if Assigned(AParam) then ParamList.Params := AParam.Params;
   InitParamList();
   inherited Create(AOwner);
   //∏≥¥∞ÃÂ±ÍÃ‚

@@ -201,12 +201,26 @@ end;
 function TGridItem.GetCellValue(ADBName: string; ARowIndex: Integer): Variant;
 var
   aCol: Integer;
+  aColItem: TColInfo;
+  aFindCol: Boolean;
 begin
   try
-//    aCol := FGridTV.GetColumnByFieldName(ADBName).Index;
-    Result := FGridTV.DataController.GetValue(ARowIndex, aCol);
-  except
-    raise(SysService as IExManagement).CreateSysEx('读取表格列[' + ADBName + ']数据错误,请设置表格列字段！');
+    aFindCol := False;
+    for aCol := 0 to Length(FColList) - 1 do
+    begin
+      aColItem := FColList[aCol];
+      if UpperCase(aColItem.FFieldName) = UpperCase(ADBName) then
+      begin
+        Result := FGridTV.DataController.GetValue(ARowIndex, aColItem.FGridColumn.Index);
+        aFindCol := True;
+        Break;
+      end;
+    end;
+  finally
+    if not aFindCol then
+    begin
+      raise(SysService as IExManagement).CreateSysEx('读取表格列[' + ADBName + ']数据错误,请设置表格列字段！');
+    end;
   end;
 end;
 

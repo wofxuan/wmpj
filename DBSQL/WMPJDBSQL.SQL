@@ -215,11 +215,26 @@ BEGIN
 	VALUES  ( '00000' ,'0' ,0 ,'000000000' ,'全部部门')
 END
 GO 
+
+--所有用户表格定义的相关信息
+IF OBJECT_ID('dbo.tbx_tbx_Sys_TbxCfg') IS NULL 
+    CREATE TABLE [dbo].[tbx_TbxCfg]
+        (
+          [TbxId] INT NOT NULL , --表格在SysObjects表的系统ID
+          [TbxName] VARCHAR(50) NOT NULL DEFAULT '' ,
+          [TbxType] INT NOT NULL DEFAULT -1 , --表格类型：-1未定义；0基本信息；1单据；2其它
+          [TbxRowIndex] INT NOT NULL DEFAULT 0 ,--排列顺序
+          [TbxComment] VARCHAR(200) NOT NULL DEFAULT '' , 
+          CONSTRAINT PK_tbx_Sys_TbxCfg PRIMARY KEY ( TbxId )
+        )
+        
+GO
+
 --记录MoudleNo对应的窗体和默认参数
 IF OBJECT_ID('dbo.tbx_FrmMoudleNoParams') IS NULL 
     CREATE TABLE [dbo].[tbx_FrmMoudleNoParams]
         (
-          [FMPID] [int] IDENTITY(1, 1) ,
+          [FMPID] INT IDENTITY(1, 1) ,
           [MoudleNo] INT NOT NULL DEFAULT 0 ,
           [FMPKey] VARCHAR(50) NOT NULL DEFAULT '' ,
           [DefaultCaption] VARCHAR(50) NOT NULL ,
@@ -236,7 +251,7 @@ GO
 IF OBJECT_ID('dbo.tbx_DefSQLList') IS NULL 
     CREATE TABLE [dbo].[tbx_DefSQLList]
         (
-          [DSLID] [int] IDENTITY(1, 1) ,
+          [DSLID] INT IDENTITY(1, 1) ,
           [SQLNo] INT NOT NULL DEFAULT 0 ,
           [DSLKey] VARCHAR(50) NOT NULL DEFAULT '' ,
           [SQLStr] VARCHAR(5000) NOT NULL DEFAULT '' ,

@@ -1,5 +1,5 @@
 尽量用cx的按钮和输入框
-窗体单元名称用uFrmXX，单元里面的船体名称用TfrmXXX
+窗体单元名称用uFrmXX，单元里面的窗体名称用TfrmXXX
 
 控件前缀
 按钮:btn

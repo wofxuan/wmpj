@@ -40,6 +40,7 @@ contains
   uModelParent in 'uModelParent.pas',
   uModelBaseType in 'uModelBaseType.pas',
   uModelBaseList in 'uModelBaseList.pas',
-  uBusinessLayer in 'uBusinessLayer.pas';
+  uBusinessLayer in 'uBusinessLayer.pas',
+  uModelSys in 'uModelSys.pas';
 
 end.

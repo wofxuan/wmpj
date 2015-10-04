@@ -225,6 +225,7 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m1000', '系统维护', '', '', 0, nil);
     AddMenu('m10001000', '系统参数设置', 'm1000', '', 0, nil);
     AddMenu('m100010001000', '加载包设置', 'm10001000', '', fnMdlLoadItemSet, nil);
+    AddMenu('m100010002000', '系统表格配置', 'm10001000', '', fnMdlBaseTbxCfg, nil);
 
     AddMenu('m100011111', '测试接口', 'm1000', '', 0, TestIntfMethod);
 

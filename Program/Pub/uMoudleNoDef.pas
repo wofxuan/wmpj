@@ -43,8 +43,9 @@ const
 
   //系统设置-------------------------------4000---------------------
   fnMdlLoadItemSet = fnSystem + 0001; //加载包设置
-  fnMdlHelp_Calc = fnSystem + 0002; //计算器
-  fnMdlHelp_Online = fnSystem + 0003; //在线帮助
+  fnMdlBaseTbxCfg = fnSystem + 0002; //表格信息配置
+  fnMdlHelp_Calc = fnSystem + 0003; //计算器
+  fnMdlHelp_Online = fnSystem + 0004; //在线帮助
 
   //系统设置-------------------------------4000---------------------
   fnMdlTTest = fnTest + 0001; //测试

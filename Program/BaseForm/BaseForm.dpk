@@ -57,6 +57,7 @@ contains
   uBaseForm in 'uBaseForm.pas',
   uDBComConfig in 'uDBComConfig.pas',
   uFrmApp in 'uFrmApp.pas',
-  uFrmMDIBill in 'uFrmMDIBill.pas' {frmMDIBill};
+  uFrmMDIBill in 'uFrmMDIBill.pas' {frmMDIBill},
+  uFrmDialog in 'uFrmDialog.pas' {frmDialog};
 
 end.

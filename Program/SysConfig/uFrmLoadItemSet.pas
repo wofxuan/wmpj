@@ -9,7 +9,7 @@ uses
   cxDBData, ActnList, DBClient, cxGridLevel, cxClasses, cxControls,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView, uParamObject,
   cxGridDBTableView, cxGrid, StdCtrls, cxButtons, ExtCtrls, uFrmBaseInput,
-  ComCtrls, cxContainer, cxTreeView;
+  ComCtrls, cxContainer, cxTreeView, dxBar, dxBarExtItems, ImgList;
 
 type
   TfrmLoadItemSet = class(TfrmMDIBaseType)
@@ -24,9 +24,7 @@ type
   public
     { Public declarations }
     procedure BeforeFormShow; override;
-
     class function GetMdlDisName: string; override; //得到模块显示名称
-
   end;
 
 var

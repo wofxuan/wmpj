@@ -38,6 +38,7 @@ contains
   uBusinessIntfExport in 'uBusinessIntfExport.pas',
   uModelBaseListIntf in 'uModelBaseListIntf.pas',
   uModelFunIntf in 'uModelFunIntf.pas',
-  uModelControlIntf in 'uModelControlIntf.pas';
+  uModelControlIntf in 'uModelControlIntf.pas',
+  uModelSysIntf in 'uModelSysIntf.pas';
 
 end.

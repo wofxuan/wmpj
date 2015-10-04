@@ -1,8 +1,8 @@
 object FrmWMPG: TFrmWMPG
-  Left = 393
-  Top = 186
-  Width = 632
-  Height = 422
+  Left = 68
+  Top = 108
+  Width = 1076
+  Height = 517
   Caption = #20027#31243#24207
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,14 +22,14 @@ object FrmWMPG: TFrmWMPG
   object imgTop: TImage
     Left = 0
     Top = 0
-    Width = 616
+    Width = 1060
     Height = 65
     Align = alTop
   end
   object statList: TStatusBar
     Left = 0
-    Top = 364
-    Width = 616
+    Top = 459
+    Width = 1060
     Height = 19
     Panels = <
       item
@@ -48,7 +48,7 @@ object FrmWMPG: TFrmWMPG
   object tclFrmList: TcxTabControl
     Left = 0
     Top = 65
-    Width = 616
+    Width = 1060
     Height = 20
     Align = alTop
     Options = [pcoAlwaysShowGoDialogButton, pcoCloseButton, pcoGradient, pcoGradientClientArea, pcoRedrawOnResize]
@@ -62,7 +62,7 @@ object FrmWMPG: TFrmWMPG
     OnCanClose = tclFrmListCanClose
     OnChange = tclFrmListChange
     ClientRectBottom = 20
-    ClientRectRight = 616
+    ClientRectRight = 1060
     ClientRectTop = 19
   end
 end

@@ -1,0 +1,2 @@
+基本信息类表格命名为 tbx_Base_XXX
+系统类表格命名为 tbx_Sys_XXX

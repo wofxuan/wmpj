@@ -42,11 +42,15 @@ requires
   cxPageControlVCLD7,
   cxExtEditorsVCLD7,
   vclx,
-  cxExportVCLD7;
+  cxExportVCLD7,
+  dxBarD7,
+  dxComnD7,
+  dxBarExtItemsD7;
 
 contains
   uSysConfigExport in 'uSysConfigExport.pas',
   uFrmLoadItemSet in 'uFrmLoadItemSet.pas' {frmLoadItemSet},
-  uFrmLoadItemSetInput in 'uFrmLoadItemSetInput.pas' {frmLoadItemSetInput};
+  uFrmLoadItemSetInput in 'uFrmLoadItemSetInput.pas' {frmLoadItemSetInput},
+  uFrmBaseTbxCfg in 'uFrmBaseTbxCfg.pas' {frmBaseTbxCfg};
 
 end.

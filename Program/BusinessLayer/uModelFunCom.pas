@@ -39,7 +39,7 @@ type
     //数据库操作
     function ExecProcByName(AProcName: string; AInParam: TParamObject): Integer;
     function ExecProcBackData(AProcName: string; AInParam: TParamObject = nil; ABackData: TClientDataSet = nil): Integer;
-
+    procedure QuerySQL(const ASQLStr: string; AQueryData: TClientDataSet);
     //显示提示消息
     function ShowMsgBox(AMsg: string; ACaption: string = ''; AMsgType: TMessageBoxType = mbtInformation; AButtons: TMessageBoxButtons = [mbbOk]): Integer;
 
@@ -131,6 +131,12 @@ begin
     Result := 0
   else
     Result := E_NOINTERFACE;
+end;
+
+procedure TModelFunCom.QuerySQL(const ASQLStr: string;
+  AQueryData: TClientDataSet);
+begin
+  FDBAC.QuerySQL(ASQLStr, AQueryData);
 end;
 
 initialization
