@@ -6,7 +6,7 @@ inherited frmMDI: TfrmMDI
   PixelsPerInch = 96
   TextHeight = 13
   object splOP: TSplitter [0]
-    Left = 121
+    Left = 0
     Top = 82
     Height = 235
   end
@@ -19,32 +19,13 @@ inherited frmMDI: TfrmMDI
     Caption = 'pnlTop'
     TabOrder = 0
   end
-  object pnlTV: TPanel [2]
-    Left = 0
+  object gridMainShow: TcxGrid [2]
+    Left = 3
     Top = 82
-    Width = 121
-    Height = 235
-    Align = alLeft
-    Caption = 'pnlTV'
-    TabOrder = 1
-    Visible = False
-    object tvClass: TcxTreeView
-      Left = 1
-      Top = 1
-      Width = 119
-      Height = 233
-      Align = alClient
-      TabOrder = 0
-      ReadOnly = True
-    end
-  end
-  object gridMainShow: TcxGrid [3]
-    Left = 124
-    Top = 82
-    Width = 612
+    Width = 733
     Height = 235
     Align = alClient
-    TabOrder = 2
+    TabOrder = 1
     object gridTVMainShow: TcxGridTableView
       NavigatorButtons.ConfirmDelete = False
       DataController.Summary.DefaultGroupSummaryItems = <>
@@ -55,12 +36,12 @@ inherited frmMDI: TfrmMDI
       GridView = gridTVMainShow
     end
   end
-  object dsMainShow: TDataSource [4]
+  object dsMainShow: TDataSource [3]
     DataSet = cdsMainShow
     Left = 660
     Top = 16
   end
-  object cdsMainShow: TClientDataSet [5]
+  object cdsMainShow: TClientDataSet [4]
     Aggregates = <>
     Params = <>
     Left = 596
@@ -72,10 +53,6 @@ inherited frmMDI: TfrmMDI
     object actClose: TAction
       Caption = #20851#38381
       OnExecute = actCloseExecute
-    end
-    object actReturn: TAction
-      Caption = #36820#22238
-      OnExecute = actReturnExecute
     end
   end
   object imglstBtn: TcxImageList
@@ -194,10 +171,6 @@ inherited frmMDI: TfrmMDI
       ItemLinks = <
         item
           Visible = True
-          ItemName = 'btnReturn'
-        end
-        item
-          Visible = True
           ItemName = 'btnClose'
         end>
       OneOnRow = True
@@ -205,12 +178,6 @@ inherited frmMDI: TfrmMDI
       UseOwnFont = False
       Visible = True
       WholeRow = False
-    end
-    object btnReturn: TdxBarLargeButton
-      Action = actReturn
-      Category = 0
-      LargeImageIndex = 0
-      AutoGrayScale = False
     end
     object btnClose: TdxBarLargeButton
       Action = actClose

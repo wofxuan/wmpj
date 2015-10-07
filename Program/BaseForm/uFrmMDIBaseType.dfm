@@ -6,27 +6,40 @@ inherited frmMDIBaseType: TfrmMDIBaseType
   PixelsPerInch = 96
   TextHeight = 13
   inherited splOP: TSplitter
-    Left = 113
     Height = 232
-  end
-  inherited pnlTV: TPanel
-    Width = 113
-    Height = 232
-    inherited tvClass: TcxTreeView
-      Width = 111
-      Height = 230
-      OnChange = tvClassChange
-    end
   end
   inherited gridMainShow: TcxGrid
-    Left = 116
-    Width = 620
+    Left = 124
+    Width = 612
     Height = 232
     inherited gridTVMainShow: TcxGridTableView
       OnCellDblClick = gridTVMainShowCellDblClick
     end
   end
+  object pnlTV: TPanel [3]
+    Left = 3
+    Top = 82
+    Width = 121
+    Height = 232
+    Align = alLeft
+    Caption = 'pnlTV'
+    TabOrder = 6
+    Visible = False
+    object tvClass: TcxTreeView
+      Left = 1
+      Top = 1
+      Width = 119
+      Height = 230
+      Align = alClient
+      TabOrder = 0
+      ReadOnly = True
+    end
+  end
   inherited actlstEvent: TActionList
+    object actReturn: TAction
+      Caption = 'actReturn'
+      OnExecute = actReturnExecute
+    end
     object actAdd: TAction
       Caption = #26032#22686
       OnExecute = actAddExecute
@@ -438,8 +451,7 @@ inherited frmMDIBaseType: TfrmMDIBaseType
       2)
     Categories.Visibles = (
       True)
-    Left = 352
-    Top = 24
+    Left = 692
     DockControlHeights = (
       0
       0
@@ -534,6 +546,14 @@ inherited frmMDIBaseType: TfrmMDIBaseType
       Action = actStop
       Category = 0
       LargeImageIndex = 9
+      AutoGrayScale = False
+    end
+    object btnReturn: TdxBarLargeButton
+      Caption = #36820#22238
+      Category = 0
+      Visible = ivAlways
+      LargeImageIndex = 0
+      OnClick = actReturnExecute
       AutoGrayScale = False
     end
   end

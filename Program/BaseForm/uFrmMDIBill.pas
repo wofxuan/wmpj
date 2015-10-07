@@ -8,10 +8,20 @@ uses
   cxFilter, cxData, cxDataStorage, cxEdit, dxBar, dxBarExtItems, cxClasses,
   ImgList, ActnList, DB, DBClient, cxGridLevel, cxControls,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxGrid,
-  cxContainer, cxTreeView, ExtCtrls;
+  cxContainer, cxTreeView, ExtCtrls, cxLabel, cxDropDownEdit, cxCalendar,
+  cxTextEdit, cxMaskEdit, cxButtonEdit;
 
 type
   TfrmMDIBill = class(TfrmMDI)
+    pnlBillTitle: TPanel;
+    pnlBillMaster: TPanel;
+    lblBillTitle: TcxLabel;
+    edtBillNumber: TcxButtonEdit;
+    deBillDate: TcxDateEdit;
+    lblBillDate: TcxLabel;
+    lblBillNumber: TcxLabel;
+    btnNewBill: TdxBarLargeButton;
+    actNewBill: TAction;
   private
     { Private declarations }
   public
@@ -22,6 +32,9 @@ var
   frmMDIBill: TfrmMDIBill;
 
 implementation
+
+uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
+     uBaseInfoDef, uDefCom, uGridConfig, uFrmApp;
 
 {$R *.dfm}
 

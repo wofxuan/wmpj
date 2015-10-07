@@ -8,7 +8,8 @@ uses
   cxFilter, cxData, cxDataStorage, cxEdit, dxBar, dxBarExtItems, cxClasses,
   ImgList, ActnList, DB, DBClient, cxGridLevel, cxControls,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxGrid,
-  cxContainer, cxTreeView, ExtCtrls;
+  cxContainer, cxTreeView, ExtCtrls, cxDropDownEdit, cxCalendar,
+  cxTextEdit, cxMaskEdit, cxButtonEdit, cxLabel;
 
 type
   TfrmMDIBill1 = class(TfrmMDIBill)
@@ -23,6 +24,12 @@ var
 
 implementation
 
+uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
+     uBaseInfoDef, uDefCom, uGridConfig, uFrmApp;
+
 {$R *.dfm}
 
+initialization
+  gFormManage.RegForm(TfrmMDIBill1, fnMdlBillOrder);
+  
 end.

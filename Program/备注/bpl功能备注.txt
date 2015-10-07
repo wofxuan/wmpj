@@ -13,7 +13,7 @@ BaseForm
 BusinessLayer
 业务逻辑层
 
-BusinessForm
+BusinessForm（基本信息和单据等）
 业务逻辑显示窗体
 
 BusinessIntf

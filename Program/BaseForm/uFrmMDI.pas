@@ -15,27 +15,20 @@ uses
 type
   TfrmMDI = class(TfrmParent)
     pnlTop: TPanel;
-    pnlTV: TPanel;
     gridLVMainShow: TcxGridLevel;
     gridMainShow: TcxGrid;
     dsMainShow: TDataSource;
     cdsMainShow: TClientDataSet;
-    tvClass: TcxTreeView;
     splOP: TSplitter;
     imglstBtn: TcxImageList;
     actClose: TAction;
-    actReturn: TAction;
     bmList: TdxBarManager;
     barTool: TdxBar;
-    btnReturn: TdxBarLargeButton;
     btnClose: TdxBarLargeButton;
     gridTVMainShow: TcxGridTableView;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure actCloseExecute(Sender: TObject);
-    procedure actReturnExecute(Sender: TObject);
   private
-    procedure SetTVVisble(const Value: Boolean); //树表是否显示 调用此函数应该在IniGridData内
-    function GetTVVisble: Boolean;
     function FrmShowStyle: TShowStyle; override;
   protected
     { Private declarations }
@@ -52,7 +45,7 @@ type
     procedure InitParamList; override;
   public
     { Public declarations }
-    property TVVisble: boolean read GetTVVisble write SetTVVisble;
+    
   end;
 
 var
@@ -81,11 +74,6 @@ begin
   FModelFun := SysService as IModelFun;
 end;
 
-function TfrmMDI.GetTVVisble: Boolean;
-begin
-  Result := pnlTV.Visible;
-end;
-
 procedure TfrmMDI.IniGridField;
 begin
 
@@ -100,11 +88,6 @@ end;
 procedure TfrmMDI.LoadGridData(ATypeid: string);
 begin
 
-end;
-
-procedure TfrmMDI.SetTVVisble(const Value: Boolean);
-begin
-  pnlTV.Visible := Value;
 end;
 
 function TfrmMDI.LoadParGridData: Boolean;
@@ -132,13 +115,6 @@ begin
   aMainForm := SysService as IMainForm;
   OutputDebugString(PAnsiChar(Self.Caption));
   aMainForm.CloseFom(Self, aCanClose);
-end;
-
-procedure TfrmMDI.actReturnExecute(Sender: TObject);
-begin
-  inherited;
-  if (not LoadParGridData()) then Close;
-  gridMainShow.SetFocus;
 end;
 
 end.

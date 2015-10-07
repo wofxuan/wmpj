@@ -3,7 +3,6 @@ inherited frmBaseTbxCfg: TfrmBaseTbxCfg
   PixelsPerInch = 96
   TextHeight = 13
   inherited splOP: TSplitter
-    Left = 65
     Top = 86
     Height = 231
   end
@@ -11,19 +10,8 @@ inherited frmBaseTbxCfg: TfrmBaseTbxCfg
     Top = 48
     Visible = False
   end
-  inherited pnlTV: TPanel
-    Top = 86
-    Width = 65
-    Height = 231
-    inherited tvClass: TcxTreeView
-      Width = 63
-      Height = 229
-    end
-  end
   inherited gridMainShow: TcxGrid
-    Left = 68
     Top = 86
-    Width = 668
     Height = 231
   end
   inherited actlstEvent: TActionList

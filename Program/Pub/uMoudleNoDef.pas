@@ -36,10 +36,11 @@ const
   fnMdlBaseKtypeList = fnBase + 0005; //仓库
 
   //单据---------------------------------2000-----------------------
-  fnMdlBillBuy = fnBill + 0001; //单据-商品进货单
+  fnMdlBillOrder = fnBill + 0001; //订单
+  fnMdlBillBuy = fnBill + 0002; //进货单
 
   //报表-----------------------------------3000---------------------
-  fnMdlReportGoods = fnReport + 0001; //报表-商品库存情况
+  fnMdlReportGoods = fnReport + 0001; //商品库存情况
 
   //系统设置-------------------------------4000---------------------
   fnMdlLoadItemSet = fnSystem + 0001; //加载包设置

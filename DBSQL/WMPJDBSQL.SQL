@@ -283,9 +283,11 @@ VALUES  ( '00005' ,'00000' ,0 ,0 ,1 ,'SysConfig.bpl' ,'SysConfig.bpl' ,'SysConfi
 INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUsercode ,IFullname ,INamepy ,IComment ,ISystem ,RowIndex)
 VALUES  ( '00006' ,'00000' ,0 ,0 ,1 ,'BaseInfo.bpl' ,'BaseInfo.bpl' ,'BaseInfo.bpl' ,'基本信息' ,1, 5)
 INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUsercode ,IFullname ,INamepy ,IComment ,ISystem ,RowIndex)
-VALUES  ( '00007' ,'00000' ,0 ,0 ,1 ,'TestBpl.bpl' ,'TestBpl.bpl' ,'TestBpl.bpl' ,'测试BPL' ,0, 6)
+VALUES  ( '00007' ,'00000' ,0 ,0 ,1 ,'BillForm.bpl' ,'BillForm.bpl' ,'BillForm.bpl' ,'单据' ,1, 6)
 INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUsercode ,IFullname ,INamepy ,IComment ,ISystem ,RowIndex)
-VALUES  ( '00008' ,'00000' ,0 ,0 ,1 ,'Testdll.dll' ,'Testdll.dll' ,'Testdll.dll' ,'测试DLL' ,0, 7)
+VALUES  ( '00008' ,'00000' ,0 ,0 ,1 ,'TestBpl.bpl' ,'TestBpl.bpl' ,'TestBpl.bpl' ,'测试BPL' ,0, 7)
+INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUsercode ,IFullname ,INamepy ,IComment ,ISystem ,RowIndex)
+VALUES  ( '00009' ,'00000' ,0 ,0 ,1 ,'Testdll.dll' ,'Testdll.dll' ,'Testdll.dll' ,'测试DLL' ,0, 8)
 GO 
 
 DELETE dbo.tbx_Sys_FrmParams

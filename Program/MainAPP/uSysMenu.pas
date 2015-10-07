@@ -238,6 +238,9 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m20005000', '-', 'm2000', '', 0, nil);
     AddMenu('m20006000', '部门信息', 'm2000', '', fnMdlBaseDtypeList, nil);
 
+    AddMenu('m3000', '采购管理', '', '', 0, nil);
+    AddMenu('m30001000', '进货订单', 'm3000', '', fnMdlBillOrder, nil);
+
     AddMenu('m9000', '帮助', '', '', 0, nil);
     AddMenu('m90001000', '在线帮助', 'm9000', '', fnMdlHelp_Online, nil);
     AddMenu('m90002000', '计算器', 'm9000', '', fnMdlHelp_Calc, nil, 'F5');

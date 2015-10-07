@@ -9,7 +9,7 @@ uses
   cxDBData, ActnList, DBClient, cxGridLevel, cxClasses, cxControls,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView,
   cxGridDBTableView, cxGrid, StdCtrls, cxButtons, ExtCtrls, uFrmBaseInput,
-  ComCtrls, cxContainer, cxTreeView;
+  ComCtrls, cxContainer, cxTreeView, dxBar, dxBarExtItems, ImgList;
 
 type
   TfrmBaseDtypeList = class(TfrmMDIBaseType)

@@ -30,6 +30,10 @@ type
     btnQuery: TdxBarLargeButton;
     btnStop: TdxBarLargeButton;
     actStop: TAction;
+    pnlTV: TPanel;
+    tvClass: TcxTreeView;
+    btnReturn: TdxBarLargeButton;
+    actReturn: TAction;
     procedure actAddExecute(Sender: TObject);
     procedure actModifyExecute(Sender: TObject);
     procedure actDeleteExecute(Sender: TObject);
@@ -41,9 +45,11 @@ type
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
     procedure tvClassChange(Sender: TObject; Node: TTreeNode);
+    procedure actReturnExecute(Sender: TObject);
   private
     { Private declarations }
-
+    procedure SetTVVisble(const Value: Boolean); //树表是否显示 调用此函数应该在IniGridData内
+    function GetTVVisble: Boolean;
   protected
     FModelBaseList: IModelBaseList;
 
@@ -65,6 +71,7 @@ type
   public
     { Public declarations }
     property CurTypeId: string read GetCurTypeId;
+    property TVVisble: boolean read GetTVVisble write SetTVVisble;
 
   end;
 
@@ -331,6 +338,23 @@ begin
   begin
     LoadGridData(aNodeData.Typeid);
   end;
+end;
+
+function TfrmMDIBaseType.GetTVVisble: Boolean;
+begin
+  Result := pnlTV.Visible;
+end;
+
+procedure TfrmMDIBaseType.SetTVVisble(const Value: Boolean);
+begin
+  pnlTV.Visible := Value;
+end;
+
+procedure TfrmMDIBaseType.actReturnExecute(Sender: TObject);
+begin
+  inherited;
+  if (not LoadParGridData()) then Close;
+  gridMainShow.SetFocus;
 end;
 
 end.
