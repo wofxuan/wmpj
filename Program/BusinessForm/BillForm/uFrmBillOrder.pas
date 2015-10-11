@@ -12,15 +12,17 @@ uses
   cxTextEdit, cxMaskEdit, cxButtonEdit, cxLabel;
 
 type
-  TfrmMDIBill1 = class(TfrmMDIBill)
+  TfrmBillOrder = class(TfrmMDIBill)
   private
     { Private declarations }
+    procedure InitMasterTitles(Sender: TObject); override;
+    procedure InitGrids(Sender: TObject); override;
   public
     { Public declarations }
   end;
 
 var
-  frmMDIBill1: TfrmMDIBill1;
+  frmBillOrder: TfrmBillOrder;
 
 implementation
 
@@ -29,7 +31,26 @@ uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
 
 {$R *.dfm}
 
+{ TfrmBillOrder }
+
+procedure TfrmBillOrder.InitGrids(Sender: TObject);
+begin
+  inherited;
+  FGridItem.ClearField();
+  FGridItem.AddFiled('PTypeId', 'PTypeId', -1);
+  FGridItem.AddFiled('PFullname', '商品名称', 200);
+  FGridItem.AddFiled('PUsercode', '商品编码', 200);
+  FGridItem.AddFiled('uni', '单位', 200);
+  FGridItem.InitGridData;
+end;
+
+procedure TfrmBillOrder.InitMasterTitles(Sender: TObject);
+begin
+  inherited;
+
+end;
+
 initialization
-  gFormManage.RegForm(TfrmMDIBill1, fnMdlBillOrder);
-  
+  gFormManage.RegForm(TfrmBillOrder, fnMdlBillOrder);
+
 end.

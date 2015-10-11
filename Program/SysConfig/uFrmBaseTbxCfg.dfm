@@ -13,6 +13,9 @@ inherited frmBaseTbxCfg: TfrmBaseTbxCfg
   inherited gridMainShow: TcxGrid
     Top = 86
     Height = 231
+    inherited gridTVMainShow: TcxGridTableView
+      OnCellDblClick = gridTVMainShowCellDblClick
+    end
   end
   inherited actlstEvent: TActionList
     object actCheckDefTbx: TAction
@@ -41,7 +44,6 @@ inherited frmBaseTbxCfg: TfrmBaseTbxCfg
         end
         item
           Visible = True
-          ItemName = 'btnReturn'
         end
         item
           Visible = True

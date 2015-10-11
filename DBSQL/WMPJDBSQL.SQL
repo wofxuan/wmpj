@@ -223,11 +223,34 @@ IF OBJECT_ID('dbo.tbx_Sys_TbxCfg') IS NULL
     CREATE TABLE [dbo].[tbx_Sys_TbxCfg]
         (
           [TbxId] INT NOT NULL , --表格在SysObjects表的系统ID
-          [TbxName] VARCHAR(50) NOT NULL DEFAULT '' ,
+          [TbxName] VARCHAR(50) NOT NULL DEFAULT '' ,--表格数据库名称
+          [TbxDefName] VARCHAR(100) NOT NULL DEFAULT '' ,--表格别名
           [TbxType] INT NOT NULL DEFAULT -1 , --表格类型：-1未定义；0基本信息；1单据；2其它
           [TbxRowIndex] INT NOT NULL DEFAULT 0 ,--排列顺序
           [TbxComment] VARCHAR(200) NOT NULL DEFAULT '' , 
           CONSTRAINT PK_tbx_Sys_TbxCfg PRIMARY KEY ( TbxId )
+        )
+        
+GO
+
+--本地化对应显示表格字段列配置
+IF OBJECT_ID('dbo.tbx_Sys_BasicTypeItem') IS NULL 
+    CREATE TABLE [dbo].[tbx_Sys_BasicTypeItem]
+        (
+          [BtiId] INT IDENTITY(1, 1) ,
+          [BtType] VARCHAR(50) NOT NULL DEFAULT '' ,--基本信息名称 btPtype, btKtype 等
+          [BtName] VARCHAR(50) NOT NULL DEFAULT '' ,--基本信息名称 商品信息, 仓库信息 等
+          [TbxName] VARCHAR(50) NOT NULL DEFAULT '' ,--对应的视图或者表格
+          [ColName] VARCHAR(50) NOT NULL DEFAULT '' ,--列在视图或者表格中名称
+          [ColDisName] VARCHAR(100) NOT NULL DEFAULT '' ,--列显示名称
+          [ColValueType] VARCHAR(100) NOT NULL DEFAULT '' ,--列类型,字符串，整数等gctSting, gctInt
+          [ColDisWidth] VARCHAR(100) NOT NULL DEFAULT '' ,--列显示宽带
+          [IsCheckBox] BIT NOT NULL DEFAULT -0 , --是否显示为CheckBox
+          [IsDis] BIT NOT NULL DEFAULT -0 , --是否显示
+          [DisIndex] INT NOT NULL DEFAULT 0 ,--表格显示列顺序
+          [RowIndex] INT NOT NULL DEFAULT 0 ,--排列顺序
+          [Comment] VARCHAR(200) NOT NULL DEFAULT '' , 
+          CONSTRAINT PK_tbx_Sys_BasicTypeItem PRIMARY KEY ( [BtiId] )
         )
         
 GO

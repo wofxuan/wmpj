@@ -15,6 +15,8 @@ function OleDataToStr(const AData: OleVariant): string; //由 OLEVARIANT 中加载 S
 function StringEmpty(const AStr: string): Boolean; //字符串是否为空
 function StringFormat(const AFormat: string; const AArgs: array of const): string; //格式字符串
 function IsNumberic(AStr: string): Boolean; //字符串是否是数字
+function StringToInt(const AStr: string; ADefault: Integer = 0): Integer; //字符串转换为整数
+function IntToString(const AStr: Integer): string; //整数换为字符串转
 
 implementation
 
@@ -88,6 +90,16 @@ begin
     end;
   end;
   Result := True;
+end;
+
+function StringToInt(const AStr: string; ADefault: Integer = 0): Integer;
+begin
+  Result := StrToIntDef(AStr, ADefault);
+end;
+
+function IntToString(const AStr: Integer): string;
+begin
+  Result := IntToStr(AStr);
 end;
 
 end.

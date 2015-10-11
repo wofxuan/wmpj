@@ -1,5 +1,5 @@
-inherited frmMDIBill1: TfrmMDIBill1
-  Caption = 'frmMDIBill1'
+inherited frmBillOrder: TfrmBillOrder
+  Caption = 'frmBillOrder'
   PixelsPerInch = 96
   TextHeight = 13
   inherited pnlTop: TPanel
@@ -7,6 +7,11 @@ inherited frmMDIBill1: TfrmMDIBill1
       inherited lblBillTitle: TcxLabel
         Style.IsFontAssigned = True
       end
+    end
+  end
+  inherited gridMainShow: TcxGrid
+    inherited gridTVMainShow: TcxGridTableView
+      OptionsSelection.InvertSelect = False
     end
   end
   inherited imglstBtn: TcxImageList

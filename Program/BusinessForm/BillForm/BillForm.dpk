@@ -39,7 +39,7 @@ requires
   Other;
 
 contains
-  uFrmBillOrder in 'uFrmBillOrder.pas' {frmMDIBill1},
+  uFrmBillOrder in 'uFrmBillOrder.pas' {frmBillOrder},
   uBillFormExport in 'uBillFormExport.pas';
 
 end.

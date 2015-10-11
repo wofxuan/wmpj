@@ -9,26 +9,27 @@ unit uGridConfig;
 interface
 
 uses
-  Windows, Classes, Db, DBClient, SysUtils, cxGrid, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGraphics, uBaseInfoDef, uModelBaseIntf, uModelFunIntf;
+  Windows, Classes, Db, DBClient, SysUtils, Controls, cxGrid, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
+  cxGridDBTableView, cxGraphics, uBaseInfoDef, uModelBaseIntf, uModelFunIntf, uModelOtherSet;
 
 type
   //列显示类型
   TGCType = (gctSting, gctInt, gctFloat, gctDate, gctDateTime, gctBoolen);
 
-  //每次表格加载完数据后调用
-  TAfterLoadDataEvent = procedure(Sender: TObject) of object;
-
+  //表格单元格双击事件
+  TCellDblClickEvent = procedure(Sender: TcxCustomGridTableView;
+  ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+  AShift: TShiftState; var AHandled: Boolean) of object;
   //表格每列的信息
   TColInfo = class(TObject)
   private
     FGridColumn: TcxGridColumn;
     FFieldName: string;
 
-    FDataToDisplay: TStringList;//字段显示与查询数据对应列表
-    procedure  GetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: String);
+    FDataToDisplay: TStringList; //字段显示与查询数据对应列表
+    procedure GetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: string);
   public
-    procedure SetDisplayText(ADataText, DisplayText: string);//设置查询数据与显示数据的对应关系
+    procedure SetDisplayText(ADisplayText: TIDDisplayText); //设置查询数据与显示数据的对应关系
     constructor Create(AGridColumn: TcxGridColumn; AFieldName: string);
     destructor Destroy; override;
   end;
@@ -43,9 +44,14 @@ type
     FBasicType: TBasicType; //表格如果要分组的需要根据类型在去ptypeid等的儿子数来看是否显示*
     FColList: array of TColInfo; //记录添加的所以列信息
     FTypeClassList: TStringList; //记录ID对应的商品是否有子类格式 00001=0 or 00001=1,0没有儿子，1有儿子;为了减少每行的查询操作
+    FOnSelectBasic: TSelectBasicinfoEvent; //弹出TC类选择框
+    FOldCellDblClick: TCellDblClickEvent; //表格单元格原来的双击事件
 
     //给表格增加序号
     procedure XHOnCustomDrawCell(Sender: TcxGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxCustomGridIndicatorItemViewInfo; var ADone: Boolean);
+    procedure ReClassList; //要在子类加载数据完成后执行.刷新表格记录ID的PSonnum,在判断是否是类显示*的时候需要用到
+    procedure GridCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+              AShift: TShiftState; var AHandled: Boolean);
   public
     constructor Create(AGridID: Integer; AGrid: TcxGrid; AGridTV: TcxGridTableView);
     destructor Destroy; override;
@@ -55,13 +61,14 @@ type
     function AddCheckBoxCol(AFileName, AShowCaption: string; AValueChecked, ValueUnchecked: Variant): TColInfo;
     function GetCellValue(ADBName: string; ARowIndex: Integer): Variant;
     procedure InitGridData;
-    procedure ReClassList; //要在子类加载数据完成后执行.刷新表格记录ID的PSonnum,在判断是否是类显示*的时候需要用到
 
     function GetFirstRow: Integer; //获取行的首行
     function GetLastRow: Integer; //获取行的末行
-    procedure LoadData(ACdsData: TClientDataSet);
+    procedure LoadData(ACdsData: TClientDataSet);//加载数据
+    procedure SetGridCellSelect(ACellSelect: Boolean);//是否能选中单元格和此行其它单元格不是选中状态
   published
     property BasicType: TBasicType read FBasicType write FBasicType;
+    property OnSelectBasic: TSelectBasicinfoEvent read FOnSelectBasic write FOnSelectBasic;
 
   end;
 
@@ -80,7 +87,7 @@ var
 
 implementation
 
-uses uSysSvc, uOtherIntf, cxDataStorage, cxCheckBox, Graphics;
+uses uSysSvc, uOtherIntf, cxDataStorage, cxCheckBox, uPubFun, Graphics;
 
 { TGridItem }
 
@@ -143,6 +150,8 @@ begin
   FGrid := AGrid;
   FGridTV := AGridTV;
   FGridTV.OnCustomDrawIndicatorCell := XHOnCustomDrawCell;
+  FOldCellDblClick := FGridTV.OnCellDblClick;
+  FGridTV.OnCellDblClick := GridCellDblClick;
 
   FModelFun := SysService as IModelFun;
   //显示行号的那一列
@@ -199,7 +208,7 @@ end;
 
 procedure TGridItem.InitGridData;
 begin
-
+  FGridTV.DataController.RecordCount := 500;
 end;
 
 function TGridItem.GetCellValue(ADBName: string; ARowIndex: Integer): Variant;
@@ -241,7 +250,7 @@ begin
   begin
     aTypeId := Self.GetCellValue(GetBaseTypeid(Self.BasicType), aRowIndex);
     aSonnum := FModelFun.GetLocalValue(Self.BasicType, GetBaseTypeSonnumStr(Self.BasicType), aTypeId);
-    if StrToIntDef(aSonnum, 0) > 0 then
+    if StringToInt(aSonnum) > 0 then
     begin
       FTypeClassList.Add(IntToStr(aRowIndex + 1))
     end;
@@ -275,7 +284,7 @@ begin
         aFieldName := FColList[i].FFieldName;
         aCdsCol := ACdsData.FieldDefs.IndexOf(aFieldName);
         if aCdsCol <> -1 then
-          FGridTV.DataController.Values[aRow, i]:= ACdsData.FieldValues[aFieldName];
+          FGridTV.DataController.Values[aRow, i] := ACdsData.FieldValues[aFieldName];
       end;
       inc(aRow);
       ACdsData.Next;
@@ -283,6 +292,37 @@ begin
   finally
     ReClassList();
     FGridTV.EndUpdate;
+  end;
+end;
+
+procedure TGridItem.SetGridCellSelect(ACellSelect: Boolean);
+begin
+  //是否能选中单元格
+  FGridTV.OptionsSelection.CellSelect := ACellSelect;
+  FGridTV.OptionsSelection.InvertSelect := not ACellSelect;
+end;
+
+procedure TGridItem.GridCellDblClick(Sender: TcxCustomGridTableView;
+  ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+  AShift: TShiftState; var AHandled: Boolean);
+var
+  i, aReturnCount: Integer;
+  aBasicType: TBasicType;
+  aSelectParam: TSelectBasicParam;
+  aSelectOptions: TSelectBasicOptions;
+  aReturnArray: TSelectBasicDatas;
+begin
+  if Assigned(FOldCellDblClick) then FOldCellDblClick(Sender, ACellViewInfo, AButton, AShift, AHandled);
+
+  for i := 0 to Length(FColList) - 1 do
+  begin
+    if FColList[i].FGridColumn = FGridTV.Controller.FocusedColumn then
+    begin
+      if FColList[i].FFieldName = 'PFullname' then
+      begin
+        OnSelectBasic(FGrid, ABasicType, ASelectParam, ASelectOptions, AReturnArray, aReturnCount);
+      end;
+    end;
   end;
 end;
 
@@ -320,7 +360,7 @@ begin
 end;
 
 procedure TColInfo.GetDisplayText(Sender: TcxCustomGridTableItem;
-  ARecord: TcxCustomGridRecord; var AText: String);
+  ARecord: TcxCustomGridRecord; var AText: string);
 var
   aDataIndex: Integer;
 begin
@@ -331,7 +371,7 @@ begin
   end;
 end;
 
-procedure TColInfo.SetDisplayText(ADataText, DisplayText: string);
+procedure TColInfo.SetDisplayText(ADisplayText: TIDDisplayText);
 begin
   if not Assigned(FDataToDisplay) then
   begin
@@ -339,7 +379,7 @@ begin
     FGridColumn.OnGetDisplayText := GetDisplayText;
   end;
 
-  FDataToDisplay.Add(ADataText + '=' + DisplayText);
+  FDataToDisplay.AddStrings(ADisplayText);
 end;
 
 initialization

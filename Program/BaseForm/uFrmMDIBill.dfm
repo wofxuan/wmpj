@@ -83,6 +83,9 @@ inherited frmMDIBill: TfrmMDIBill
   inherited gridMainShow: TcxGrid
     Top = 133
     Height = 184
+    inherited gridTVMainShow: TcxGridTableView
+      OptionsView.GroupByBox = False
+    end
   end
   inherited actlstEvent: TActionList
     object actNewBill: TAction

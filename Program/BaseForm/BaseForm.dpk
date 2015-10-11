@@ -58,6 +58,7 @@ contains
   uDBComConfig in 'uDBComConfig.pas',
   uFrmApp in 'uFrmApp.pas',
   uFrmMDIBill in 'uFrmMDIBill.pas' {frmMDIBill},
-  uFrmDialog in 'uFrmDialog.pas' {frmDialog};
+  uFrmDialog in 'uFrmDialog.pas' {frmDialog},
+  uFrmBaseSelect in 'uFrmBaseSelect.pas' {frmBaseSelect};
 
 end.

@@ -310,7 +310,7 @@ var
 begin
   inherited;
   aSonnum := FModelFun.GetLocalValue(FModelBaseList.GetBasicType, GetBaseTypeSonnumStr(FModelBaseList.GetBasicType), CurTypeId);
-  if StrToIntDef(aSonnum, 0) > 0 then
+  if StringToInt(aSonnum) > 0 then
   begin
     LoadGridData(CurTypeId);
     actReturn.Enabled := True;

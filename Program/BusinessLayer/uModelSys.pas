@@ -10,6 +10,8 @@ type
   private
     procedure LoadGridData(AType: string; ACdsBaseList: TClientDataSet);
     function CheckTbxCfg(ACheckType: TTbxCheckType): Boolean;
+    procedure GetTbxInfoRec(ATbxId: Integer; ACdsBaseList: TClientDataSet);//得到一条具体记录
+    function ModfifyTbxInfoRec(ATbxId: Integer; ATbxInfoRec: TParamObject): Boolean;
   protected
 
   public
@@ -49,20 +51,29 @@ begin
   end;
 end;
 
-procedure TModelTbxCfg.LoadGridData(AType: string; ACdsBaseList: TClientDataSet);
+procedure TModelTbxCfg.GetTbxInfoRec(ATbxId: Integer;
+  ACdsBaseList: TClientDataSet);
 var
   aList: TParamObject;
   aSQL: string;
 begin
-  inherited;
   aList := TParamObject.Create;
   try
-//    aList.Add('@cMode', GetBaseTypeKeyStr(BasicType));
-//    aList.Add('@szTypeid', ATypeid);
-//    aList.Add('@OperatorID', gMFCom.OperatorID);
+    aSQL := 'SELECT * FROM tbx_Sys_TbxCfg WHERE TbxId = ' + IntToString(ATbxId);
+    gMFCom.QuerySQL(aSQL, ACdsBaseList);
+  finally
+    aList.Free;
+  end;
+end;
+
+procedure TModelTbxCfg.LoadGridData(AType: string; ACdsBaseList: TClientDataSet);
+var
+  aSQL: string;
+begin
+  try
     if AType = 'L' then
     begin
-      aSQL := 'SELECT tbxId, tbxName, tbxType, tbxComment FROM tbx_Sys_TbxCfg order by TbxRowIndex';
+      aSQL := 'SELECT tbxId, tbxName, tbxDefName, tbxType, tbxComment FROM tbx_Sys_TbxCfg order by TbxRowIndex';
     end
     else if AType = 'U' then
     begin
@@ -72,8 +83,38 @@ begin
     begin
       aSQL := 'SELECT tbxName FROM dbo.tbx_Sys_TbxCfg WHERE TbxId NOT IN (SELECT id FROM SysObjects WHERE XType = ''U'')';
     end;
-    
+
     gMFCom.QuerySQL(aSQL, ACdsBaseList);
+  finally
+  end;
+end;
+
+function TModelTbxCfg.ModfifyTbxInfoRec(ATbxId: Integer;
+  ATbxInfoRec: TParamObject): Boolean;
+var
+  aList: TParamObject;
+  aRet: Integer;
+  aErrorMsg: string;
+begin
+  if not Assigned(ATbxInfoRec) then Exit;
+
+  Result := False;
+  aList := TParamObject.Create;
+  try
+    aList.Add('@TbxId', ATbxId);
+    aList.Add('@TbxDefName', ATbxInfoRec.AsString('TbxDefName'));
+    aList.Add('@TbxType', ATbxInfoRec.AsInteger('TbxType'));
+    aList.Add('@TbxComment', ATbxInfoRec.AsString('TbxComment'));
+    aList.Add('@errorValue', '');
+
+    aRet := gMFCom.ExecProcByName('pbx_Sys_ModfifyTbx', aList);
+    if aRet <> 0 then
+    begin
+      aErrorMsg := aList.AsString('@errorValue');
+      gMFCom.ShowMsgBox(aErrorMsg, '错误', mbtError);
+      Exit;
+    end;
+    Result := True;
   finally
     aList.Free;
   end;

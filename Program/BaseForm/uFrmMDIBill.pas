@@ -24,6 +24,19 @@ type
     actNewBill: TAction;
   private
     { Private declarations }
+  protected
+    procedure BeforeFormShow; override;
+    procedure BeforeFormDestroy; override;
+    
+    procedure InitParamList; override;
+
+    function LoadBillDataMaster: Boolean; virtual;
+    function LoadBillDataGrid: Boolean; virtual;
+
+    procedure InitMasterTitles(Sender: TObject); virtual; //初始化表头
+    procedure InitGrids(Sender: TObject); virtual; //初始化表体
+    procedure InitMenuItem(Sender: TObject); virtual; //初始化右建菜单
+    procedure InitOthers(Sender: TObject); virtual; ////初始化其它
   public
     { Public declarations }
   end;
@@ -37,5 +50,61 @@ uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
      uBaseInfoDef, uDefCom, uGridConfig, uFrmApp;
 
 {$R *.dfm}
+
+{ TfrmMDIBill }
+
+procedure TfrmMDIBill.BeforeFormDestroy;
+begin
+  inherited;
+
+end;
+
+procedure TfrmMDIBill.BeforeFormShow;
+begin
+  inherited;
+  FGridItem.OnSelectBasic := DoSelectBasic;
+  FGridItem.SetGridCellSelect(True);
+  
+  InitMasterTitles(Self);
+  InitGrids(self);
+  InitMenuItem(self);
+  InitOthers(self);
+end;
+
+procedure TfrmMDIBill.InitGrids(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmMDIBill.InitMasterTitles(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmMDIBill.InitMenuItem(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmMDIBill.InitOthers(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmMDIBill.InitParamList;
+begin
+  inherited;
+
+end;
+
+function TfrmMDIBill.LoadBillDataGrid: Boolean;
+begin
+
+end;
+
+function TfrmMDIBill.LoadBillDataMaster: Boolean;
+begin
+
+end;
 
 end.

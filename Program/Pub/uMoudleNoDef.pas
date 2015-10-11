@@ -24,8 +24,8 @@ const
   fnDlgcond = 5000;
   //TC选择类
   fnTc = 6000;
-  //测试时使用的， 发布是删除
-  fnTest = 6000;
+  //测试时使用的， 发布时删除
+  fnTest = 7000;
 
 
   //基本信息-----------------------------1000------------------------
@@ -45,10 +45,11 @@ const
   //系统设置-------------------------------4000---------------------
   fnMdlLoadItemSet = fnSystem + 0001; //加载包设置
   fnMdlBaseTbxCfg = fnSystem + 0002; //表格信息配置
-  fnMdlHelp_Calc = fnSystem + 0003; //计算器
-  fnMdlHelp_Online = fnSystem + 0004; //在线帮助
+  fnMdlBasicTypeCfg = fnSystem + 0003; //本地化信息列配置
+  fnMdlHelp_Calc = fnSystem + 0004; //计算器
+  fnMdlHelp_Online = fnSystem + 0005; //在线帮助
 
-  //系统设置-------------------------------4000---------------------
+  //系统设置-------------------------------7000---------------------
   fnMdlTTest = fnTest + 0001; //测试
 
 implementation

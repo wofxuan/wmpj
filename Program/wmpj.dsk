@@ -1,94 +1,43 @@
 [Closed Files]
-File_0=SourceModule,'E:\code\delphi\wmpj\Program\BaseForm\uFrmMDIBill.pas',0,1,37,115,27,1,0
-File_1=SourceModule,'E:\code\delphi\wmpj\Program\BusinessForm\BaseInfo\uFrmBaseDtypeList.pas',0,1,22,1,33,1,0
-File_2=SourceModule,'E:\code\delphi\wmpj\Program\Pub\uMoudleNoDef.pas',0,1,31,17,39,0,0
-File_3=SourceModule,'E:\code\delphi\wmpj\Program\BaseForm\uFrmMDI.pas',0,1,8,27,16,1,0
-File_4=SourceModule,'E:\code\delphi\wmpj\Program\BusinessLayer\uModelParent.pas',0,1,73,1,83,0,0
-File_5=SourceModule,'E:\code\delphi\wmpj\Program\BusinessIntf\uBusinessIntfExport.pas',0,1,37,1,1,0,0
-File_6=SourceModule,'E:\code\delphi\wmpj\Program\BaseForm\uFrmParent.pas',0,1,1,1,11,1,0
-File_7=SourceModule,'E:\code\delphi\wmpj\Program\BusinessForm\BaseInfo\uFrmBaseBtypeInput.pas',0,1,1,105,7,0,0
-File_8=SourceModule,'E:\code\delphi\wmpj\Program\SysConfig\uFrmBaseTbxCfg.pas',0,1,28,23,32,1,0
+File_0=SourceModule,'c:\program files (x86)\borland\delphi7\source\vcl\Controls.pas',0,1,502,1,511,0,0
+File_1=SourceModule,'c:\program files (x86)\borland\delphi7\source\rtl\common\classes.pas',0,1,74,1,83,0,0
+File_2=SourceModule,'D:\delphiCommpoent\DevExpress\ExpressQuantumGrid 6\Sources\cxGrid.pas',0,1,1,44,4,0,0
+File_3=SourceModule,'D:\delphiCommpoent\DevExpress\ExpressQuantumGrid 6\Sources\cxGridTableView.pas',0,1,2902,41,2911,0,0
+File_4=SourceModule,'E:\code\delphi\wmpj\Program\BaseForm\uFrmBaseInput.pas',0,1,14,33,15,1,0
+File_5=SourceModule,'E:\code\delphi\wmpj\Program\BaseForm\uFrmApp.pas',0,1,10,1,6,0,0
+File_6=SourceModule,'E:\code\delphi\wmpj\Program\BaseForm\uFunApp.pas',0,1,1,101,7,0,0
+File_7=SourceModule,'E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseListIntf.pas',0,1,7,43,8,0,0
+File_8=SourceModule,'E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseIntf.pas',0,1,21,53,11,0,0
+File_9=SourceModule,'E:\code\delphi\wmpj\Program\BusinessIntf\uModelSysIntf.pas',0,1,8,89,13,0,0
 
 [Modules]
-Module0=E:\code\delphi\wmpj\Program\BusinessIntf\uModelSysIntf.pas
-Module1=E:\code\delphi\wmpj\Program\Pub\uBaseInfoDef.pas
-Module2=E:\code\delphi\wmpj\Program\BusinessLayer\uModelSys.pas
-Module3=E:\code\delphi\wmpj\Program\MainAPP\uFrmWMPG.pas
-Module4=E:\code\delphi\wmpj\Program\BusinessForm\BillForm\uFrmBillOrder.pas
-Module5=E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseListIntf.pas
-Module6=E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseIntf.pas
-Module7=E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseTypeIntf.pas
-Module8=E:\code\delphi\wmpj\Program\BusinessForm\BaseInfo\uBaseInfoExport.pas
-Module9=E:\code\delphi\wmpj\Program\MainAPP\uSysMenu.pas
-Count=10
+Module0=E:\code\delphi\wmpj\Program\BusinessForm\BillForm\uFrmBillOrder.pas
+Module1=E:\code\delphi\wmpj\Program\BaseForm\uGridConfig.pas
+Module2=E:\code\delphi\wmpj\Program\BaseForm\uFrmMDIBill.pas
+Module3=E:\code\delphi\wmpj\Program\MainAPP\WMPJ.dpr
+Count=4
 EditWindowCount=1
-PackageWindowCount=11
-
-[E:\code\delphi\wmpj\Program\BusinessIntf\uModelSysIntf.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\Pub\uBaseInfoDef.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BusinessLayer\uModelSys.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\MainAPP\uFrmWMPG.pas]
-ModuleType=SourceModule
-FormState=1
-FormOnTop=1
+PackageWindowCount=10
 
 [E:\code\delphi\wmpj\Program\BusinessForm\BillForm\uFrmBillOrder.pas]
 ModuleType=SourceModule
-FormState=0
+FormState=1
 FormOnTop=0
 
-[E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseListIntf.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseIntf.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseTypeIntf.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BusinessForm\BaseInfo\uBaseInfoExport.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\MainAPP\uSysMenu.pas]
+[E:\code\delphi\wmpj\Program\BaseForm\uGridConfig.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
 [E:\code\delphi\wmpj\Program\BaseForm\uFrmMDIBill.pas]
-FormState=0
+ModuleType=SourceModule
+FormState=1
 FormOnTop=0
 
-[E:\code\delphi\wmpj\Program\BaseForm\uFrmMDI.pas]
+[E:\code\delphi\wmpj\Program\MainAPP\WMPJ.dpr]
+ModuleType=SourceModule
 FormState=0
 FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BaseForm\uFrmParent.pas]
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BusinessForm\BillForm\BillForm.dpk]
-FormState=0
-FormOnTop=1
 
 [E:\code\delphi\wmpj\Program\wmpj.bpg]
 FormState=0
@@ -126,6 +75,10 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
+[E:\code\delphi\wmpj\Program\BusinessForm\BillForm\BillForm.dpk]
+FormState=0
+FormOnTop=0
+
 [E:\code\delphi\wmpj\Program\SysConfig\SysConfig.dpk]
 FormState=0
 FormOnTop=0
@@ -138,43 +91,29 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
-[E:\code\delphi\wmpj\Program\MainAPP\WMPJ.dpr]
+[E:\code\delphi\wmpj\Program\BaseForm\uFrmMDI.pas]
 FormState=0
 FormOnTop=0
 
-[D:\delphiCommpoent\DevExpress\ExpressDataController\Packages\cxDataD7.dpk]
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BaseForm\uFrmBaseInput.pas]
-FormState=0
-FormOnTop=0
-
-[E:\code\delphi\wmpj\Program\BaseForm\uFrmMDIBaseType.pas]
+[E:\code\delphi\wmpj\Program\BaseForm\uFrmParent.pas]
 FormState=0
 FormOnTop=0
 
 [EditWindow0]
-ViewCount=10
-CurrentView=4
+ViewCount=4
+CurrentView=1
 View0=0
 View1=1
 View2=2
 View3=3
-View4=4
-View5=5
-View6=6
-View7=7
-View8=8
-View9=9
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
 Visible=1
 State=2
-Left=242
-Top=122
-Width=1038
+Left=268
+Top=153
+Width=1012
 Height=505
 MaxLeft=-8
 MaxTop=113
@@ -182,82 +121,40 @@ MaxWidth=1296
 MaxHeight=578
 ClientWidth=1280
 ClientHeight=539
-LeftPanelSize=76
+LeftPanelSize=140
 LeftPanelClients=CodeExplorer@EditWindow0
-LeftPanelData=00000400000000004C000000000000000295010000000000000100000000460000000000000001000000009A0000000000000001000000004C0000000C000000436F64654578706C6F726572FFFFFFFF
+LeftPanelData=000004000000000000000000000000000000000000000000000100000000000000000C000000436F64654578706C6F726572FFFFFFFF
 RightPanelSize=0
-BottomPanelSize=131
-BottomPanelClients=MessageView@EditWindow0,CallStackWindow
-BottomPanelData=00000400000000000005000000000000028300000000000000010000000171030000000000000200000000830000000B0000004D6573736167655669657702000000008C000000000000000100000000000500000F00000043616C6C537461636B57696E646F77FFFFFFFF
+BottomPanelSize=85
+BottomPanelClients=MessageView@EditWindow0
+BottomPanelData=000004000000000000000000000000000000000000000000000100000000000000000B0000004D65737361676556696577FFFFFFFF
 
 [View0]
-Module=E:\code\delphi\wmpj\Program\MainAPP\uFrmWMPG.pas
-CursorX=87
-CursorY=7
+Module=E:\code\delphi\wmpj\Program\MainAPP\WMPJ.dpr
+CursorX=1
+CursorY=1
 TopLine=1
 LeftCol=1
 
 [View1]
-Module=E:\code\delphi\wmpj\Program\MainAPP\uSysMenu.pas
-CursorX=31
-CursorY=244
-TopLine=230
+Module=E:\code\delphi\wmpj\Program\BusinessForm\BillForm\uFrmBillOrder.pas
+CursorX=101
+CursorY=37
+TopLine=26
 LeftCol=1
 
 [View2]
-Module=E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseListIntf.pas
-CursorX=43
-CursorY=8
-TopLine=7
+Module=E:\code\delphi\wmpj\Program\BaseForm\uFrmMDIBill.pas
+CursorX=5
+CursorY=64
+TopLine=55
 LeftCol=1
 
 [View3]
-Module=E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseIntf.pas
-CursorX=53
-CursorY=11
-TopLine=21
-LeftCol=1
-
-[View4]
-Module=E:\code\delphi\wmpj\Program\BusinessIntf\uModelSysIntf.pas
-CursorX=85
-CursorY=21
-TopLine=8
-LeftCol=1
-
-[View5]
-Module=E:\code\delphi\wmpj\Program\BusinessLayer\uModelSys.pas
+Module=E:\code\delphi\wmpj\Program\BaseForm\uGridConfig.pas
 CursorX=1
-CursorY=1
-TopLine=25
-LeftCol=1
-
-[View6]
-Module=E:\code\delphi\wmpj\Program\BusinessIntf\uModelBaseTypeIntf.pas
-CursorX=1
-CursorY=1
-TopLine=1
-LeftCol=1
-
-[View7]
-Module=E:\code\delphi\wmpj\Program\BusinessForm\BillForm\uFrmBillOrder.pas
-CursorX=14
-CursorY=28
-TopLine=20
-LeftCol=1
-
-[View8]
-Module=E:\code\delphi\wmpj\Program\Pub\uBaseInfoDef.pas
-CursorX=38
-CursorY=23
-TopLine=11
-LeftCol=1
-
-[View9]
-Module=E:\code\delphi\wmpj\Program\BusinessForm\BaseInfo\uBaseInfoExport.pas
-CursorX=6
-CursorY=18
-TopLine=13
+CursorY=319
+TopLine=310
 LeftCol=1
 
 [PackageWindow0]
@@ -279,8 +176,8 @@ StatusBar=0
 TextLabels=1
 Toolbar=1
 SectionWidth0=150
-SectionWidth1=202
-Module=E:\code\delphi\wmpj\Program\BusinessForm\BillForm\BillForm.dpk
+SectionWidth1=210
+Module=E:\code\delphi\wmpj\Program\Core\Core.dpk
 
 [PackageWindow1]
 Create=1
@@ -302,7 +199,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\Core\Core.dpk
+Module=E:\code\delphi\wmpj\Program\Other\Other.dpk
 
 [PackageWindow2]
 Create=1
@@ -324,7 +221,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\Other\Other.dpk
+Module=E:\code\delphi\wmpj\Program\DBAccess\DBAccess.dpk
 
 [PackageWindow3]
 Create=1
@@ -346,7 +243,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\DBAccess\DBAccess.dpk
+Module=E:\code\delphi\wmpj\Program\BusinessIntf\BusinessIntf.dpk
 
 [PackageWindow4]
 Create=1
@@ -368,7 +265,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\BusinessIntf\BusinessIntf.dpk
+Module=E:\code\delphi\wmpj\Program\BusinessLayer\BusinessLayer.dpk
 
 [PackageWindow5]
 Create=1
@@ -390,7 +287,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\BusinessLayer\BusinessLayer.dpk
+Module=E:\code\delphi\wmpj\Program\BaseForm\BaseForm.dpk
 
 [PackageWindow6]
 Create=1
@@ -412,7 +309,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\BaseForm\BaseForm.dpk
+Module=E:\code\delphi\wmpj\Program\BusinessForm\BaseInfo\BaseInfo.dpk
 
 [PackageWindow7]
 Create=1
@@ -434,7 +331,7 @@ TextLabels=1
 Toolbar=1
 SectionWidth0=150
 SectionWidth1=210
-Module=E:\code\delphi\wmpj\Program\BusinessForm\BaseInfo\BaseInfo.dpk
+Module=E:\code\delphi\wmpj\Program\BusinessForm\BillForm\BillForm.dpk
 
 [PackageWindow8]
 Create=1
@@ -480,28 +377,6 @@ SectionWidth0=150
 SectionWidth1=210
 Module=E:\code\delphi\wmpj\Program\testbpl\TestBpl.dpk
 
-[PackageWindow10]
-Create=1
-Visible=0
-State=0
-Left=252
-Top=241
-Width=368
-Height=244
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=352
-ClientHeight=205
-TBDockHeight=244
-LRDockWidth=368
-Dockable=1
-StatusBar=0
-TextLabels=1
-Toolbar=1
-SectionWidth0=150
-SectionWidth1=202
-Module=D:\delphiCommpoent\DevExpress\ExpressDataController\Packages\cxDataD7.dpk
-
 [Watches]
 Count=0
 
@@ -524,8 +399,7 @@ LRDockWidth=426
 Dockable=1
 
 [Breakpoints]
-Count=1
-Breakpoint0='E:\code\delphi\wmpj\Program\Core\uFormFactoryMgr.pas',92,'',0,1,'',1,0,0,'',1,'','',''
+Count=0
 
 [AddressBreakpoints]
 Count=0
@@ -549,8 +423,8 @@ ClientHeight=90
 Create=1
 Visible=1
 State=0
-Left=261
-Top=231
+Left=375
+Top=260
 Width=446
 Height=315
 MaxLeft=-1
@@ -611,8 +485,8 @@ ClientHeight=60
 Create=1
 Visible=1
 State=0
-Left=123
-Top=341
+Left=0
+Top=350
 Width=258
 Height=377
 MaxLeft=-1
@@ -624,8 +498,8 @@ LRDockWidth=190
 Dockable=1
 SplitPos=126
 ArrangeBy=Name
-SelectedItem=Caption
-ExpandedItems=DataBinding,DataController,ImageOptions,Properties,Properties.DateButtons,Style.Font
+SelectedItem=DataController
+ExpandedItems=DataBinding,DataController,ImageOptions,OptionsCustomize,OptionsSelection,Properties
 HiddenCategories=
 
 [BreakpointWindow]
@@ -652,17 +526,17 @@ Column5Width=75
 
 [CallStackWindow]
 Create=1
-Visible=1
+Visible=0
 State=0
-Left=893
+Left=0
 Top=0
-Width=387
-Height=131
+Width=298
+Height=86
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=387
-ClientHeight=131
-TBDockHeight=131
+ClientWidth=282
+ClientHeight=47
+TBDockHeight=47
 LRDockWidth=99
 Dockable=1
 
@@ -757,13 +631,13 @@ FlagPane=59
 Create=1
 Visible=0
 State=0
-Left=296
-Top=172
-Width=784
+Left=481
+Top=422
+Width=638
 Height=355
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=768
+ClientWidth=622
 ClientHeight=316
 TBDockHeight=355
 LRDockWidth=638
@@ -771,7 +645,7 @@ Dockable=1
 Column0Width=125
 Column1Width=100
 Column2Width=155
-EntryPointPane=317
+EntryPointPane=225
 CompUnitPane=104
 
 [MessageHintFrm]
@@ -796,14 +670,14 @@ Visible=1
 State=0
 Left=0
 Top=12
-Width=76
-Height=393
+Width=140
+Height=439
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=76
-ClientHeight=393
-TBDockHeight=393
-LRDockWidth=66
+ClientWidth=140
+ClientHeight=439
+TBDockHeight=305
+LRDockWidth=140
 Dockable=1
 
 [MessageView@EditWindow0]
@@ -812,13 +686,13 @@ Visible=1
 State=0
 Left=12
 Top=0
-Width=865
-Height=131
+Width=1268
+Height=85
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=865
-ClientHeight=131
-TBDockHeight=131
+ClientWidth=1268
+ClientHeight=85
+TBDockHeight=85
 LRDockWidth=443
 Dockable=1
 
@@ -826,5 +700,5 @@ Dockable=1
 DockHostCount=0
 
 [ActiveProject]
-ActiveProject=2
+ActiveProject=7
 

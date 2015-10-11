@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, uFactoryFormIntf, uParamObject, ExtCtrls,
-  ActnList, uBaseInfoDef, uGridConfig, uDBComConfig, uDefCom;
+  ActnList, uBaseInfoDef, uGridConfig, uDBComConfig, uDefCom, uModelFunIntf;
 
 type
   TfrmParent = class(TForm, IFormIntf)
@@ -34,6 +34,10 @@ type
     procedure FrmClose;
     function FrmShowStyle: TShowStyle; virtual; abstract;//窗体显示的类型，是否modal
 
+    procedure DoSelectBasic(Sender: TObject; ABasicType: TBasicType;
+      ASelectBasicParam: TSelectBasicParam;
+      ASelectOptions: TSelectBasicOptions; var ABasicDatas: TSelectBasicDatas;
+      var ReturnCount: Integer); virtual;
     procedure BeforeFormShow; virtual;
     procedure InitParamList; virtual;                       //产品可以在窗口创建之前先对参数进行处理；不要对界面的控件进行处理
     procedure BeforeFormDestroy; virtual;
@@ -56,7 +60,7 @@ var
 
 implementation
 
-uses uSysSvc, uDBIntf, uMoudleNoDef;
+uses uSysSvc, uDBIntf, uMoudleNoDef, uFrmBaseSelect;
 
 {$R *.dfm}
 
@@ -166,6 +170,19 @@ begin
     Result := 0
   else
     Result := E_NOINTERFACE;
+end;
+
+procedure TfrmParent.DoSelectBasic(Sender: TObject; ABasicType: TBasicType;
+  ASelectBasicParam: TSelectBasicParam;
+  ASelectOptions: TSelectBasicOptions; var ABasicDatas: TSelectBasicDatas;
+  var ReturnCount: Integer);
+begin
+  //基本信息选择
+  //双击、按钮为全部，回车支持模糊查询
+  if ASelectBasicParam.SelectBasicMode <> sbtKeydown then
+    ASelectBasicParam.SearchString := '';
+  ReturnCount := SelectBasicData(ABasicType, ASelectBasicParam,
+    ASelectOptions, ABasicDatas);
 end;
 
 initialization

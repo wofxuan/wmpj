@@ -9,7 +9,7 @@ interface
 
 uses
   Windows, Classes, Db, DBClient, SysUtils, cxGrid, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGraphics, cxContainer, cxTreeView;
+  cxGridDBTableView, cxGraphics, cxContainer, cxTreeView, cxDropDownEdit, uModelOtherSet;
 
 type
   PNodeData = ^TNodeData;   //一个树节点数据
@@ -22,6 +22,9 @@ type
 
 procedure LoadBaseTVData(AMode: string; ATVClass: TcxTreeView); //根据类型加载树节点
 procedure FreeBaseTVData(ATVClass: TcxTreeView); //释放树节点保存的对象
+procedure LoadCbbList(ACbbClass: TcxComboBox; AIDDT: TIDDisplayText); //加载下拉列表数据
+function GetCbbListID(ACbbClass: TcxComboBox; AIDDT: TIDDisplayText): string; //获取下拉列表当前对应的值
+procedure SetCbbListID(ACbbClass: TcxComboBox; AIDDT: TIDDisplayText; AID: string); //设置下拉列表ID对应的index
 
 implementation
 
@@ -100,6 +103,66 @@ begin
       Dispose(aNodeData);
     end;
     aNode := aNode.GetNext;
+  end;
+end;
+
+procedure LoadCbbList(ACbbClass: TcxComboBox; AIDDT: TIDDisplayText);
+var
+  i: Integer;
+begin
+  ACbbClass.Clear;
+  try
+    ACbbClass.Properties.BeginUpdate;
+    for i := 0 to AIDDT.Count - 1 do
+    begin
+      ACbbClass.Properties.Items.Add(AIDDT.ValueFromIndex[i]);
+    end;
+    if ACbbClass.Properties.Items.Count > 0 then
+    begin
+      ACbbClass.ItemIndex := 0;
+    end;
+  finally
+    ACbbClass.Properties.EndUpdate;
+  end;
+end;
+
+procedure SetCbbListID(ACbbClass: TcxComboBox; AIDDT: TIDDisplayText; AID: string);
+var
+  i, aIndex: Integer;
+  aDisplayText: string;
+begin
+  try
+    for i := 0 to AIDDT.Count - 1 do
+    begin
+      if AID = AIDDT.Names[i] then
+      begin
+        aDisplayText := AIDDT.ValueFromIndex[i];
+        aIndex := ACbbClass.Properties.Items.IndexOf(aDisplayText);
+        ACbbClass.ItemIndex := aIndex;
+        Break;
+      end;
+    end;
+  finally
+
+  end;
+end;
+
+function GetCbbListID(ACbbClass: TcxComboBox; AIDDT: TIDDisplayText): string;
+var
+  i: Integer;
+begin
+  Result := '';
+  try
+    for i := 0 to AIDDT.Count - 1 do
+    begin
+      if ACbbClass.Text = AIDDT.ValueFromIndex[i] then
+      begin
+        Result := AIDDT.Names[i];
+        Break;
+      end;
+    end;
+  finally
+
   end;
 end;
 

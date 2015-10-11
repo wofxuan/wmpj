@@ -15,6 +15,9 @@ type
     btnUnDefTbx: TdxBarLargeButton;
     actCheckDefTbx: TAction;
     procedure actCheckDefTbxExecute(Sender: TObject);
+    procedure gridTVMainShowCellDblClick(Sender: TcxCustomGridTableView;
+      ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+      AShift: TShiftState; var AHandled: Boolean);
   private
     FModelTbxCfg: IModelTbxCfg;
     { Private declarations }
@@ -22,6 +25,8 @@ type
     procedure BeforeFormShow; override;
     procedure IniGridField; override;
     procedure LoadGridData(ATypeid: string); override;
+    function GetCurTypeId: string;          //获取当前表格选中行的ID
+    function ModifyRecTbxCfg(ATbxId: Integer): Boolean;
   public
     { Public declarations }
     class function GetMdlDisName: string; override; 
@@ -33,7 +38,7 @@ var
 implementation
 
 uses uBaseFormPlugin, uSysSvc, uDBIntf, uGridConfig, uMoudleNoDef, uBaseInfoDef,
-     uModelBaseListIntf, uModelControlIntf, uFrmBaseTbxCheckDef;
+     uModelControlIntf, uFrmBaseTbxCheckDef, uPubFun, uFrmBaseTbxModfify;
 {$R *.dfm}
 
 { TfrmMDI1 }
@@ -57,10 +62,12 @@ var
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled('tbxId', 'ITypeId', -1);
+  FGridItem.AddFiled('tbxId', 'tbxId', -1);
   FGridItem.AddFiled('tbxName', '表格名称', 200);
+  FGridItem.AddFiled('tbxDefName', '表格别名', 200);             
   aCol := FGridItem.AddFiled('tbxType', '表格类型', 200);
-  aCol.SetDisplayText('-1', '未定义');
+  aCol.SetDisplayText(TSys_TbxType);
+
   FGridItem.AddFiled('tbxComment', '备注', 200);
   FGridItem.InitGridData;
 end;
@@ -83,6 +90,41 @@ begin
   inherited;
   if CallTfrmBaseTbxCheckDef(FModelTbxCfg, Self) = MROK then
     LoadGridData('');
+end;
+
+function TfrmBaseTbxCfg.GetCurTypeId: string;
+var
+  aRowIndex: Integer;
+begin
+  Result := '';
+  aRowIndex := gridTVMainShow.Controller.FocusedRowIndex;
+  if (aRowIndex < FGridItem.GetFirstRow) or (aRowIndex > FGridItem.GetLastRow) then
+    Exit;
+
+  Result := FGridItem.GetCellValue('tbxId', aRowIndex);
+end;
+
+procedure TfrmBaseTbxCfg.gridTVMainShowCellDblClick(
+  Sender: TcxCustomGridTableView;
+  ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+  AShift: TShiftState; var AHandled: Boolean);
+var
+  aTbxId: string;
+begin
+  inherited;
+  aTbxId := GetCurTypeId();
+  if not StringEmpty(aTbxId)  then
+  begin
+    if ModifyRecTbxCfg(StringToInt(aTbxId)) then
+    begin
+      LoadGridData('');
+    end;
+  end
+end;
+
+function TfrmBaseTbxCfg.ModifyRecTbxCfg(ATbxId: Integer): Boolean;
+begin
+  Result := CallfrmBaseTbxModfify(ATbxId) = mrOk;
 end;
 
 initialization
