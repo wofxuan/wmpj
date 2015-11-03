@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, Windows, SysUtils, DBClient, uPubFun, uParamObject,
-  uDefCom, uModelBaseIntf, uBaseInfoDef;
+  uDefCom, uModelBaseIntf, uBaseInfoDef, uBillData, uPackData;
 
 type
   //所有的业务父类,如果继承TInterfacedObject则不需要手动释放，如果继承TObject则需要手动释放且实现QueryInterface等
@@ -80,9 +80,23 @@ type
 
   end;
 
+  TModelBill = class(TModelBase, IModelBill)        //基本信息列表的业务父类
+  private
+    FVchType: Integer;
+
+
+    function SaveDetail(AVchCode: Integer; APackData: TPackData): Integer;//保存业务明细
+    function SaveAccount(AVchCode: Integer; APackData: TPackData): Integer;//保存财务数据
+    function ClearDlyBakData(APRODUCT_TRADE, AModi, AVchType, AVchcode, AOldVchcode: Integer): Integer; //错误后清除单据相关记录
+  protected
+    function SaveBill(const ABillData: TBillData; AOutPutData: TParamObject): Integer;
+  public
+
+  end;
+
 implementation
 
-uses uSysSvc, uOtherIntf, uModelFunCom, uBasicDataLocalClass, Controls;
+uses uSysSvc, uOtherIntf, uModelFunCom, uBasicDataLocalClass, Controls, Math;
 
 { TModelBase }
 
@@ -479,6 +493,91 @@ end;
 function TModelBaseList.ModelInfName: string;
 begin
   Result := '基本信息列表领域';
+end;
+
+{ TModelBill }
+
+function TModelBill.ClearDlyBakData(APRODUCT_TRADE, AModi, AVchType,
+  AVchcode, AOldVchcode: Integer): Integer;
+begin
+
+end;
+
+function TModelBill.SaveAccount(AVchCode: Integer;
+  APackData: TPackData): Integer;
+var
+  aAccountData: TParamObject;
+begin
+  Result := 0;
+  aAccountData :=  TParamObject.Create;
+  try
+    APackData.GetChildAllParam(aAccountData);
+    Result := gMFCom.ExecProcByName(APackData.ProcName, aAccountData);
+  finally
+    aAccountData.Free;
+  end;
+end;
+
+function TModelBill.SaveBill(const ABillData: TBillData; AOutPutData: TParamObject): Integer;
+var
+  aNewVchcode: Integer; //新生成的单据号
+  aRet: Integer;
+  aResultDataSet: TClientDataSet;
+begin
+  Result := -1;  
+  aNewVchcode := 0;
+  AOutPutData.add('NdxReturn', 0);
+  AOutPutData.add('CopyAudit', 0);
+  AOutPutData.add('DlyReturn', 0);
+  AOutPutData.add('dlyAccReturn', 0);
+  AOutPutData.add('CreateDraftReturn', 0);
+
+  //保存主表
+  aNewVchcode := gMFCom.ExecProcByName(ABillData.ProcName, ABillData.ParamData);
+  AOutPutData.add('NewVchcode', aNewVchcode);
+  if aNewVchcode < 0 then
+  begin
+    AOutPutData.add('NdxReturn', aNewVchcode);
+    ClearDlyBakData(ABillData.PRODUCT_TRADE, IfThen(ABillData.isModi, 1, 0), ABillData.VchType, ANewVchcode, ABillData.VchCode);
+    Exit;
+  end;
+
+  //保存明细数据
+  aRet := SaveDetail(ANewVchcode, ABillData.DetailData);
+  if aRet < 0 then
+  begin
+    AOutPutData.add('DlyReturn', aRet);
+    ClearDlyBakData(ABillData.PRODUCT_TRADE, IfThen(ABillData.isModi, 1, 0), ABillData.VchType, ANewVchcode, ABillData.VchCode);
+    Result := aRet;
+    Exit;
+  end;
+
+  //保存帐务数据
+  aRet := SaveAccount(ANewVchcode, ABillData.AccountData);
+  if aRet < 0 then
+  begin
+    AOutPutData.add('DlyAccReturn', aRet);
+    ClearDlyBakData(ABillData.PRODUCT_TRADE, IfThen(ABillData.isModi, 1, 0), ABillData.VchType, ANewVchcode, ABillData.VchCode);
+    Result := aRet;
+    Exit;
+  end;
+
+  Result := ANewVchcode;
+end;
+
+function TModelBill.SaveDetail(AVchCode: Integer;
+  APackData: TPackData): Integer;
+var
+  aDetailData: TParamObject;
+begin
+  Result := 0;
+  aDetailData :=  TParamObject.Create;
+  try
+    APackData.GetChildAllParam(aDetailData);
+    Result := gMFCom.ExecProcByName(APackData.ProcName, aDetailData);
+  finally
+    aDetailData.Free;
+  end;
 end;
 
 end.

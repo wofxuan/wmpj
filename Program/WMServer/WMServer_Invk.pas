@@ -29,6 +29,7 @@ type
     procedure Invoke_QuerySQL(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
     procedure Invoke_ExecuteProc(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
     procedure Invoke_ExecuteProcBackData(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
+    procedure Invoke_SaveBill(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
   end;
 
 implementation
@@ -146,6 +147,29 @@ begin
     __Message.Write('Result', TypeInfo(Integer), lResult, []);
     __Message.Write('AOutParams', TypeInfo(OleVariant), AOutParams, []);
     __Message.Write('ABackData', TypeInfo(OleVariant), ABackData, []);
+    __Message.Finalize;
+    __Message.UnsetAttributes(__Transport);
+
+  finally
+  end;
+end;
+
+procedure TWMFBData_Invoker.Invoke_SaveBill(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
+{ function SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer; }
+var
+  ABillData: OleVariant;
+  AOutPutData: OleVariant;
+  lResult: Integer;
+begin
+  try
+    __Message.Read('ABillData', TypeInfo(OleVariant), ABillData, []);
+    __Message.Read('AOutPutData', TypeInfo(OleVariant), AOutPutData, []);
+
+    lResult := (__Instance as IWMFBData).SaveBill(ABillData, AOutPutData);
+
+    __Message.InitializeResponseMessage(__Transport, 'WMServer', 'WMFBData', 'SaveBillResponse');
+    __Message.Write('Result', TypeInfo(Integer), lResult, []);
+    __Message.Write('AOutPutData', TypeInfo(OleVariant), AOutPutData, []);
     __Message.Finalize;
     __Message.UnsetAttributes(__Transport);
 

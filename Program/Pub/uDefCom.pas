@@ -31,7 +31,7 @@ const
   COSTMODE_FIFO = 1; //先进先出法
   COSTMODE_AIFO = 2; //后进先出法
   COSTMODE_HAND = 3; //手工指定法
-  
+
 type
   //表格列字段类型
   //字符串，整数，正整数(允许0)，小数，正小数
@@ -48,11 +48,18 @@ type
   //操作数据变化             增加、   复制新增、 删除、  修改、   分类、    查看
   TDataChangeType = (dctNo, dctAdd, dctAddCopy, dctDel, dctModif, dctClass,
     dctDis, dctInsert, dctAddSub);
-  
+
+  //单据状态
+  TBillOpenState = (bosNew, bosEdit, bosView, bosSett, bosModi); //单据是以什么状态打开
+  TBillCurrState = (bcsEdit, bcsAudit, bcsView, bcsEditAudit); //单据当前的状态
+  TBillBlock = (stBody, stBankCash, stPref, stSubject, stFeeCash); //表体，收付款账户，优惠， 科目详情，运费收付款账户
+  TBillSaveState = (sbNone, soSettle, soDraft, soCancel, soAnswer); //单据保存类型状态  Settle过账， Draft草稿，Answer询问
+
+
   //窗体显示方式
   TShowStyle = (fssShow, fssShowModal);
 
-function GetDataChangeType(AMode: string): TDataChangeType;//数据操作数据变化转化
+function GetDataChangeType(AMode: string): TDataChangeType; //数据操作数据变化转化
 
 implementation
 

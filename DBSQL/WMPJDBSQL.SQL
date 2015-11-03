@@ -218,13 +218,12 @@ BEGIN
 END
 GO 
 
---所有用户表格定义的相关信息
+--系统-所有用户表格定义的相关信息
 IF OBJECT_ID('dbo.tbx_Sys_TbxCfg') IS NULL 
     CREATE TABLE [dbo].[tbx_Sys_TbxCfg]
         (
           [TbxId] INT NOT NULL , --表格在SysObjects表的系统ID
-          [TbxName] VARCHAR(50) NOT NULL DEFAULT '' ,--表格数据库名称
-          [TbxDefName] VARCHAR(100) NOT NULL DEFAULT '' ,--表格别名
+          [TbxName] VARCHAR(50) NOT NULL DEFAULT '' ,
           [TbxType] INT NOT NULL DEFAULT -1 , --表格类型：-1未定义；0基本信息；1单据；2其它
           [TbxRowIndex] INT NOT NULL DEFAULT 0 ,--排列顺序
           [TbxComment] VARCHAR(200) NOT NULL DEFAULT '' , 
@@ -233,24 +232,123 @@ IF OBJECT_ID('dbo.tbx_Sys_TbxCfg') IS NULL
         
 GO
 
---本地化对应显示表格字段列配置
-IF OBJECT_ID('dbo.tbx_Sys_BasicTypeItem') IS NULL 
-    CREATE TABLE [dbo].[tbx_Sys_BasicTypeItem]
+--系统-数量，单价，金额，折扣，税率，关系和比率(%)的小数位数配置
+IF OBJECT_ID('dbo.tbx_Sys_DitDef') IS NULL 
+	CREATE TABLE [dbo].[tbx_Sys_DitDef]
+	(
+		[DitId] INT NOT NULL IDENTITY(1, 1),
+		[DitDefName] VARCHAR (100) NOT NULL  DEFAULT (''),
+		[DitDefValue] VARCHAR (100) NOT NULL  DEFAULT (''),
+		[DitDefComment] VARCHAR (100) NOT NULL  DEFAULT ('')
+		) ON [PRIMARY]
+	GO
+
+
+--单据-进货或者销售订单主表
+IF OBJECT_ID('dbo.tbx_Bill_Order_M') IS NULL 
+    CREATE TABLE [dbo].[tbx_Bill_Order_M]
         (
-          [BtiId] INT IDENTITY(1, 1) ,
-          [BtType] VARCHAR(50) NOT NULL DEFAULT '' ,--基本信息名称 btPtype, btKtype 等
-          [BtName] VARCHAR(50) NOT NULL DEFAULT '' ,--基本信息名称 商品信息, 仓库信息 等
-          [TbxName] VARCHAR(50) NOT NULL DEFAULT '' ,--对应的视图或者表格
-          [ColName] VARCHAR(50) NOT NULL DEFAULT '' ,--列在视图或者表格中名称
-          [ColDisName] VARCHAR(100) NOT NULL DEFAULT '' ,--列显示名称
-          [ColValueType] VARCHAR(100) NOT NULL DEFAULT '' ,--列类型,字符串，整数等gctSting, gctInt
-          [ColDisWidth] VARCHAR(100) NOT NULL DEFAULT '' ,--列显示宽带
-          [IsCheckBox] BIT NOT NULL DEFAULT -0 , --是否显示为CheckBox
-          [IsDis] BIT NOT NULL DEFAULT -0 , --是否显示
-          [DisIndex] INT NOT NULL DEFAULT 0 ,--表格显示列顺序
-          [RowIndex] INT NOT NULL DEFAULT 0 ,--排列顺序
-          [Comment] VARCHAR(200) NOT NULL DEFAULT '' , 
-          CONSTRAINT PK_tbx_Sys_BasicTypeItem PRIMARY KEY ( [BtiId] )
+          [VchCode] INT NOT NULL IDENTITY(1, 1), --单据Id
+          [InputDate] VARCHAR(10) DEFAULT '' ,--录得日期
+          [Number] VARCHAR(40) DEFAULT '' ,--单据编号
+          [VchType] INT NOT NULL DEFAULT (0) ,--单据类型
+		  [Summary] VARCHAR(256) NOT NULL  DEFAULT (''),--摘要，可以自动生成
+		  [Comment] VARCHAR(256) NOT NULL  DEFAULT (''),--附加说明
+		  [BtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--供货或收货单位
+		  [EtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--经手人
+		  [DtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--部门
+		  [KtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库
+		  [KtypeId2] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库,调拨单等时候
+		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
+		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
+		  [RedWord] CHAR(1) NOT NULL DEFAULT ('F'),--是否是红冲生成的单据 F不是,T是
+		  [Redold] CHAR(1) NOT NULL DEFAULT ('F'),--是否被红冲 F没有,T有
+		  [InputNo] VARCHAR(50) NOT NULL DEFAULT (''),--制单人
+		  [InputNO1] VARCHAR(50) NOT NULL DEFAULT (''),--多级审核的时候记录审核人
+		  [InputNO2] VARCHAR(50) NOT NULL DEFAULT (''),
+		  [InputNO3] VARCHAR(50) NOT NULL DEFAULT (''),
+		  [InputNO4] VARCHAR(50) NOT NULL DEFAULT (''),
+		  [InputNO5] VARCHAR(50) NOT NULL DEFAULT (''),
+		  [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),--单据所有明细总金额
+		  [Defdiscount] NUMERIC(22, 10) NOT NULL DEFAULT (0),--整单折扣
+		  [Savedate] DATETIME NULL DEFAULT (GETDATE()),--存盘时间
+		  [AuditState] INT NOT NULL DEFAULT ((-1)),--审核状态 -1:普通单据; 0:待审核; 1:审核中; 2:审核完成
+		  --以上是单据类型表必须定义的字段
+		  
+		  [OrderOver] INT NOT NULL DEFAULT (0),--是否完成 0否，1是
+		  [UserOver] INT NOT NULL DEFAULT (0), --0 未被调用， 其它:已经单元或者完成
+		  [GatheringDate] VARCHAR(10) NOT NULL DEFAULT (''),--交货日期
+          CONSTRAINT PK_tbx_Bill_Order_M PRIMARY KEY ( [VchCode] )
+        )
+        
+GO
+
+--单据-进货或者销售订单从表
+IF OBJECT_ID('dbo.tbx_Bill_Order_D') IS NULL 
+    CREATE TABLE [dbo].[tbx_Bill_Order_D]
+        (  
+		  [VchCode] INT NOT NULL DEFAULT (0), --主表单据Id
+          [VchType] INT NOT NULL DEFAULT (0) ,--单据类型
+          [DlyOrder] INT NOT NULL IDENTITY(1, 1),--数据库中行序号,可以用来关联行的其它相关信息
+          [ColRowNo] INT NOT NULL DEFAULT (0),--界面显示的行顺序
+          [AtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--会计科目
+		  [BtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--供货或收货单位
+		  [EtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--经手人
+		  [DtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--部门
+		  [KtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库
+		  [KtypeId2] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库,调拨单等时候
+		  [PtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--商品
+		  
+		  [Costmode] INT NOT NULL DEFAULT (0),--商品成本算法
+		  [Unit] INT NOT NULL DEFAULT (1),--多单位的时候对应的单位
+		  [UnitRate] NUMERIC(22, 10) NOT NULL DEFAULT (0),--此单位跟基本单位的换算关系
+		  
+		  [BlockNo] VARCHAR(20) NOT NULL DEFAULT (''),--批号
+		  [ProDate] VARCHAR(10) NOT NULL DEFAULT (''),--生产日期
+		  [UsefulEndDate] VARCHAR(10) NOT NULL DEFAULT (''),--有效期至
+		  [JhDate] VARCHAR(50) NOT NULL DEFAULT (''),--交货日期
+			
+		  [GoodsNo] INT NOT NULL DEFAULT (0),--当时出库类单据选择手工指定发的时候，记录对应选择的库存表的GoodsOrder
+
+		  [Qty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--数量,记录基本数量
+		  [Price] NUMERIC(22, 10) NOT NULL DEFAULT (0),--价格,记录基本数量对应的价格
+		  [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),--金额
+		  
+		  [DisCount] NUMERIC(22, 10) NOT NULL DEFAULT (1),--折扣
+		  [DisCountPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后单价
+		  [DisCountTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后金额
+		  
+		  [TaxRate] NUMERIC(22, 10) NOT NULL DEFAULT (0),--税率
+		  [TaxPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税单价
+		  [TaxTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税金额
+
+		  [AssQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--数量,多单位等时显示换算后的数量
+		  [AssPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--价格,多单位等是显示换算后的价格
+		  [AssDiscountPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后单价，多单位等是显示换算后的价格
+		  [AssTaxPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税单价，多单位等是显示换算后的价格
+
+		  [CostPrice] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本单价
+		  [CostTotal] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本金额
+		
+		  [OrderVchType] [int] NOT NULL DEFAULT (0),--调用的其它单据的类型(调用询价单或者销售订单等)
+		  [OrderCode] [int] NOT NULL DEFAULT (0),--调用的其它单据的主表ID
+		  [OrderDlyCode] [int] NOT NULL DEFAULT (0),--调用的其它单据的从表ID
+		  
+		  [PStutas] INT NOT NULL DEFAULT (0),--是否是赠品；0不是；1是
+		  [ToQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--到货数量
+		  [Redword] CHAR(2) NOT NULL DEFAULT ('F'),--是否是红冲生成的单据 F不是,T是
+		  [InputDate] VARCHAR(10)NOT NULL DEFAULT (''),--主表的录单日期
+		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
+		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
+		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 2是系统生成的记录
+		  [Comment] VARCHAR(256) NOT NULL DEFAULT (''),--备注
+		  
+		  --[SideQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--副单位数量,五金建材版的时候使用
+		  --[Pgholqty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--件数,布匹版
+		  --[PgholInqty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--总件数,布匹版
+		  --[InvoceTag] [int] NOT NULL DEFAULT (0),--对账标志
+		  --[InvoceTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--开票金额
+          CONSTRAINT PK_tbx_Bill_Order_D PRIMARY KEY ( [VchCode] )
         )
         
 GO
@@ -288,7 +386,7 @@ IF OBJECT_ID('dbo.tbx_Sys_DefSQL') IS NULL
         
 GO
 
-DELETE dbo.tbx_Base_PackageInfo
+TRUNCATE TABLE  dbo.tbx_Base_PackageInfo
 GO 
 ---初始化加载项
 INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUsercode ,IFullname ,INamepy ,IComment ,ISystem ,RowIndex)
@@ -313,20 +411,37 @@ INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUs
 VALUES  ( '00009' ,'00000' ,0 ,0 ,1 ,'Testdll.dll' ,'Testdll.dll' ,'Testdll.dll' ,'测试DLL' ,0, 8)
 GO 
 
-DELETE dbo.tbx_Sys_FrmParams
+TRUNCATE TABLE  dbo.tbx_Sys_FrmParams
 GO 
 --初始化窗体和对应的模块编号参数, MoudleNo要与uMoudleNoDef的对应
 INSERT INTO dbo.tbx_Sys_FrmParams ( MoudleNo ,FMPKey ,DefaultCaption ,ShowCaption ,ClassName ,ParamList , DefaultParams )
 VALUES  (101, '{1382E20F-642F-4662-A863-7F90F6E04CC7}' , '系统加载模块' , '系统加载模块' , 'TfrmLoadItemSet' , '' , '' )
 GO
 
-DELETE tbx_Sys_DefSQL
+TRUNCATE TABLE  tbx_Sys_DefSQL
 GO
 --初始化定义的SQL语句
 INSERT INTO dbo.tbx_Sys_DefSQL ( SQLNo ,DSLKey ,SQLStr ,DSLRemark ,DSLCreateTime ,DSLUpdateTime)
 VALUES  (4001 ,'{DF1C4EA1-D1F2-4150-99CB-317DF61FB17E}' ,'select * from tbx_Base_PackageInfo' ,'查询要加载的包' , GETDATE() ,GETDATE())
 GO
---初始化定义的SQL语句
 INSERT INTO dbo.tbx_Sys_DefSQL ( SQLNo ,DSLKey ,SQLStr ,DSLRemark ,DSLCreateTime ,DSLUpdateTime)
 VALUES  (1001 ,'{968FCBAC-74E3-43BA-80D3-21248ED828E1}' ,'select * from tbx_Base_Ptype where' ,'商品信息' , GETDATE() ,GETDATE())
 GO
+
+
+TRUNCATE TABLE dbo.tbx_Sys_DitDef
+--数量等的小数位数
+INSERT INTO dbo.tbx_Sys_DitDef( DitDefName ,DitDefValue ,DitDefComment)
+VALUES  ( 'DitQty' , '4' ,'数量位数')
+INSERT INTO dbo.tbx_Sys_DitDef( DitDefName ,DitDefValue ,DitDefComment)
+VALUES  ( 'DitPrice' , '8' ,'单价位数')
+INSERT INTO dbo.tbx_Sys_DitDef( DitDefName ,DitDefValue ,DitDefComment)
+VALUES  ( 'DitTotal' , '2' ,'金额位数')
+INSERT INTO dbo.tbx_Sys_DitDef( DitDefName ,DitDefValue ,DitDefComment)
+VALUES  ( 'DitDisCount' , '4' ,'折扣位数')
+INSERT INTO dbo.tbx_Sys_DitDef( DitDefName ,DitDefValue ,DitDefComment)
+VALUES  ( 'DitTax' , '0' ,'税率位数')
+INSERT INTO dbo.tbx_Sys_DitDef( DitDefName ,DitDefValue ,DitDefComment)
+VALUES  ( 'DitUnitRate' , '6' ,'关系')
+INSERT INTO dbo.tbx_Sys_DitDef( DitDefName ,DitDefValue ,DitDefComment)
+VALUES  ( 'DitcentRate' , '2' ,'比率(%)')

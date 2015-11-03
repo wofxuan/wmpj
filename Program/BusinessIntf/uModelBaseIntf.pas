@@ -2,7 +2,7 @@ unit uModelBaseIntf;
 
 interface
 
-uses DBClient, uParamObject, uBaseInfoDef, uDefCom;
+uses DBClient, uParamObject, uBaseInfoDef, uDefCom, uBillData;
 
 type
   IModelBase = interface(IInterface)
@@ -30,6 +30,13 @@ type
     procedure LoadGridData(ATypeid, ACustom: string; ACdsBaseList: TClientDataSet);
     function DeleteRec(ATypeId: string): Boolean; //删除一条记录
   end;
+
+  //单据操作
+  IModelBill = interface(IModelBase)
+    ['{192C9A3B-07F4-43E9-952D-8C486AF158C3}']
+    function SaveBill(const ABillData: TBillData; AOutPutData: TParamObject): Integer; //保存单据
+  end;
+  
 implementation
 
 end.

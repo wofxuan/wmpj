@@ -39,6 +39,7 @@ type
     function QuerySQL(const ASQL: AnsiString; var ABackData: OleVariant): Integer;
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
+    function SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer;
   end;
 
   { CoWMFBData }
@@ -56,6 +57,7 @@ type
     function QuerySQL(const ASQL: AnsiString; var ABackData: OleVariant): Integer;
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
+    function SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer;
   end;
 
 implementation
@@ -158,6 +160,24 @@ begin
     __Message.Read('Result', TypeInfo(Integer), result, []);
     __Message.Read('AOutParams', TypeInfo(OleVariant), AOutParams, []);
     __Message.Read('ABackData', TypeInfo(OleVariant), ABackData, []);
+  finally
+    __Message.UnsetAttributes(__TransportChannel);
+    __Message.FreeStream;
+  end
+end;
+
+function TWMFBData_Proxy.SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer;
+begin
+  try
+    __Message.InitializeRequestMessage(__TransportChannel, 'WMServer', __InterfaceName, 'SaveBill');
+    __Message.Write('ABillData', TypeInfo(OleVariant), ABillData, []);
+    __Message.Write('AOutPutData', TypeInfo(OleVariant), AOutPutData, []);
+    __Message.Finalize;
+
+    __TransportChannel.Dispatch(__Message);
+
+    __Message.Read('Result', TypeInfo(Integer), result, []);
+    __Message.Read('AOutPutData', TypeInfo(OleVariant), AOutPutData, []);
   finally
     __Message.UnsetAttributes(__TransportChannel);
     __Message.FreeStream;

@@ -39,7 +39,7 @@ type
     //传入的json参数格式'{"ProcName":"getptype","Params":{"@comde":"0001","@type1":"00002"}}'
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
-
+    function SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer;
   end;
 
 
@@ -229,6 +229,12 @@ begin
       end;
     end;
   end;
+end;
+
+function TWMFBData.SaveBill(const ABillData: OleVariant;
+  var AOutPutData: OleVariant): Integer;
+begin
+
 end;
 
 initialization

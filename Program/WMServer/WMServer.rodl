@@ -54,6 +54,16 @@
 </Parameter>
 </Parameters>
 </Operation>
+<Operation Name="SaveBill" UID="{EEE3D8D3-C08D-4C77-833E-F4FF49E12D19}">
+<Parameters>
+<Parameter Name="Result" DataType="Integer" Flag="Result">
+</Parameter>
+<Parameter Name="ABillData" DataType="OleVariant" Flag="In" >
+</Parameter>
+<Parameter Name="AOutPutData" DataType="OleVariant" Flag="InOut" >
+</Parameter>
+</Parameters>
+</Operation>
 </Operations>
 </Interface>
 </Interfaces>

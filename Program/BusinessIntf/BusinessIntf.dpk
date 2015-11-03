@@ -40,6 +40,7 @@ contains
   uModelFunIntf in 'uModelFunIntf.pas',
   uModelControlIntf in 'uModelControlIntf.pas',
   uModelSysIntf in 'uModelSysIntf.pas',
-  uModelOtherSet in 'uModelOtherSet.pas';
+  uModelOtherSet in 'uModelOtherSet.pas',
+  uModelBillIntf in 'uModelBillIntf.pas';
 
 end.

@@ -39,6 +39,8 @@ contains
   uSysSvc in 'uSysSvc.pas',
   uDefCom in '..\Pub\uDefCom.pas',
   uSvcInfoIntf in '..\Interfaces\uSvcInfoIntf.pas',
-  uParamObject in '..\Pub\uParamObject.pas';
+  uParamObject in '..\Pub\uParamObject.pas',
+  uBillData in '..\Pub\uBillData.pas',
+  uPackData in '..\Pub\uPackData.pas';
 
 end.

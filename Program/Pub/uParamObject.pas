@@ -21,7 +21,6 @@ type
     FParams: TGParams;
     FCount: Integer;
     procedure SetParams(Value: TGParams);
-    function AsVariant(AParamName: string): Variant;
   public
     constructor Create;
     procedure Assign(Source: TPersistent); override;
@@ -31,6 +30,7 @@ type
     function AsString(AParamName: string): string;
     function AsInteger(AParamName: string): Integer;
     function AsFloat(AParamName: string): double;
+    function AsVariant(AParamName: string): Variant;
     property Params: TGParams read FParams write SetParams;
     property Count: Integer read FCount write FCount;
     destructor Destroy; override;
@@ -244,6 +244,7 @@ begin
   FCount := 0;
   inherited;
 end;
+
 
 procedure TParamObject.SetParams(Value: TGParams);
 var

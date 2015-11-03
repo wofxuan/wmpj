@@ -9,7 +9,7 @@ uses
   ImgList, ActnList, DB, DBClient, cxGridLevel, cxControls,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxGrid,
   cxContainer, cxTreeView, ExtCtrls, cxDropDownEdit, cxCalendar,
-  cxTextEdit, cxMaskEdit, cxButtonEdit, cxLabel;
+  cxTextEdit, cxMaskEdit, cxButtonEdit, cxLabel, uBillData, uPackData;
 
 type
   TfrmBillOrder = class(TfrmMDIBill)
@@ -17,6 +17,11 @@ type
     { Private declarations }
     procedure InitMasterTitles(Sender: TObject); override;
     procedure InitGrids(Sender: TObject); override;
+
+    function SaveToSettle: Boolean; override;
+    function SaveMasterData(const ABillMasterData: TBillData): Integer; override;
+    function SaveDetailData(const ABillDetailData: TPackData): Integer; override;
+    function SaveDetailAccount(const ADetailAccountData: TPackData): integer; override; 
   public
     { Public declarations }
   end;
@@ -47,7 +52,51 @@ end;
 procedure TfrmBillOrder.InitMasterTitles(Sender: TObject);
 begin
   inherited;
+  FVchcode := 0;
+  FVchtype := 7;
+end;
 
+function TfrmBillOrder.SaveDetailAccount(
+  const ADetailAccountData: TPackData): integer;
+begin
+
+end;
+
+function TfrmBillOrder.SaveDetailData(
+  const ABillDetailData: TPackData): Integer;
+begin
+
+end;
+
+function TfrmBillOrder.SaveMasterData(
+  const ABillMasterData: TBillData): Integer;
+begin
+
+end;
+
+function TfrmBillOrder.SaveToSettle: Boolean;
+var
+  aBillData: TBillData;
+  aOutPutData: TPackData;
+begin
+  Result := False;
+  aBillData := TBillData.Create;
+  aOutPutData := TPackData.Create;
+  try
+    aBillData.PRODUCT_TRADE := 0;
+    aBillData.Draft := Ord(soSettle);
+    aBillData.isModi := false;
+    aBillData.vchCode := FVchcode;
+    aBillData.vchType := FVchtype;
+
+    SaveMasterData(aBillData);
+    SaveDetailData(aBillData.DetailData);
+    SaveDetailAccount(aBillData.AccountData);
+
+  finally
+    aOutPutData.Free;
+    aBillData.Free;
+  end;
 end;
 
 initialization
