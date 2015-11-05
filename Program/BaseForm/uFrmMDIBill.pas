@@ -9,7 +9,7 @@ uses
   ImgList, ActnList, DB, DBClient, cxGridLevel, cxControls,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxGrid,
   cxContainer, cxTreeView, ExtCtrls, cxLabel, cxDropDownEdit, cxCalendar,
-  cxTextEdit, cxMaskEdit, cxButtonEdit, uDefCom, uBillData, uPackData;
+  cxTextEdit, cxMaskEdit, cxButtonEdit, uDefCom, uBillData, uPackData, uModelBaseIntf;
 
 type
   TfrmMDIBill = class(TfrmMDI)
@@ -35,6 +35,7 @@ type
 
   protected
     FVchcode, FVchtype: Integer;//单据ID，单据类型
+    FModelBill: IModelBill;
     
     procedure BeforeFormShow; override;
     procedure BeforeFormDestroy; override;

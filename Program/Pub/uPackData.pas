@@ -101,6 +101,7 @@ begin
     begin
       AChildParam.Add(aOneItem.Params[i].ParamName, '');
     end;
+    AChildParam.add('@RowId', ''); //增加序号
   end;
 
   for i := 0 to FChildList.Count - 1 do
@@ -115,6 +116,8 @@ begin
 
       AChildParam.Add(aName, aNewValue);
     end;
+    aNewValue := AChildParam.AsString('@RowId');
+    AChildParam.add('@RowId', aNewValue + SaveBillChar + IntToStr(i + 1)); //增加序号
   end;
 end;
 

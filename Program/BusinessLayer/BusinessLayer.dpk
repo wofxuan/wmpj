@@ -41,6 +41,7 @@ contains
   uModelBaseType in 'uModelBaseType.pas',
   uModelBaseList in 'uModelBaseList.pas',
   uBusinessLayer in 'uBusinessLayer.pas',
-  uModelSys in 'uModelSys.pas';
+  uModelSys in 'uModelSys.pas',
+  uModelBill in 'uModelBill.pas';
 
 end.

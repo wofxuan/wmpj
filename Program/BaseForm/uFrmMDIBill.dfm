@@ -4,7 +4,7 @@ inherited frmMDIBill: TfrmMDIBill
   TextHeight = 13
   inherited splOP: TSplitter
     Top = 133
-    Height = 185
+    Height = 184
   end
   inherited pnlTop: TPanel
     Top = 48
@@ -82,7 +82,7 @@ inherited frmMDIBill: TfrmMDIBill
   end
   inherited gridMainShow: TcxGrid
     Top = 133
-    Height = 185
+    Height = 184
     inherited gridTVMainShow: TcxGridTableView
       OptionsView.GroupByBox = False
     end

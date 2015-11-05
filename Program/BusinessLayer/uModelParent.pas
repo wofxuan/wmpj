@@ -84,7 +84,6 @@ type
   private
     FVchType: Integer;
 
-
     function SaveDetail(AVchCode: Integer; APackData: TPackData): Integer;//保存业务明细
     function SaveAccount(AVchCode: Integer; APackData: TPackData): Integer;//保存财务数据
     function ClearDlyBakData(APRODUCT_TRADE, AModi, AVchType, AVchcode, AOldVchcode: Integer): Integer; //错误后清除单据相关记录
@@ -509,6 +508,7 @@ var
   aAccountData: TParamObject;
 begin
   Result := 0;
+  if StringEmpty(APackData.ProcName) then Exit;
   aAccountData :=  TParamObject.Create;
   try
     APackData.GetChildAllParam(aAccountData);
@@ -529,9 +529,10 @@ begin
   AOutPutData.add('NdxReturn', 0);
   AOutPutData.add('CopyAudit', 0);
   AOutPutData.add('DlyReturn', 0);
-  AOutPutData.add('dlyAccReturn', 0);
+  AOutPutData.add('DlyAccReturn', 0);
   AOutPutData.add('CreateDraftReturn', 0);
 
+  FVchType := ABillData.VchType;
   //保存主表
   aNewVchcode := gMFCom.ExecProcByName(ABillData.ProcName, ABillData.ParamData);
   AOutPutData.add('NewVchcode', aNewVchcode);
@@ -574,6 +575,8 @@ begin
   aDetailData :=  TParamObject.Create;
   try
     APackData.GetChildAllParam(aDetailData);
+    aDetailData.Add('@VchType', FVchType);
+    aDetailData.Add('@VchCode', AVchCode);
     Result := gMFCom.ExecProcByName(APackData.ProcName, aDetailData);
   finally
     aDetailData.Free;

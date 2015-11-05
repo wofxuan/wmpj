@@ -15,17 +15,18 @@ RETURNS @Re TABLE
     )
 AS 
     BEGIN
-        DECLARE @Splitlen INT
-        SET @Splitlen = LEN(@Split + 'a') - 2
+        DECLARE @SplitLen INT
+        SET @SplitLen = LEN(@Split + 'a') - 2
         WHILE CHARINDEX(@Split, @Str) > 0 
             BEGIN
                 INSERT  @re
-                VALUES  ( LEFT(@Str, CHARINDEX(@Splitlen, @Str) - 1) )
-                SET @Str = STUFF(@Str, 1, CHARINDEX(@Splitlen, @Str) + @Splitlen, '')
+                VALUES  ( LEFT(@Str, CHARINDEX(@Split, @Str) - 1) )
+                SET @Str = STUFF(@Str, 1, CHARINDEX(@Split, @Str) + @SplitLen, '')
             END
-        INSERT  @Re
+        INSERT  @re
         VALUES  ( @Str )
         RETURN
     END
 
 go
+

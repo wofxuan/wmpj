@@ -330,9 +330,9 @@ IF OBJECT_ID('dbo.tbx_Bill_Order_D') IS NULL
 		  [CostPrice] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本单价
 		  [CostTotal] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本金额
 		
-		  [OrderVchType] [int] NOT NULL DEFAULT (0),--调用的其它单据的类型(调用询价单或者销售订单等)
-		  [OrderCode] [int] NOT NULL DEFAULT (0),--调用的其它单据的主表ID
-		  [OrderDlyCode] [int] NOT NULL DEFAULT (0),--调用的其它单据的从表ID
+		  [OrderVchType] INT NOT NULL DEFAULT (0),--调用的其它单据的类型(调用询价单或者销售订单等)
+		  [OrderCode] INT NOT NULL DEFAULT (0),--调用的其它单据的主表ID
+		  [OrderDlyCode] INT NOT NULL DEFAULT (0),--调用的其它单据的从表ID
 		  
 		  [PStutas] INT NOT NULL DEFAULT (0),--是否是赠品；0不是；1是
 		  [ToQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--到货数量
