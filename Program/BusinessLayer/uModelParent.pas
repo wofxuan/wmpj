@@ -86,9 +86,10 @@ type
 
     function SaveDetail(AVchCode: Integer; APackData: TPackData): Integer;//保存业务明细
     function SaveAccount(AVchCode: Integer; APackData: TPackData): Integer;//保存财务数据
-    function ClearDlyBakData(APRODUCT_TRADE, AModi, AVchType, AVchcode, AOldVchcode: Integer): Integer; //错误后清除单据相关记录
+    function ClearSaveCreate(APRODUCT_TRADE, AModi, AVchType, AVchcode, AOldVchcode: Integer): Integer; //错误后清除单据相关记录
   protected
     function SaveBill(const ABillData: TBillData; AOutPutData: TParamObject): Integer;
+    function BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode: Integer; AOutPutData: TParamObject): Integer; //单据过账
   public
 
   end;
@@ -496,10 +497,49 @@ end;
 
 { TModelBill }
 
-function TModelBill.ClearDlyBakData(APRODUCT_TRADE, AModi, AVchType,
-  AVchcode, AOldVchcode: Integer): Integer;
+function TModelBill.BillCreate(AModi, ADraft, AVchType, AVchcode,
+  AOldVchCode: Integer; AOutPutData: TParamObject): Integer;
+var
+  aList: TParamObject;
+  aRet: Integer;
+  aErrorMsg: string;
 begin
+  aList := TParamObject.Create;
+  try
+    aList.Add('@NewVchCode', AVchcode);
+    aList.Add('@OldVchCode', AOldVchcode);
+    aList.Add('@errorValue', '');
+    aRet := gMFCom.ExecProcByName('pbx_Bill_Order_Create', aList);
+    if aRet <> 0 then
+    begin
+      aErrorMsg := aList.AsString('@errorValue');
+      gMFCom.ShowMsgBox(aErrorMsg, '错误', mbtError);
+    end;
+    Result := aRet;
+  finally
+    aList.Free;
+  end;
+end;
 
+function TModelBill.ClearSaveCreate(APRODUCT_TRADE, AModi, AVchType,
+  AVchcode, AOldVchcode: Integer): Integer;
+var
+  aList: TParamObject;
+  aRet: Integer;
+  aErrorMsg: string;
+begin
+  aList := TParamObject.Create;
+  try
+    aList.Add('@PRODUCT_TRADE', APRODUCT_TRADE);
+    aList.Add('@Modi', AModi);
+    aList.Add('@VchType', AVchType);
+    aList.Add('@NewVchCode', AVchcode);
+    aList.Add('@OldVchCode', AOldVchcode);
+
+    Result := gMFCom.ExecProcByName('pbx_Bill_ClearSaveCreate', aList);
+  finally
+    aList.Free;
+  end;
 end;
 
 function TModelBill.SaveAccount(AVchCode: Integer;
@@ -539,7 +579,8 @@ begin
   if aNewVchcode < 0 then
   begin
     AOutPutData.add('NdxReturn', aNewVchcode);
-    ClearDlyBakData(ABillData.PRODUCT_TRADE, IfThen(ABillData.isModi, 1, 0), ABillData.VchType, ANewVchcode, ABillData.VchCode);
+    ClearSaveCreate(ABillData.PRODUCT_TRADE, IfThen(ABillData.isModi, 1, 0), ABillData.VchType, ANewVchcode, ABillData.VchCode);
+    gMFCom.ShowMsgBox('保存主表信息失败，单据可能已经被过账或删除！', '错误', mbtError);
     Exit;
   end;
 
@@ -548,7 +589,8 @@ begin
   if aRet < 0 then
   begin
     AOutPutData.add('DlyReturn', aRet);
-    ClearDlyBakData(ABillData.PRODUCT_TRADE, IfThen(ABillData.isModi, 1, 0), ABillData.VchType, ANewVchcode, ABillData.VchCode);
+    ClearSaveCreate(ABillData.PRODUCT_TRADE, IfThen(ABillData.isModi, 1, 0), ABillData.VchType, ANewVchcode, ABillData.VchCode);
+    gMFCom.ShowMsgBox('保存明细数据失败，请稍后重试。', '错误', mbtError);
     Result := aRet;
     Exit;
   end;
@@ -558,7 +600,8 @@ begin
   if aRet < 0 then
   begin
     AOutPutData.add('DlyAccReturn', aRet);
-    ClearDlyBakData(ABillData.PRODUCT_TRADE, IfThen(ABillData.isModi, 1, 0), ABillData.VchType, ANewVchcode, ABillData.VchCode);
+    ClearSaveCreate(ABillData.PRODUCT_TRADE, IfThen(ABillData.isModi, 1, 0), ABillData.VchType, ANewVchcode, ABillData.VchCode);
+    gMFCom.ShowMsgBox('保存财务数据失败，请稍后重试。', '错误', mbtError);
     Result := aRet;
     Exit;
   end;

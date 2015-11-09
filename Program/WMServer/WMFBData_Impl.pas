@@ -50,7 +50,7 @@ implementation
 
 {$R *.dfm}
 uses
-  {Generated:} WMServer_Invk, uPubFun;
+  {Generated:} WMServer_Invk, IniFiles, uPubFun;
 
 procedure Create_WMFBData(out anInstance: IUnknown);
 begin
@@ -89,6 +89,7 @@ procedure TWMFBData.RORemoteDataModuleCreate(Sender: TObject);
 begin
   if not conDB.Connected then
   begin
+    conDB.ConnectionString := 'Provider=SQLOLEDB.1;Password=123456;Persist Security Info=True;User ID=sa;Initial Catalog=wmpj;Data Source=127.0.0.1';
     conDB.Connected := True;
   end;
 end;

@@ -3,12 +3,12 @@ inherited frmMDIBill: TfrmMDIBill
   PixelsPerInch = 96
   TextHeight = 13
   inherited splOP: TSplitter
-    Top = 133
-    Height = 184
+    Top = 177
+    Height = 141
   end
   inherited pnlTop: TPanel
     Top = 48
-    Height = 85
+    Height = 129
     object pnlBillTitle: TPanel
       Left = 1
       Top = 1
@@ -44,7 +44,6 @@ inherited frmMDIBill: TfrmMDIBill
             Kind = bkEllipsis
           end>
         TabOrder = 1
-        Text = 'edtBillNumber'
         Width = 209
       end
       object deBillDate: TcxDateEdit
@@ -73,16 +72,15 @@ inherited frmMDIBill: TfrmMDIBill
       Left = 1
       Top = 33
       Width = 734
-      Height = 51
+      Height = 95
       Align = alClient
       BevelOuter = bvNone
-      Caption = 'pnlBillMaster'
       TabOrder = 1
     end
   end
   inherited gridMainShow: TcxGrid
-    Top = 133
-    Height = 184
+    Top = 177
+    Height = 141
     inherited gridTVMainShow: TcxGridTableView
       OptionsView.GroupByBox = False
     end

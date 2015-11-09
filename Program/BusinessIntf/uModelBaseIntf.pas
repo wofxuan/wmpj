@@ -35,6 +35,7 @@ type
   IModelBill = interface(IModelBase)
     ['{192C9A3B-07F4-43E9-952D-8C486AF158C3}']
     function SaveBill(const ABillData: TBillData; AOutPutData: TParamObject): Integer; //保存单据
+    function BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode: Integer; AOutPutData: TParamObject): Integer; //单据过账
   end;
   
 implementation

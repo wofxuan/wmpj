@@ -54,7 +54,7 @@ type
 
 implementation
 
-uses uSysSvc, uOtherIntf, uTestdllInf, uMoudleNoDef, uDefCom;
+uses uSysSvc, uOtherIntf, uTestdllInf, uMoudleNoDef, uDefCom, uVchTypeDef;
 
 { TSysMenu }
 
@@ -239,7 +239,8 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m20006000', '部门信息', 'm2000', '', fnMdlBaseDtypeList, nil);
 
     AddMenu('m3000', '采购管理', '', '', 0, nil);
-    AddMenu('m30001000', '进货订单', 'm3000', '', fnMdlBillOrder, nil);
+    AddMenu('m30001000', '进货订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Buy), fnMdlBillOrderBuy, nil);
+    AddMenu('m30002000', '销售订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Sale), fnMdlBillOrderSale, nil);
 
     AddMenu('m9000', '帮助', '', '', 0, nil);
     AddMenu('m90001000', '在线帮助', 'm9000', '', fnMdlHelp_Online, nil);

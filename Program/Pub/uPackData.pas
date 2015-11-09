@@ -111,6 +111,8 @@ begin
       aOldValue := AChildParam.Params[j].ParamValue;
       aName := AChildParam.Params[j].ParamName;
       
+      if Trim(aName) = '@RowId' then Continue;
+
       aNewValue := TParamObject(FChildList.Items[i]).AsString(aName);
       aNewValue := aOldValue + SaveBillChar + aNewValue;
 

@@ -32,7 +32,11 @@ type
     procedure actSaveSettleExecute(Sender: TObject);
   private
     { Private declarations }
+    FBillTitle: string; //单据显示的标题
+    FBillSaveState: TBillSaveState; //单据保存类型状态
+    FBillOpenState: TBillOpenState; //单据是以什么状态打开
 
+    procedure SetBillTitle(const Value: string);
   protected
     FVchcode, FVchtype: Integer;//单据ID，单据类型
     FModelBill: IModelBill;
@@ -60,6 +64,10 @@ type
     function SaveDetailAccount(const ADetailAccountData: TPackData): integer; virtual; //保存财务信息
   public
     { Public declarations }
+     property BillTitle: string read FBillTitle write SetBillTitle;
+     property BillSaveState: TBillSaveState read FBillSaveState write FBillSaveState;
+     property BillOpenState: TBillOpenState read FBillOpenState write FBillOpenState; 
+
   end;
 
 var
@@ -68,7 +76,7 @@ var
 implementation
 
 uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
-     uBaseInfoDef, uGridConfig, uFrmApp;
+     uBaseInfoDef, uGridConfig, uFrmApp, uVchTypeDef;
 
 {$R *.dfm}
 
@@ -83,6 +91,20 @@ end;
 procedure TfrmMDIBill.BeforeFormShow;
 begin
   inherited;
+  BillSaveState := sbNone;
+  if ParamList.Count = 0 then
+  begin
+    FVchtype := VchType_Order_Sale;
+    FVchcode := 0;
+    BillOpenState := bosNew;
+  end
+  else
+  begin
+    FVchtype := ParamList.AsInteger('Vchtype');
+    FVchcode := ParamList.AsInteger('Vchcode');
+    BillOpenState := TBillOpenState(ParamList.AsInteger('bosState'));
+  end;
+  
   FGridItem.OnSelectBasic := DoSelectBasic;
   FGridItem.SetGridCellSelect(True);
   
@@ -183,6 +205,12 @@ procedure TfrmMDIBill.actSaveSettleExecute(Sender: TObject);
 begin
   inherited;
   SaveToSettle();
+end;
+
+procedure TfrmMDIBill.SetBillTitle(const Value: string);
+begin
+  FBillTitle := Value;
+  lblBillTitle.Caption := Value;
 end;
 
 end.

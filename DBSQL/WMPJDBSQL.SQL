@@ -224,6 +224,7 @@ IF OBJECT_ID('dbo.tbx_Sys_TbxCfg') IS NULL
         (
           [TbxId] INT NOT NULL , --表格在SysObjects表的系统ID
           [TbxName] VARCHAR(50) NOT NULL DEFAULT '' ,
+          [TbxDefName] VARCHAR(50) NOT NULL DEFAULT '' ,--别名
           [TbxType] INT NOT NULL DEFAULT -1 , --表格类型：-1未定义；0基本信息；1单据；2其它
           [TbxRowIndex] INT NOT NULL DEFAULT 0 ,--排列顺序
           [TbxComment] VARCHAR(200) NOT NULL DEFAULT '' , 

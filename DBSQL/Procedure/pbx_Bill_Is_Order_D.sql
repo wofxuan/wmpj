@@ -143,7 +143,7 @@ AS
                     ISNULL(TaxRate.Col, 0) ,
                     dbo.pbx_Fun_CovToPrice(ISNULL(AssTaxPrice.Col, 0) / ISNULL(P.URate, 1)) TaxPrice ,
                     ISNULL(TaxTotal.col, 0) ,
-                    ISNULL(AssQty.Col, 0) ,
+                    ISNULL(AssQty.Col, -11) ,
                     ISNULL(AssPrice.Col, 0) ,
                     ISNULL(AssDiscountPrice.Col, 0) ,
                     ISNULL(AssTaxPrice.Col, 0) ,
@@ -214,8 +214,12 @@ AS
                               ) P ON szRowId.Id = p.Id
             WHERE   szRowId.col <> ''
             ORDER BY szRowId.Id
-    IF @@ERROR <> 0 
-        GOTO ErrorRollback
+    IF @@ERROR <> 0
+    BEGIN
+		SET @ErrorValue = '批量插入明细数据失败！'
+		GOTO ErrorRollback
+    END
+        
     SET @EndDlyOrder = @@IDENTITY
 
     COMMIT TRAN OrderSaveDly

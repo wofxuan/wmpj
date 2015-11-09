@@ -36,8 +36,9 @@ const
   fnMdlBaseKtypeList = fnBase + 0005; //仓库
 
   //单据---------------------------------2000-----------------------
-  fnMdlBillOrder = fnBill + 0001; //订单
-  fnMdlBillBuy = fnBill + 0002; //进货单
+  fnMdlBillOrderBuy = fnBill + 0001; //进货订单
+  fnMdlBillOrderSale = fnBill + 0002; //销售订单
+  fnMdlBillBuy = fnBill + 0003; //进货单
 
   //报表-----------------------------------3000---------------------
   fnMdlReportGoods = fnReport + 0001; //商品库存情况

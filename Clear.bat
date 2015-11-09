@@ -60,12 +60,5 @@ del Program\WMServer\*.~*
 del Program\WMServer\*.dcu
 del Program\WMServer\*.ddp
 
-del Program\testbpl\*.~*
-del Program\testbpl\*.dcu
-del Program\testbpl\*.ddp
-
-del Program\testdll\*.~*
-del Program\testdll\*.dcu
-del Program\testdll\*.ddp
 
 

@@ -13,6 +13,20 @@ uses
 
 type
   TfrmBillOrder = class(TfrmMDIBill)
+    lblBtype: TcxLabel;
+    edtBtype: TcxButtonEdit;
+    lbl2: TcxLabel;
+    edtEtype: TcxButtonEdit;
+    lbl3: TcxLabel;
+    edtDtype: TcxButtonEdit;
+    lbl4: TcxLabel;
+    deGatheringDate: TcxDateEdit;
+    lblKtype: TcxLabel;
+    edtKtype: TcxButtonEdit;
+    lbl6: TcxLabel;
+    edtSummary: TcxButtonEdit;
+    lbl7: TcxLabel;
+    edtComment: TcxButtonEdit;
   private
     { Private declarations }
     procedure BeforeFormShow; override;
@@ -34,7 +48,7 @@ var
 implementation
 
 uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
-     uBaseInfoDef, uDefCom, uGridConfig, uFrmApp, uModelBillIntf;
+     uBaseInfoDef, uDefCom, uGridConfig, uFrmApp, uModelBillIntf, uVchTypeDef;
 
 {$R *.dfm}
 
@@ -61,8 +75,22 @@ end;
 procedure TfrmBillOrder.InitMasterTitles(Sender: TObject);
 begin
   inherited;
-  FVchcode := 0;
-  FVchtype := 7;
+  MoudleNo := FVchType;
+
+  case FVchType of
+    VchType_Order_Buy:
+      begin
+        BillTitle := '进货订单';
+        lblBtype.Caption := '供货单位';
+        lblKtype.Caption := '收货仓库';
+      end;
+    VchType_Order_Sale:
+      begin
+        BillTitle := '销售订单';
+        lblBtype.Caption := '购买单位';
+        lblKtype.Caption := '发货仓库';
+      end;
+  end;
 end;
 
 function TfrmBillOrder.SaveDetailAccount(
@@ -79,13 +107,13 @@ begin
   ABillDetailData.ProcName := 'pbx_Bill_Is_Order_D';
   aPackData := ABillDetailData.AddChild();
   aPackData.Add('@ColRowNo', '1');
-  aPackData.Add('@Atypeid', '0000100001');
-  aPackData.Add('@Btypeid', '00001');
-  aPackData.Add('@Etypeid', '00001');
-  aPackData.Add('@Dtypeid', '00001');
-  aPackData.Add('@Ktypeid', '00001');
-  aPackData.Add('@Ktypeid2', '00001');
-  aPackData.Add('@PtypeId', '00001' );
+  aPackData.Add('@AtypeId', '0000100001');
+  aPackData.Add('@BtypeId', '00000');
+  aPackData.Add('@EtypeId', '00000');
+  aPackData.Add('@DtypeId', '00000');
+  aPackData.Add('@KtypeId', '00000');
+  aPackData.Add('@KtypeId2', '00000');
+  aPackData.Add('@PtypeId', '00000' );
   aPackData.Add('@CostMode', 1);
   aPackData.Add('@UnitRate', 1);
   aPackData.Add('@Unit', 1);
@@ -93,7 +121,7 @@ begin
   aPackData.Add('@Prodate', '');
   aPackData.Add('@UsefulEndDate', '');
   aPackData.Add('@Jhdate', '');
-  aPackData.Add('@GoodsNo', 'qqq');
+  aPackData.Add('@GoodsNo', '1');
   aPackData.Add('@Qty', 5);
   aPackData.Add('@Price', 6);
   aPackData.Add('@Total', 30);
@@ -137,11 +165,11 @@ begin
   ABillMasterData.Add('@VchType', FVchType);
   ABillMasterData.Add('@Summary', 'sss');
   ABillMasterData.Add('@Comment', 'wwww');
-  ABillMasterData.Add('@Btypeid', '00001');
-  ABillMasterData.Add('@Etypeid', '00001');
-  ABillMasterData.Add('@Dtypeid', '00001');
-  ABillMasterData.Add('@Ktypeid', '00001');
-  ABillMasterData.Add('@Ktypeid2', '00001');
+  ABillMasterData.Add('@Btypeid', '00000');
+  ABillMasterData.Add('@Etypeid', '00000');
+  ABillMasterData.Add('@Dtypeid', '00000');
+  ABillMasterData.Add('@Ktypeid', '00000');
+  ABillMasterData.Add('@Ktypeid2', '00000');
   ABillMasterData.Add('@Period', 1);
   ABillMasterData.Add('@YearPeriod', 1);
   ABillMasterData.Add('@Total', 11);
@@ -154,6 +182,7 @@ function TfrmBillOrder.SaveToSettle: Boolean;
 var
   aBillData: TBillData;
   aOutPutData: TParamObject;
+  aNewVchcode: Integer;
 begin
   Result := False;
   aBillData := TBillData.Create;
@@ -161,14 +190,18 @@ begin
   try
     aBillData.PRODUCT_TRADE := 0;
     aBillData.Draft := Ord(soSettle);
-    aBillData.isModi := false;
-    aBillData.vchCode := FVchcode;
-    aBillData.vchType := FVchtype;
+    aBillData.IsModi := false;
+    aBillData.VchCode := FVchcode;
+    aBillData.VchType := FVchtype;
 
     SaveMasterData(aBillData);
     SaveDetailData(aBillData.DetailData);
     SaveDetailAccount(aBillData.AccountData);
-    FModelBill.SaveBill(aBillData, aOutPutData);
+    aNewVchcode := FModelBill.SaveBill(aBillData, aOutPutData);
+    if aNewVchcode >= 0 then
+    begin
+      FModelBill.BillCreate(0, aBillData.Draft, FVchType, aNewVchcode, aBillData.VchCode, aOutPutData);
+    end;
   finally
     aOutPutData.Free;
     aBillData.Free;
@@ -176,6 +209,7 @@ begin
 end;
 
 initialization
-  gFormManage.RegForm(TfrmBillOrder, fnMdlBillOrder);
+  gFormManage.RegForm(TfrmBillOrder, fnMdlBillOrderBuy);
+  gFormManage.RegForm(TfrmBillOrder, fnMdlBillOrderSale);
 
 end.
