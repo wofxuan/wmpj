@@ -15,44 +15,43 @@ type
   private
     { Private declarations }
 
-    FMoudleNo: Integer;                                     //模块的编号和uMoudleNoDef单元的常量对应
-    FParamList: TParamObject;                               //初始化是传入的参数
-    FTitle: string;                                         //窗体工具栏显示的名称
-    FDBComItem: TFormDBComItem;                             //配置界面控件和数据字段
-
+    FMoudleNo: Integer; //模块的编号和uMoudleNoDef单元的常量对应
+    FParamList: TParamObject; //初始化是传入的参数
+    FTitle: string; //窗体工具栏显示的名称
+    FDBComItem: TFormDBComItem; //配置界面控件和数据字段
   protected
     { IInterface }
     function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
-    
+
     { IFormIntf }
     procedure CreateParamList(AOwner: TComponent; AParam: TParamObject);
     procedure FrmShow;
     function FrmShowModal: Integer;
     procedure FrmFree;
     procedure FrmClose;
-    function FrmShowStyle: TShowStyle; virtual; abstract;//窗体显示的类型，是否modal
+    function FrmShowStyle: TShowStyle; virtual; abstract; //窗体显示的类型，是否modal
 
     procedure DoSelectBasic(Sender: TObject; ABasicType: TBasicType;
       ASelectBasicParam: TSelectBasicParam;
       ASelectOptions: TSelectBasicOptions; var ABasicDatas: TSelectBasicDatas;
-      var ReturnCount: Integer); virtual;
+      var AReturnCount: Integer); virtual;
     procedure BeforeFormShow; virtual;
-    procedure InitParamList; virtual;                       //产品可以在窗口创建之前先对参数进行处理；不要对界面的控件进行处理
+    procedure InitParamList; virtual; //产品可以在窗口创建之前先对参数进行处理；不要对界面的控件进行处理
     procedure BeforeFormDestroy; virtual;
     procedure SetTitle(const Value: string); virtual;
-    procedure IniView; virtual;                             //初始化视图
+    procedure IniView; virtual; //初始化视图
     procedure IniData; virtual;
   public
     { Public declarations }
     constructor CreateFrmParamList(AOwner: TComponent; AParam: TParamObject); virtual; //带参数的创建
     property MoudleNo: Integer read FMoudleNo write FMoudleNo;
     property ParamList: TParamObject read FParamList write FParamList;
-    class function GetMdlDisName: string; virtual;          //得到模块显示名称
-    property Title: string read FTitle write SetTitle;      //代表了子类的lbltitle.caption
+    class function GetMdlDisName: string; virtual; //得到模块显示名称
+    property Title: string read FTitle write SetTitle; //代表了子类的lbltitle.caption
     property DBComItem: TFormDBComItem read FDBComItem write FDBComItem;
-    
+
   end;
 
 var
@@ -87,7 +86,8 @@ end;
 
 procedure TfrmParent.FormShow(Sender: TObject);
 begin
-  FDBComItem := TFormDBComItem.Create;
+  FDBComItem := TFormDBComItem.Create(Self);
+  FDBComItem.OnSelectBasic := DoSelectBasic;
   BeforeFormShow();
 end;
 
@@ -175,13 +175,13 @@ end;
 procedure TfrmParent.DoSelectBasic(Sender: TObject; ABasicType: TBasicType;
   ASelectBasicParam: TSelectBasicParam;
   ASelectOptions: TSelectBasicOptions; var ABasicDatas: TSelectBasicDatas;
-  var ReturnCount: Integer);
+  var AReturnCount: Integer);
 begin
   //基本信息选择
   //双击、按钮为全部，回车支持模糊查询
   if ASelectBasicParam.SelectBasicMode <> sbtKeydown then
     ASelectBasicParam.SearchString := '';
-  ReturnCount := SelectBasicData(ABasicType, ASelectBasicParam,
+  AReturnCount := SelectBasicData(ABasicType, ASelectBasicParam,
     ASelectOptions, ABasicDatas);
 end;
 

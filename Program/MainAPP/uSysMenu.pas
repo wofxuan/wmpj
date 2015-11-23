@@ -241,6 +241,8 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m3000', '采购管理', '', '', 0, nil);
     AddMenu('m30001000', '进货订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Buy), fnMdlBillOrderBuy, nil);
     AddMenu('m30002000', '销售订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Sale), fnMdlBillOrderSale, nil);
+    AddMenu('m30003000', '进货单', 'm3000', 'Vchtype=' + IntToStr(VchType_Buy), fnMdlBillBuy, nil);
+    AddMenu('m30004000', '销售单', 'm3000', 'Vchtype=' + IntToStr(VchType_Sale), fnMdlBillSale, nil);
 
     AddMenu('m9000', '帮助', '', '', 0, nil);
     AddMenu('m90001000', '在线帮助', 'm9000', '', fnMdlHelp_Online, nil);

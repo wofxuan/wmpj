@@ -8,7 +8,7 @@ uses
   cxGraphics, cxFilter, cxData, cxDataStorage, cxEdit, DB, cxDBData,
   cxGridLevel, cxClasses, cxControls, cxGridCustomView,
   cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGrid,
-  uFrmMDI, ActnList, DBClient;
+  uFrmMDI, ActnList, DBClient, dxBar, dxBarExtItems, ImgList;
 
 type
   TFrmTest = class(TfrmMDI)

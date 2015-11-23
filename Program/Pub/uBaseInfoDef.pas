@@ -22,10 +22,13 @@ type
 
 function GetBaseTypesLevels(ABasic: TBasicType): Integer; //返回基本信息的层数，来判断是否分类等操作
 function GetBaseTypeid(ABasic: TBasicType): string;//返回对应的id段名称
+function GetBaseTypeFullName(ABasic: TBasicType): string;//返回对应的全名段名称
+function GetBaseTypeUsercode(ABasic: TBasicType): string;//返回对应的编号段名称
 function GetBaseTypeKeyStr(ABasic: TBasicType): string;//返回对应的关键字
 function GetBaseTypeSonnumStr(ABasic: TBasicType): string;//返回对应的儿子数字段名称
 function GetBaseTypeTable(ABasic: TBasicType): string;//返回对应的表格名称
 function IsSaveToLocal(ABasic: TBasicType): Boolean;//不需要本地化的东东，就加到这里
+function BasicTypeToString(ABasicType: TBasicType; AName: string = ''): string;//基本信息转化为字符串
 
 implementation
 
@@ -39,6 +42,36 @@ begin
     btEtype: Result := 'ETypeId';
     btDtype: Result := 'DTypeId';
     btKtype: Result := 'KTypeId';
+  else
+    Result := '';
+  end;
+end;
+
+function GetBaseTypeFullName(ABasic: TBasicType): string;
+begin
+  case ABasic of
+    btAtype: Result := 'AFullname';
+    btItype: Result := 'IFullname';
+    btPtype: Result := 'PFullname';
+    btBtype: Result := 'BFullname';
+    btEtype: Result := 'EFullname';
+    btDtype: Result := 'DFullname';
+    btKtype: Result := 'KFullname';
+  else
+    Result := '';
+  end;
+end;
+
+function GetBaseTypeUsercode(ABasic: TBasicType): string;
+begin
+  case ABasic of
+    btAtype: Result := 'AUsercode';
+    btItype: Result := 'IUsercode';
+    btPtype: Result := 'PUsercode';
+    btBtype: Result := 'BUsercode';
+    btEtype: Result := 'EUsercode';
+    btDtype: Result := 'DUsercode';
+    btKtype: Result := 'KUsercode';
   else
     Result := '';
   end;
@@ -106,5 +139,21 @@ begin
   Result := not (ABasic in [btNo, btAtype, btAll]); //不需要本地化的东东，就加到这里
 end;
 
+function BasicTypeToString(ABasicType: TBasicType; AName: string = ''): string;
+var
+  aBtString: string;
+begin
+  case ABasicType of
+    btAtype: aBtString := 'btAtype';
+    btBtype: aBtString := 'btBtype';
+    btEtype: aBtString := 'btEtype';
+    btKtype: aBtString := 'btKtype';
+    btPtype: aBtString := 'btPtype';
+    btDtype: aBtString := 'btDtype';
+  else
+    aBtString := 'btUtype';
+  end;
+  Result := aBtString + AName;
+end;
 end.
 

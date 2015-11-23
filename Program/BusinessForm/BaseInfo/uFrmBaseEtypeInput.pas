@@ -10,7 +10,7 @@ uses
   cxDropDownEdit, uParamObject, ComCtrls, cxStyles, cxCustomData, cxFilter,
   cxData, cxDataStorage, DB, cxDBData, cxGridLevel, cxClasses,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGrid, uDBComConfig;
+  cxGridDBTableView, cxGrid, uDBComConfig, cxCalendar, uBaseInfoDef, uModelFunIntf;
 
 type
   TfrmBaseEtypeInput = class(TfrmBaseInput)
@@ -26,7 +26,6 @@ type
     lbl5: TLabel;
     lbl6: TLabel;
     edtTel: TcxButtonEdit;
-    edtBirthday: TcxButtonEdit;
     edtAddress: TcxButtonEdit;
     lbl7: TLabel;
     lbl8: TLabel;
@@ -37,11 +36,17 @@ type
     lbl10: TLabel;
     edtLowLimitDiscount: TcxButtonEdit;
     lbl11: TLabel;
+    deBirthday: TcxDateEdit;
   protected
     { Private declarations }
     procedure SetFrmData(ASender: TObject; AList: TParamObject); override;
     procedure GetFrmData(ASender: TObject; AList: TParamObject); override;
     procedure ClearFrmData; override;
+
+    procedure DoSelectBasic(Sender: TObject; ABasicType: TBasicType;
+      ASelectBasicParam: TSelectBasicParam;
+      ASelectOptions: TSelectBasicOptions; var ABasicDatas: TSelectBasicDatas;
+      var AReturnCount: Integer); override;
   public
     { Public declarations }
     procedure BeforeFormShow; override;
@@ -56,7 +61,7 @@ implementation
 
 {$R *.dfm}
 
-uses uSysSvc, uBaseFormPlugin, uBaseInfoDef, uModelBaseTypeIntf, uModelControlIntf, uOtherIntf, uDefCom;
+uses uSysSvc, uBaseFormPlugin, uModelBaseTypeIntf, uModelControlIntf, uOtherIntf, uDefCom;
 
 { TfrmBasePtypeInput }
 
@@ -72,9 +77,9 @@ begin
   DBComItem.AddItem(edtPYM, 'Namepy', 'Enamepy');
   DBComItem.AddItem(chkStop, 'IsStop', 'IsStop');
 
-  DBComItem.AddItem(edtDType, 'DTypeID', 'DTypeID');
+  DBComItem.AddItem(edtDType, 'DTypeId', 'DTypeId', 'DFullname', btDtype);
   DBComItem.AddItem(edtTel, 'Tel', 'Tel');
-  DBComItem.AddItem(edtBirthday, 'Birthday', 'Birthday');
+  DBComItem.AddItem(deBirthday, 'Birthday', 'Birthday');
   DBComItem.AddItem(edtEMail, 'EMail', 'EMail');
   DBComItem.AddItem(edtJob, 'Job', 'Job');
   DBComItem.AddItem(edtTopTotal, 'TopTotal', 'TopTotal');
@@ -86,6 +91,25 @@ end;
 procedure TfrmBaseEtypeInput.ClearFrmData;
 begin
   inherited;
+end;
+
+procedure TfrmBaseEtypeInput.DoSelectBasic(Sender: TObject;
+  ABasicType: TBasicType; ASelectBasicParam: TSelectBasicParam;
+  ASelectOptions: TSelectBasicOptions; var ABasicDatas: TSelectBasicDatas;
+  var AReturnCount: Integer);
+begin
+  if  Sender = edtDType then
+  begin
+//    ASelectOptions := ASelectOptions + [opMultiSelect]
+  end;
+  inherited;
+//  if  Sender = edtDType then
+//  begin
+//    if AReturnCount >= 1 then
+//    begin
+//      DBComItem.SetBasicItemValue(edtDType, ABasicDatas[0]);
+//    end;
+//  end;
 end;
 
 procedure TfrmBaseEtypeInput.GetFrmData(ASender: TObject;

@@ -9,7 +9,7 @@ uses
   cxDBData, ActnList, DBClient, cxGridLevel, cxClasses, cxControls,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView,
   cxGridDBTableView, cxGrid, StdCtrls, cxButtons, ExtCtrls, uFrmBaseInput,
-  ComCtrls, cxContainer, cxTreeView;
+  ComCtrls, cxContainer, cxTreeView, dxBar, dxBarExtItems, ImgList;
 
 type
   TfrmBaseKtypeList = class(TfrmMDIBaseType)
@@ -55,10 +55,8 @@ procedure TfrmBaseKtypeList.IniGridField;
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled('KTypeId', 'KTypeId', -1);
-  FGridItem.AddFiled('KFullname', '≤÷ø‚√˚≥∆', 200);
-  FGridItem.AddFiled('KUsercode', '≤÷ø‚±‡¬Î', 200);
-  FGridItem.AddFiled('RowIndex', '–Ú∫≈', 50, gctInt);
+  FGridItem.AddFiled(btKtype);
+  FGridItem.AddFiled('RowIndex', '–Ú∫≈', 50, cfInt);
   FGridItem.AddCheckBoxCol('IsStop', ' «∑ÒÕ£”√', 1, 0);
   FGridItem.InitGridData;
 end;

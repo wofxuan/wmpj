@@ -39,6 +39,7 @@ const
   fnMdlBillOrderBuy = fnBill + 0001; //进货订单
   fnMdlBillOrderSale = fnBill + 0002; //销售订单
   fnMdlBillBuy = fnBill + 0003; //进货单
+  fnMdlBillSale = fnBill + 0004; //销售单
 
   //报表-----------------------------------3000---------------------
   fnMdlReportGoods = fnReport + 0001; //商品库存情况

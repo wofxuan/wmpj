@@ -89,7 +89,7 @@ type
     function ClearSaveCreate(APRODUCT_TRADE, AModi, AVchType, AVchcode, AOldVchcode: Integer): Integer; //错误后清除单据相关记录
   protected
     function SaveBill(const ABillData: TBillData; AOutPutData: TParamObject): Integer;
-    function BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode: Integer; AOutPutData: TParamObject): Integer; //单据过账
+    function BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode: Integer; AOutPutData: TParamObject): Integer; virtual; //单据过账
   public
 
   end;
@@ -449,6 +449,10 @@ begin
     begin                                                   //列表
       aList.Add('@Custom', ACustom);
       gMFCom.ExecProcBackData('pbx_Base_GetList', aList, ACdsBaseList);
+    end
+    else
+    begin
+      raise (SysService as IExManagement).CreateFunEx('没有指定查询数据方式（列表或分组）！');
     end;
   finally
     aList.Free;
@@ -504,21 +508,26 @@ var
   aRet: Integer;
   aErrorMsg: string;
 begin
-  aList := TParamObject.Create;
-  try
-    aList.Add('@NewVchCode', AVchcode);
-    aList.Add('@OldVchCode', AOldVchcode);
-    aList.Add('@errorValue', '');
-    aRet := gMFCom.ExecProcByName('pbx_Bill_Order_Create', aList);
-    if aRet <> 0 then
-    begin
-      aErrorMsg := aList.AsString('@errorValue');
-      gMFCom.ShowMsgBox(aErrorMsg, '错误', mbtError);
-    end;
-    Result := aRet;
-  finally
-    aList.Free;
-  end;
+  Result := 0;
+//  aList := TParamObject.Create;
+//  try
+//    aList.Add('@NewVchCode', AVchcode);
+//    aList.Add('@OldVchCode', AOldVchcode);
+//    aList.Add('@errorValue', '');
+//    aRet := gMFCom.ExecProcByName('pbx_Bill_Order_Create', aList);
+//    if aRet <> 0 then
+//    begin
+//      aErrorMsg := aList.AsString('@errorValue');
+//      gMFCom.ShowMsgBox(aErrorMsg, '错误', mbtError);
+//    end
+//    else
+//    begin
+//      gMFCom.ShowMsgBox('过账完成！', '提示', mbtError);
+//    end;
+//    Result := aRet;
+//  finally
+//    aList.Free;
+//  end;
 end;
 
 function TModelBill.ClearSaveCreate(APRODUCT_TRADE, AModi, AVchType,

@@ -91,6 +91,7 @@ end;
 
 procedure TfrmBaseInput.IniData;
 begin
+  ClearFrmData();
   FModelBaseType.IniData(CurTypeId);
 end;
 

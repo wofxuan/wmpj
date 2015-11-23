@@ -4,7 +4,7 @@ inherited frmBaseTbxCfg: TfrmBaseTbxCfg
   TextHeight = 13
   inherited splOP: TSplitter
     Top = 86
-    Height = 231
+    Height = 232
   end
   inherited pnlTop: TPanel
     Top = 48
@@ -12,7 +12,7 @@ inherited frmBaseTbxCfg: TfrmBaseTbxCfg
   end
   inherited gridMainShow: TcxGrid
     Top = 86
-    Height = 231
+    Height = 232
     inherited gridTVMainShow: TcxGridTableView
       OnCellDblClick = gridTVMainShowCellDblClick
     end

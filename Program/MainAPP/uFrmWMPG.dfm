@@ -12,6 +12,7 @@ object FrmWMPG: TFrmWMPG
   Font.Style = []
   FormStyle = fsMDIForm
   OldCreateOrder = False
+  Position = poScreenCenter
   Visible = True
   OnClose = FormClose
   OnCreate = FormCreate
@@ -28,7 +29,7 @@ object FrmWMPG: TFrmWMPG
   end
   object statList: TStatusBar
     Left = 0
-    Top = 459
+    Top = 460
     Width = 1060
     Height = 19
     Panels = <

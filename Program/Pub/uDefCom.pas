@@ -34,7 +34,7 @@ const
 
 type
   //表格列字段类型
-  //字符串，整数，正整数(允许0)，小数，正小数
+  //字符串，整数，正整数(允许0)，小数，正小数, boolen
   //数量，单价，金额，折扣，日期，时间，日期时间
   TColField = (cfString, cfInt, cfPlusInt, cfFloat, cfPlusFloat, cfCheck,
     cfQty, cfPrice, cfTotal, cfDiscount, cfDate, cfTime, cfDatime);

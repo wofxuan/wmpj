@@ -9,7 +9,8 @@ uses
   ImgList, ActnList, DB, DBClient, cxGridLevel, cxControls,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxGrid,
   cxContainer, cxTreeView, ExtCtrls, cxLabel, cxDropDownEdit, cxCalendar,
-  cxTextEdit, cxMaskEdit, cxButtonEdit, uDefCom, uBillData, uPackData, uModelBaseIntf;
+  cxTextEdit, cxMaskEdit, cxButtonEdit, uDefCom, uBillData, uPackData,
+  uModelBaseIntf, uModelFunIntf;
 
 type
   TfrmMDIBill = class(TfrmMDI)
@@ -38,14 +39,15 @@ type
 
     procedure SetBillTitle(const Value: string);
   protected
-    FVchcode, FVchtype: Integer;//单据ID，单据类型
+    FVchcode, FVchtype: Integer; //单据ID，单据类型
     FModelBill: IModelBill;
-    
+
     procedure BeforeFormShow; override;
     procedure BeforeFormDestroy; override;
-    
+
     procedure InitParamList; override;
 
+    function LoadBillData(AVchType, AVchCode: Integer): Boolean; virtual;
     function LoadBillDataMaster: Boolean; virtual;
     function LoadBillDataGrid: Boolean; virtual;
 
@@ -62,11 +64,13 @@ type
     function SaveMasterData(const ABillMasterData: TBillData): Integer; virtual; //保存主表信息
     function SaveDetailData(const ABillDetailData: TPackData): Integer; virtual; //保存从表信息
     function SaveDetailAccount(const ADetailAccountData: TPackData): integer; virtual; //保存财务信息
+
+    function LoadOnePtype(ARow: Integer; AData: TSelectBasicData; IsImport: Boolean = False): Boolean; virtual; //加载一条记录
   public
     { Public declarations }
-     property BillTitle: string read FBillTitle write SetBillTitle;
-     property BillSaveState: TBillSaveState read FBillSaveState write FBillSaveState;
-     property BillOpenState: TBillOpenState read FBillOpenState write FBillOpenState; 
+    property BillTitle: string read FBillTitle write SetBillTitle;
+    property BillSaveState: TBillSaveState read FBillSaveState write FBillSaveState;
+    property BillOpenState: TBillOpenState read FBillOpenState write FBillOpenState;
 
   end;
 
@@ -76,7 +80,7 @@ var
 implementation
 
 uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
-     uBaseInfoDef, uGridConfig, uFrmApp, uVchTypeDef;
+  uBaseInfoDef, uGridConfig, uFrmApp, uVchTypeDef;
 
 {$R *.dfm}
 
@@ -104,14 +108,15 @@ begin
     FVchcode := ParamList.AsInteger('Vchcode');
     BillOpenState := TBillOpenState(ParamList.AsInteger('bosState'));
   end;
-  
-  FGridItem.OnSelectBasic := DoSelectBasic;
+
   FGridItem.SetGridCellSelect(True);
-  
+
   InitMasterTitles(Self);
   InitGrids(self);
   InitMenuItem(self);
   InitOthers(self);
+
+  LoadBillData(FVchtype, FVchcode);
 end;
 
 function TfrmMDIBill.BeforeSaveBill(ASaveState: TBillSaveState): Boolean;
@@ -126,7 +131,8 @@ end;
 
 procedure TfrmMDIBill.InitMasterTitles(Sender: TObject);
 begin
-
+  DBComItem.AddItem(deBillDate, 'InputDate');
+  DBComItem.AddItem(edtBillNumber, 'Number');
 end;
 
 procedure TfrmMDIBill.InitMenuItem(Sender: TObject);
@@ -187,12 +193,12 @@ end;
 
 function TfrmMDIBill.SaveToDraft: Boolean;
 begin
-
+  Result := True;
 end;
 
 function TfrmMDIBill.SaveToSettle: Boolean;
 begin
-
+  Result := True;
 end;
 
 procedure TfrmMDIBill.actSaveDraftExecute(Sender: TObject);
@@ -204,13 +210,32 @@ end;
 procedure TfrmMDIBill.actSaveSettleExecute(Sender: TObject);
 begin
   inherited;
-  SaveToSettle();
+  if SaveToSettle() then
+  begin
+    LoadBillData(FVchtype, 0);
+  end;
 end;
 
 procedure TfrmMDIBill.SetBillTitle(const Value: string);
 begin
   FBillTitle := Value;
   lblBillTitle.Caption := Value;
+  Caption := Value;
+end;
+
+function TfrmMDIBill.LoadOnePtype(ARow: Integer; AData: TSelectBasicData;
+  IsImport: Boolean): Boolean;
+begin
+
+end;
+
+function TfrmMDIBill.LoadBillData(AVchType, AVchCode: Integer): Boolean;
+begin
+  FVchtype := AVchtype;
+  FVchcode := AVchcode;
+  LoadBillDataMaster();
+  LoadBillDataGrid();
 end;
 
 end.
+

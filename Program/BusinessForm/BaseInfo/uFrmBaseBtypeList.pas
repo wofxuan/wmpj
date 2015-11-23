@@ -55,10 +55,8 @@ procedure TfrmBaseBtypeList.IniGridField;
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled('BTypeId', 'PTypeId', -1);
-  FGridItem.AddFiled('BFullname', '单位名称', 200);
-  FGridItem.AddFiled('BUsercode', '单位编码', 200);
-  FGridItem.AddFiled('RowIndex', '序号', 50, gctInt);
+  FGridItem.AddFiled(btBtype);
+  FGridItem.AddFiled('RowIndex', '序号', 50, cfInt);
   FGridItem.AddCheckBoxCol('IsStop', '是否停用', 1, 0);
   FGridItem.InitGridData;
 end;

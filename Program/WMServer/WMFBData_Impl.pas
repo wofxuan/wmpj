@@ -18,6 +18,9 @@ uses
   {Generated:} WMServer_Intf, DB, Provider, Dialogs, Variants, DBClient,
   ADODB, uParamObject, superobject;
 
+const
+  ServerCfgFile = 'WMServer.Cfg';
+  
 type
   { TWMFBData }
   TWMFBData = class(TRORemoteDataModule, IWMFBData)
@@ -28,9 +31,12 @@ type
     dspPubBackSPData: TDataSetProvider;
     procedure RORemoteDataModuleCreate(Sender: TObject);
   private
+    FServerAddr, FPassword, FUser, FBaseName: string;
+
     procedure SetParametersValue(AParams: TParameters; AInputParams: ISuperObject);
     function GetParamValueByName(const AParamName: string; AParams: ISuperObject; var Value: Variant): Boolean;
     procedure SetBackParameters(AProcParams: TParameters; aBackParams: TParams);
+    procedure LoadCfg;
   protected
     { IWMFBData methods }
     function Sum(const A: Integer; const B: Integer): Integer;
@@ -89,7 +95,9 @@ procedure TWMFBData.RORemoteDataModuleCreate(Sender: TObject);
 begin
   if not conDB.Connected then
   begin
-    conDB.ConnectionString := 'Provider=SQLOLEDB.1;Password=123456;Persist Security Info=True;User ID=sa;Initial Catalog=wmpj;Data Source=127.0.0.1';
+    LoadCfg();
+    conDB.ConnectionString := 'Provider=SQLOLEDB.1;Password=' + FPassword + ';Persist Security Info=True;' +
+                              'User ID=' + FUser + ';Initial Catalog=' + FBaseName + ';Data Source=' + FServerAddr;
     conDB.Connected := True;
   end;
 end;
@@ -236,6 +244,34 @@ function TWMFBData.SaveBill(const ABillData: OleVariant;
   var AOutPutData: OleVariant): Integer;
 begin
 
+end;
+
+procedure TWMFBData.LoadCfg;
+var
+  aFilePath: string;
+  aIni: TIniFile;
+begin
+  aFilePath := ExtractFilePath(ParamStr(0)) + ServerCfgFile;
+  if not FileExists(aFilePath) then
+  begin
+    FileCreate(aFilePath)
+  end;
+  aIni := TIniFile.Create(aFilePath);
+  try
+    FServerAddr := aIni.ReadString('DataBase', 'ServerAddr', '127.0.0.1');  
+    aIni.WriteString('DataBase', 'ServerAddr', FServerAddr);
+    
+    FPassword := aIni.ReadString('DataBase', 'Password', '123456');
+    aIni.WriteString('DataBase', 'Password', FPassword);
+
+    FUser := aIni.ReadString('DataBase', 'User', 'sa');
+    aIni.WriteString('DataBase', 'User', FUser);
+
+    FBaseName := aIni.ReadString('Server', 'BaseName', 'wmpj');
+    aIni.WriteString('DataBase', 'BaseName', FBaseName);
+  finally
+    aIni.Free;
+  end;
 end;
 
 initialization

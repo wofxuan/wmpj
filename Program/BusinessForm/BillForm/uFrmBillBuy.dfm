@@ -1,5 +1,5 @@
-inherited frmBillOrder: TfrmBillOrder
-  Caption = 'frmBillOrder'
+inherited frmBillBuy: TfrmBillBuy
+  Caption = 'frmBillBuy'
   ClientWidth = 824
   PixelsPerInch = 96
   TextHeight = 13
@@ -155,8 +155,5 @@ inherited frmBillOrder: TfrmBillOrder
       0
       48
       0)
-    inherited btnSave: TdxBarLargeButton
-      OnClick = btnSaveClick
-    end
   end
 end

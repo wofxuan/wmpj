@@ -349,11 +349,132 @@ IF OBJECT_ID('dbo.tbx_Bill_Order_D') IS NULL
 		  --[PgholInqty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--总件数,布匹版
 		  --[InvoceTag] [int] NOT NULL DEFAULT (0),--对账标志
 		  --[InvoceTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--开票金额
-          CONSTRAINT PK_tbx_Bill_Order_D PRIMARY KEY ( [VchCode] )
+          CONSTRAINT PK_tbx_Bill_Order_D PRIMARY KEY ( [DlyOrder] )
         )
         
 GO
 
+--单据-进货,销售或者其它要过账单据的主表
+IF OBJECT_ID('dbo.tbx_Bill_M') IS NULL 
+    CREATE TABLE [dbo].[tbx_Bill_M]
+        (
+          [VchCode] INT NOT NULL IDENTITY(1, 1), --单据Id
+          [InputDate] VARCHAR(10) DEFAULT '' ,--录得日期
+          [Number] VARCHAR(40) DEFAULT '' ,--单据编号
+          [VchType] INT NOT NULL DEFAULT (0) ,--单据类型
+		  [Summary] VARCHAR(256) NOT NULL  DEFAULT (''),--摘要，可以自动生成
+		  [Comment] VARCHAR(256) NOT NULL  DEFAULT (''),--附加说明
+		  [BtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--供货或收货单位
+		  [EtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--经手人
+		  [DtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--部门
+		  [KtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库
+		  [KtypeId2] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库,调拨单等时候
+		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
+		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
+		  [RedWord] CHAR(1) NOT NULL DEFAULT ('F'),--是否是红冲生成的单据 F不是,T是
+		  [Redold] CHAR(1) NOT NULL DEFAULT ('F'),--是否被红冲 F没有,T有
+		  [InputNo] VARCHAR(50) NOT NULL DEFAULT (''),--制单人
+		  [InputNO1] VARCHAR(50) NOT NULL DEFAULT (''),--多级审核的时候记录审核人
+		  [InputNO2] VARCHAR(50) NOT NULL DEFAULT (''),
+		  [InputNO3] VARCHAR(50) NOT NULL DEFAULT (''),
+		  [InputNO4] VARCHAR(50) NOT NULL DEFAULT (''),
+		  [InputNO5] VARCHAR(50) NOT NULL DEFAULT (''),
+		  [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),--单据所有明细总金额
+		  [Defdiscount] NUMERIC(22, 10) NOT NULL DEFAULT (0),--整单折扣
+		  [Savedate] DATETIME NULL DEFAULT (GETDATE()),--存盘时间
+		  [AuditState] INT NOT NULL DEFAULT ((-1)),--审核状态 -1:普通单据; 0:待审核; 1:审核中; 2:审核完成
+		  --以上是单据类型表必须定义的字段
+		  
+		  [PostNo] VARCHAR(50) NOT NULL DEFAULT (''),--单据过账人ID
+		  [Attach] INT NOT NULL DEFAULT (0),--附件ID
+		  [GatheringDate] VARCHAR(10) NOT NULL DEFAULT (''),--交货日期
+		  [InvoceTag] INT NOT NULL DEFAULT (0),--对账标记
+		  [VipCardID] INT NOT NULL DEFAULT (0),--会员卡ID，0没有，>0会员卡ID
+		  [VipDiscount] NUMERIC(22, 10) DEFAULT (0),--会员卡设置的折扣
+		  [IsRetail] INT NOT NULL DEFAULT (0),--零售单标志，0不是，1是
+		  [FromOrderCode] INT NOT NULL DEFAULT (0),--收款单,付款单的时候,记录进货单,销售单ID
+		  [ModifyEtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--过账后,修改单据的人员ID
+		  [ModifyDate] VARCHAR(20) NOT NULL DEFAULT (''),--过账后,修改单据的时间
+		  [MenID] INT NOT NULL DEFAULT (0),--如果是门店上传的单据记录门店ID
+		  [IsFaxed] INT NOT NULL DEFAULT (0),--如果是门店，上传标志
+          CONSTRAINT PK_tbx_Bill_M PRIMARY KEY ( [VchCode] )
+        )
+        
+GO
+
+--单据-进货,销售或者其它要过账单据的草稿从表
+IF OBJECT_ID('dbo.tbx_Bill_D_Bak') IS NULL 
+    CREATE TABLE [dbo].[tbx_Bill_D_Bak]
+        (  
+		  [VchCode] INT NOT NULL DEFAULT (0), --主表单据Id
+          [VchType] INT NOT NULL DEFAULT (0) ,--单据类型
+          [DlyOrder] INT NOT NULL IDENTITY(1, 1),--数据库中行序号,可以用来关联行的其它相关信息
+          [ColRowNo] INT NOT NULL DEFAULT (0),--界面显示的行顺序
+          [AtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--会计科目
+		  [BtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--供货或收货单位
+		  [EtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--经手人
+		  [DtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--部门
+		  [KtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库
+		  [KtypeId2] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库,调拨单等时候
+		  [PtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--商品
+		  
+		  [Costmode] INT NOT NULL DEFAULT (0),--商品成本算法
+		  [Unit] INT NOT NULL DEFAULT (1),--多单位的时候对应的单位
+		  [UnitRate] NUMERIC(22, 10) NOT NULL DEFAULT (0),--此单位跟基本单位的换算关系
+		  
+		  [BlockNo] VARCHAR(20) NOT NULL DEFAULT (''),--批号
+		  [ProDate] VARCHAR(10) NOT NULL DEFAULT (''),--生产日期
+		  [UsefulEndDate] VARCHAR(10) NOT NULL DEFAULT (''),--有效期至
+		  [JhDate] VARCHAR(50) NOT NULL DEFAULT (''),--交货日期
+			
+		  [GoodsNo] INT NOT NULL DEFAULT (0),--当时出库类单据选择手工指定发的时候，记录对应选择的库存表的GoodsOrder
+
+		  [Qty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--数量,记录基本数量
+		  [Price] NUMERIC(22, 10) NOT NULL DEFAULT (0),--价格,记录基本数量对应的价格
+		  [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),--金额
+		  
+		  [DisCount] NUMERIC(22, 10) NOT NULL DEFAULT (1),--折扣
+		  [DisCountPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后单价
+		  [DisCountTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后金额
+		  
+		  [TaxRate] NUMERIC(22, 10) NOT NULL DEFAULT (0),--税率
+		  [TaxPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税单价
+		  [TaxTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税金额
+
+		  [AssQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--数量,多单位等时显示换算后的数量
+		  [AssPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--价格,多单位等是显示换算后的价格
+		  [AssDiscountPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后单价，多单位等是显示换算后的价格
+		  [AssTaxPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税单价，多单位等是显示换算后的价格
+
+		  [CostPrice] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本单价
+		  [CostTotal] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本金额
+		
+		  [OrderVchType] INT NOT NULL DEFAULT (0),--调用的其它单据的类型(调用询价单或者销售订单等)
+		  [OrderCode] INT NOT NULL DEFAULT (0),--调用的其它单据的主表ID
+		  [OrderDlyCode] INT NOT NULL DEFAULT (0),--调用的其它单据的从表ID
+		  
+		  [PStutas] INT NOT NULL DEFAULT (0),--是否是赠品；0不是；1是
+		  [ToQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--到货数量
+		  [Redword] CHAR(2) NOT NULL DEFAULT ('F'),--是否是红冲生成的单据 F不是,T是
+		  [InputDate] VARCHAR(10)NOT NULL DEFAULT (''),--主表的录单日期
+		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
+		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
+		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 2是系统生成的记录
+		  [Comment] VARCHAR(256) NOT NULL DEFAULT (''),--备注
+		  
+		  [VipCardId] INT NOT NULL DEFAULT (0),--会员卡号
+		  [PromoVchcode] NUMERIC(10, 0) NOT NULL DEFAULT (0),--促销单号
+		  [InPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--入库单价
+		  [InTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--入库金额
+		  --[SideQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--副单位数量,五金建材版的时候使用
+		  --[Pgholqty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--件数,布匹版
+		  --[PgholInqty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--总件数,布匹版
+		  --[InvoceTag] [int] NOT NULL DEFAULT (0),--对账标志
+		  --[InvoceTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--开票金额
+          CONSTRAINT PK_tbx_Bill_D_Bak PRIMARY KEY ( [DlyOrder] )
+        )
+        
+GO
 --记录MoudleNo对应的窗体和默认参数
 IF OBJECT_ID('dbo.tbx_Sys_FrmParams') IS NULL 
     CREATE TABLE [dbo].[tbx_Sys_FrmParams]

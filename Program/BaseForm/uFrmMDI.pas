@@ -70,6 +70,7 @@ procedure TfrmMDI.BeforeFormShow;
 begin
   inherited;
   FGridItem := TGridItem.Create(MoudleNo, gridMainShow, gridTVMainShow);
+  FGridItem.OnSelectBasic := DoSelectBasic;
   FDBAC := SysService as IDBAccess;
   FModelFun := SysService as IModelFun;
 end;

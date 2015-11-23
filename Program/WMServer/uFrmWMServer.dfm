@@ -1,11 +1,13 @@
 object FrmWMServer: TFrmWMServer
   Left = 372
   Top = 277
-  Width = 244
-  Height = 102
+  Width = 416
+  Height = 246
+  BorderIcons = [biSystemMenu, biMinimize]
   Caption = #26381#21153#31471
   Color = clBtnFace
   ParentFont = True
+  Menu = mmServer
   OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
@@ -13,8 +15,8 @@ object FrmWMServer: TFrmWMServer
   TextHeight = 13
   object ROMessage: TROBinMessage
     Envelopes = <>
-    Left = 36
-    Top = 8
+    Left = 286
+    Top = 16
   end
   object ROServer: TROIndyHTTPServer
     Dispatchers = <
@@ -33,7 +35,22 @@ object FrmWMServer: TFrmWMServer
     IndyServer.ReplyTexts = <>
     IndyServer.ReplyUnknownCommand.NumericCode = 0
     Port = 8099
-    Left = 8
-    Top = 8
+    Left = 318
+    Top = 16
+  end
+  object mmServer: TMainMenu
+    Left = 254
+    Top = 16
+    object mniSet: TMenuItem
+      Caption = #35774#32622
+      object mniDataBaseSet: TMenuItem
+        Caption = #25968#25454#24211#36830#25509#35774#32622
+        OnClick = mniDataBaseSetClick
+      end
+      object mniServerSet: TMenuItem
+        Caption = #26381#21153#31471#35774#32622
+        OnClick = mniServerSetClick
+      end
+    end
   end
 end

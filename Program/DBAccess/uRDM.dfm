@@ -1,5 +1,6 @@
 object DMWMServer: TDMWMServer
   OldCreateOrder = False
+  OnCreate = DataModuleCreate
   Left = 423
   Top = 369
   Height = 148
@@ -13,8 +14,8 @@ object DMWMServer: TDMWMServer
     UserAgent = 'RemObjects SDK'
     TargetURL = 'http://localhost:8099/BIN'
     TrustInvalidCA = False
-    ServerLocators = <>
     DispatchOptions = []
+    ServerLocators = <>
     Left = 8
     Top = 8
   end

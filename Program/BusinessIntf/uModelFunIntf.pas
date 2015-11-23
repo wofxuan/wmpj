@@ -7,7 +7,7 @@ unit uModelFunIntf;
 
 interface
 
-uses SysUtils, uParamObject, uBaseInfoDef, uDefCom;
+uses SysUtils, uParamObject, uBaseInfoDef, uDefCom, uOtherIntf;
 
 type
  //TC选择后返回的
@@ -53,6 +53,7 @@ type
   IModelFun = interface
     ['{C3B4809A-0778-4A97-85FE-96788D5563A0}']
     function GetLocalValue(ABasicType: TBasicType; ADbName, ATypeid: string): string;
+    function ShowMsgBox(AMsg: string; ACaption: string = ''; AMsgType: TMessageBoxType = mbtInformation; AButtons: TMessageBoxButtons = [mbbOk]): Integer;
 end;
 
 

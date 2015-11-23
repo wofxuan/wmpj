@@ -36,10 +36,24 @@ requires
   BaseForm,
   BusinessIntf,
   Core,
-  Other;
+  Other,
+  cxLibraryVCLD7,
+  dxThemeD7,
+  dxGDIPlusD7,
+  cxEditorsVCLD7,
+  cxDataD7,
+  cxExtEditorsVCLD7,
+  cxGridD7,
+  cxPageControlVCLD7,
+  cxExportVCLD7,
+  dxBarD7,
+  dxComnD7,
+  dxBarExtItemsD7;
 
 contains
+  uFrmBillSale in 'uFrmBillSale.pas' {frmBillSale},
+  uBillFormExport in 'uBillFormExport.pas',
   uFrmBillOrder in 'uFrmBillOrder.pas' {frmBillOrder},
-  uBillFormExport in 'uBillFormExport.pas';
+  uFrmBillBuy in 'uFrmBillBuy.pas' {frmBillBuy};
 
 end.

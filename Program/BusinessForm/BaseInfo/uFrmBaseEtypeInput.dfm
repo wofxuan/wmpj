@@ -3,21 +3,22 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
   Top = 201
   Caption = 'frmBaseEtypeInput'
   ClientHeight = 279
-  ClientWidth = 655
+  ClientWidth = 699
   PixelsPerInch = 96
   TextHeight = 13
   inherited pnlBottom: TPanel
     Top = 230
-    Width = 655
+    Width = 699
+    TabOrder = 2
     inherited btnOK: TcxButton
-      Left = 438
+      Left = 505
     end
     inherited btnCannel: TcxButton
-      Left = 534
+      Left = 601
     end
   end
   inherited pnlClient: TPanel
-    Width = 655
+    Width = 699
     Height = 189
     object lbl1: TLabel
       Left = 11
@@ -38,7 +39,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Caption = #32844#21592#32534#21495
     end
     object lbl3: TLabel
-      Left = 228
+      Left = 245
       Top = 42
       Width = 57
       Height = 13
@@ -47,7 +48,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Caption = #25340#38899#30721
     end
     object lbl4: TLabel
-      Left = 443
+      Left = 478
       Top = 42
       Width = 57
       Height = 13
@@ -56,7 +57,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Caption = #32844#21592#37096#38376
     end
     object lbl5: TLabel
-      Left = 228
+      Left = 245
       Top = 74
       Width = 57
       Height = 13
@@ -65,7 +66,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Caption = #30005#35805
     end
     object lbl6: TLabel
-      Left = 443
+      Left = 478
       Top = 74
       Width = 57
       Height = 13
@@ -92,9 +93,9 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Caption = #32844#20301
     end
     object lbl9: TLabel
-      Left = 207
+      Left = 216
       Top = 106
-      Width = 78
+      Width = 86
       Height = 13
       Alignment = taRightJustify
       AutoSize = False
@@ -110,7 +111,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Caption = 'EMail'
     end
     object lbl11: TLabel
-      Left = 408
+      Left = 443
       Top = 106
       Width = 92
       Height = 13
@@ -128,7 +129,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
         end>
       TabOrder = 0
       Text = 'edtFullname'
-      Width = 566
+      Width = 601
     end
     object edtUsercode: TcxButtonEdit
       Left = 75
@@ -143,7 +144,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Width = 137
     end
     object edtPYM: TcxButtonEdit
-      Left = 289
+      Left = 306
       Top = 38
       Properties.Buttons = <
         item
@@ -162,7 +163,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Width = 81
     end
     object edtDType: TcxButtonEdit
-      Left = 504
+      Left = 539
       Top = 38
       Properties.Buttons = <
         item
@@ -174,19 +175,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Width = 137
     end
     object edtTel: TcxButtonEdit
-      Left = 289
-      Top = 70
-      Properties.Buttons = <
-        item
-          Default = True
-          Kind = bkEllipsis
-        end>
-      TabOrder = 4
-      Text = 'edtName'
-      Width = 137
-    end
-    object edtBirthday: TcxButtonEdit
-      Left = 504
+      Left = 306
       Top = 70
       Properties.Buttons = <
         item
@@ -194,11 +183,11 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
           Kind = bkEllipsis
         end>
       TabOrder = 5
-      Text = 'edtPYM'
+      Text = 'edtName'
       Width = 137
     end
     object edtAddress: TcxButtonEdit
-      Left = 73
+      Left = 75
       Top = 134
       Properties.Buttons = <
         item
@@ -207,7 +196,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
         end>
       TabOrder = 10
       Text = 'edtUsercode'
-      Width = 569
+      Width = 601
     end
     object edtJob: TcxButtonEdit
       Left = 75
@@ -222,7 +211,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
       Width = 137
     end
     object edtTopTotal: TcxButtonEdit
-      Left = 289
+      Left = 306
       Top = 102
       Properties.Buttons = <
         item
@@ -230,7 +219,7 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
           Kind = bkEllipsis
         end>
       TabOrder = 8
-      Text = 'edtPYM'
+      Text = '0'
       Width = 137
     end
     object edtEMail: TcxButtonEdit
@@ -241,12 +230,12 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
           Default = True
           Kind = bkEllipsis
         end>
-      TabOrder = 6
+      TabOrder = 4
       Text = 'edtUsercode'
       Width = 137
     end
     object edtLowLimitDiscount: TcxButtonEdit
-      Left = 504
+      Left = 539
       Top = 102
       Properties.Buttons = <
         item
@@ -254,12 +243,19 @@ inherited frmBaseEtypeInput: TfrmBaseEtypeInput
           Kind = bkEllipsis
         end>
       TabOrder = 9
-      Text = 'edtUsercode'
+      Text = '0'
+      Width = 137
+    end
+    object deBirthday: TcxDateEdit
+      Left = 539
+      Top = 70
+      TabOrder = 6
       Width = 137
     end
   end
   inherited pnlTop: TPanel
-    Width = 655
+    Width = 699
+    TabOrder = 0
     inherited lblTitle: TcxLabel
       Style.IsFontAssigned = True
     end

@@ -10,21 +10,24 @@ interface
 
 uses
   Windows, Classes, Db, DBClient, SysUtils, Controls, cxGrid, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGraphics, uBaseInfoDef, uModelBaseIntf, uModelFunIntf, uModelOtherSet;
+  cxGridDBTableView, cxGraphics, uBaseInfoDef, uModelBaseIntf, uModelFunIntf, uModelOtherSet, cxEdit, uDefCom;
 
 type
-  //列显示类型
-  TGCType = (gctSting, gctInt, gctFloat, gctDate, gctDateTime, gctBoolen);
-
   //表格单元格双击事件
   TCellDblClickEvent = procedure(Sender: TcxCustomGridTableView;
-  ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
-  AShift: TShiftState; var AHandled: Boolean) of object;
+    ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+    AShift: TShiftState; var AHandled: Boolean) of object;
+
+  TGridEditKeyPressEvent = procedure(Sender: TcxCustomGridTableView;
+    AItem: TcxCustomGridTableItem; AEdit: TcxCustomEdit; var Key: Char) of object;
+
   //表格每列的信息
   TColInfo = class(TObject)
   private
     FGridColumn: TcxGridColumn;
     FFieldName: string;
+    FColShowType: TColField; //字段类型
+    FBasicType: TBasicType; //点击列单元格的时候显示哪种TC
 
     FDataToDisplay: TStringList; //字段显示与查询数据对应列表
     procedure GetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: string);
@@ -32,6 +35,9 @@ type
     procedure SetDisplayText(ADisplayText: TIDDisplayText); //设置查询数据与显示数据的对应关系
     constructor Create(AGridColumn: TcxGridColumn; AFieldName: string);
     destructor Destroy; override;
+  published
+    property GridColumn: TcxGridColumn read FGridColumn write FGridColumn;
+
   end;
 
   //管理每个表格对应的数据和操作
@@ -46,28 +52,43 @@ type
     FTypeClassList: TStringList; //记录ID对应的商品是否有子类格式 00001=0 or 00001=1,0没有儿子，1有儿子;为了减少每行的查询操作
     FOnSelectBasic: TSelectBasicinfoEvent; //弹出TC类选择框
     FOldCellDblClick: TCellDblClickEvent; //表格单元格原来的双击事件
+    FOldGridEditKey: TcxGridEditKeyEvent; //表格单元格原来的按键事件
+    FOldGridEditKeyPress: TGridEditKeyPressEvent; //表格单元格原来的按键事件
 
     //给表格增加序号
     procedure XHOnCustomDrawCell(Sender: TcxGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxCustomGridIndicatorItemViewInfo; var ADone: Boolean);
     procedure ReClassList; //要在子类加载数据完成后执行.刷新表格记录ID的PSonnum,在判断是否是类显示*的时候需要用到
     procedure GridCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
-              AShift: TShiftState; var AHandled: Boolean);
+      AShift: TShiftState; var AHandled: Boolean);
+    procedure GridEditKeyEvent(Sender: TcxCustomGridTableView; AItem: TcxCustomGridTableItem;
+      AEdit: TcxCustomEdit; var Key: Word; Shift: TShiftState);
+    procedure GridEditKeyPressEvent(Sender: TcxCustomGridTableView; AItem: TcxCustomGridTableItem; AEdit: TcxCustomEdit; var Key: Char); //表格单元格输入事件
+    procedure ColumnPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer); //添加基本信息时，单元格内的按钮点击事件
+    function GetRowIndex: Integer; //获取当前选中的行
+    procedure SetRowIndex(Value: Integer); //设置选中的行
   public
     constructor Create(AGridID: Integer; AGrid: TcxGrid; AGridTV: TcxGridTableView);
     destructor Destroy; override;
 
     procedure ClearField;
-    function AddFiled(AFileName, AShowCaption: string; AWidth: Integer = 100; AColShowType: TGCType = gctSting): TColInfo; overload;
+    procedure ClearGridData;//清空表格数据
+    function AddFiled(AFileName, AShowCaption: string; AWidth: Integer = 100; AColShowType: TColField = cfString): TColInfo; overload;
+    procedure AddFiled(ABasicType: TBasicType); overload;
     function AddCheckBoxCol(AFileName, AShowCaption: string; AValueChecked, ValueUnchecked: Variant): TColInfo;
-    function GetCellValue(ADBName: string; ARowIndex: Integer): Variant;
+    function GetCellValue(ADBName: string; ARowIndex: Integer): Variant; //获取单元格值
+    procedure SetCellValue(ADBName: string; ARowIndex: Integer; AValue: Variant); //设置单元格值
     procedure InitGridData;
 
     function GetFirstRow: Integer; //获取行的首行
     function GetLastRow: Integer; //获取行的末行
-    procedure LoadData(ACdsData: TClientDataSet);//加载数据
-    procedure SetGridCellSelect(ACellSelect: Boolean);//是否能选中单元格和此行其它单元格不是选中状态
+    function SelectedRowCount: Integer; //选中的行数
+    procedure LoadData(ACdsData: TClientDataSet); //加载数据
+    procedure SetGridCellSelect(ACellSelect: Boolean); //是否能选中单元格和此行其它单元格不是选中状态
+    procedure SetGoToNextCellOnEnter(ANextCellOnEnter: Boolean); //是否是否通过回车换行
+    procedure MultiSelect(AMultiSelect: Boolean); //是否运行多选
   published
     property BasicType: TBasicType read FBasicType write FBasicType;
+    property RowIndex: Integer read GetRowIndex write SetRowIndex;
     property OnSelectBasic: TSelectBasicinfoEvent read FOnSelectBasic write FOnSelectBasic;
 
   end;
@@ -87,12 +108,12 @@ var
 
 implementation
 
-uses uSysSvc, uOtherIntf, cxDataStorage, cxCheckBox, uPubFun, Graphics;
+uses uSysSvc, uOtherIntf, cxDataStorage, cxCheckBox, cxButtonEdit, uPubFun, Graphics, Variants;
 
 { TGridItem }
 
 function TGridItem.AddFiled(AFileName, AShowCaption: string;
-  AWidth: Integer; AColShowType: TGCType): TColInfo;
+  AWidth: Integer; AColShowType: TColField): TColInfo;
 var
   aCol: TcxGridColumn;
   aColInfo: TColInfo;
@@ -104,17 +125,18 @@ begin
   if AWidth <= 0 then aCol.Visible := False;
 
   case AColShowType of
-    gctSting: aCol.DataBinding.ValueTypeClass := TcxStringValueType;
-    gctInt: aCol.DataBinding.ValueTypeClass := TcxIntegerValueType;
-    gctFloat: aCol.DataBinding.ValueTypeClass := TcxFloatValueType;
+    cfString: aCol.DataBinding.ValueTypeClass := TcxStringValueType;
+    cfInt, cfPlusInt: aCol.DataBinding.ValueTypeClass := TcxIntegerValueType;
+    cfFloat, cfPlusFloat, cfQty, cfPrice, cfTotal, cfDiscount: aCol.DataBinding.ValueTypeClass := TcxFloatValueType;
 //    gctDate: aCol.DataBinding.ValueTypeClass := ;                      //日期类型是什么，没有找到 2014-12-02
-    gctDateTime: aCol.DataBinding.ValueTypeClass := TcxDateTimeValueType;
-    gctBoolen: aCol.DataBinding.ValueTypeClass := TcxBooleanValueType;
+    cfDatime: aCol.DataBinding.ValueTypeClass := TcxDateTimeValueType;
+    cfCheck: aCol.DataBinding.ValueTypeClass := TcxBooleanValueType;
   else
     aCol.DataBinding.ValueTypeClass := TcxStringValueType;
   end;
 
   aColInfo := TColInfo.Create(aCol, AFileName);
+  aColInfo.FColShowType := AColShowType;
   SetLength(FColList, Length(FColList) + 1);
   FColList[Length(FColList) - 1] := aColInfo;
   Result := aColInfo;
@@ -150,15 +172,24 @@ begin
   FGrid := AGrid;
   FGridTV := AGridTV;
   FGridTV.OnCustomDrawIndicatorCell := XHOnCustomDrawCell;
-  FOldCellDblClick := FGridTV.OnCellDblClick;
-  FGridTV.OnCellDblClick := GridCellDblClick;
+//  FOldCellDblClick := FGridTV.OnCellDblClick;
+//  FGridTV.OnCellDblClick := GridCellDblClick;//在编辑单元格进行双击的时候不能触发
+  FOldGridEditKey := FGridTV.OnEditKeyDown; //基本信息单元格回车的时候弹出TC
+  FGridTV.OnEditKeyDown := GridEditKeyEvent;
+
+  FOldGridEditKeyPress := FGridTV.OnEditKeyPress; //根据字段类型，判断是否能够输入字符
+  FGridTV.OnEditKeyPress := GridEditKeyPressEvent;
 
   FModelFun := SysService as IModelFun;
   //显示行号的那一列
   FGridTV.OptionsView.Indicator := True;
   FGridTV.OptionsView.IndicatorWidth := 40;
-  //是否能选中单元格
-  FGridTV.OptionsSelection.CellSelect := False;
+
+  FGridTV.OptionsSelection.CellSelect := False; //是否能选中单元格
+  FGridTV.OptionsView.NoDataToDisplayInfoText := '没有数据'; //表格没有数据时显示的内容
+  FGridTV.OptionsView.GroupByBox := False; //不显示表头的分组功能
+  FGridTV.OptionsBehavior.FocusCellOnCycle := True; //切换时可以循环
+  FGridTV.OptionsBehavior.GoToNextCellOnEnter := True; //通过回车切换单元格
 
   FColCfg.AddGradItem(Self);
   FTypeClassList := TStringList.Create;
@@ -218,6 +249,7 @@ var
   aFindCol: Boolean;
 begin
   try
+    Result := varEmpty;
     aFindCol := False;
     for aCol := 0 to Length(FColList) - 1 do
     begin
@@ -289,6 +321,10 @@ begin
       inc(aRow);
       ACdsData.Next;
     end;
+    if FGridTV.DataController.RecordCount > 0 then
+    begin
+      FGridTV.DataController.FocusedRowIndex := 0;
+    end;
   finally
     ReClassList();
     FGridTV.EndUpdate;
@@ -320,12 +356,200 @@ begin
     begin
       if FColList[i].FFieldName = 'PFullname' then
       begin
-        OnSelectBasic(FGrid, ABasicType, ASelectParam, ASelectOptions, AReturnArray, aReturnCount);
+        OnSelectBasic(FGridTV, ABasicType, ASelectParam, ASelectOptions, AReturnArray, aReturnCount);
+        Break;
       end;
     end;
   end;
 end;
 
+procedure TGridItem.AddFiled(ABasicType: TBasicType);
+var
+  aColInfo: TColInfo;
+begin
+  if ABasicType = btPtype then
+  begin
+    AddFiled('PTypeId', 'PTypeId', -1);
+
+    aColInfo := AddFiled('PFullname', '商品名称');
+    aColInfo.FGridColumn.PropertiesClass := TcxButtonEditProperties;
+    aColInfo.FBasicType := btPtype;
+    (aColInfo.FGridColumn.Properties as TcxButtonEditProperties).OnButtonClick := ColumnPropertiesButtonClick; //关联点击事件
+
+    AddFiled('PUsercode', '商品编码');
+  end
+  else if ABasicType = btBtype then
+  begin
+    AddFiled('BTypeId', 'BTypeId', -1);
+    AddFiled('BFullname', '单位名称');
+    AddFiled('BUsercode', '单位编码');
+  end
+  else if ABasicType = btEtype then
+  begin
+    AddFiled('ETypeId', 'ETypeId', -1);
+    AddFiled('EFullname', '职员名称');
+    AddFiled('EUsercode', '职员编码');
+  end
+  else if ABasicType = btDtype then
+  begin
+    AddFiled('DTypeId', 'DTypeId', -1);
+    AddFiled('DFullname', '部门名称');
+    AddFiled('DUsercode', '部门编码');
+  end
+  else if ABasicType = btKtype then
+  begin
+    AddFiled('KTypeId', 'KTypeId', -1);
+    AddFiled('KFullname', '仓库名称');
+    AddFiled('KUsercode', '仓库编码');
+  end
+  else
+  begin
+    raise(SysService as IExManagement).CreateSysEx('没有配置[' + BasicTypeToString(ABasicType) + ']此基本信息对应的列,请配置！');
+  end;
+end;
+
+procedure TGridItem.ColumnPropertiesButtonClick(Sender: TObject;
+  AButtonIndex: Integer);
+var
+  i, aReturnCount: Integer;
+  aBasicType: TBasicType;
+  aSelectParam: TSelectBasicParam;
+  aSelectOptions: TSelectBasicOptions;
+  aReturnArray: TSelectBasicDatas;
+begin
+  for i := 0 to Length(FColList) - 1 do
+  begin
+    if FColList[i].FGridColumn = FGridTV.Controller.FocusedColumn then
+    begin
+      if FColList[i].FBasicType <> btNo then
+      begin
+        OnSelectBasic(FGrid, FColList[i].FBasicType, aSelectParam, aSelectOptions, aReturnArray, aReturnCount);
+      end;
+    end;
+  end;
+end;
+
+function TGridItem.GetRowIndex: Integer;
+begin
+  Result := -1;
+
+//Result := FGridTV.Controller.FocusedRowIndex;
+  if FGridTV.Controller.SelectedRowCount > 0 then
+    Result := FGridTV.Controller.SelectedRows[0].RecordIndex;
+end;
+
+procedure TGridItem.SetRowIndex(Value: Integer);
+begin
+  FGridTV.Controller.FocusedRowIndex := Value;
+end;
+
+procedure TGridItem.GridEditKeyEvent(Sender: TcxCustomGridTableView;
+  AItem: TcxCustomGridTableItem; AEdit: TcxCustomEdit; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Assigned(FOldGridEditKey) then FOldGridEditKey(Sender, AItem, AEdit, Key, Shift);
+  if Key = VK_RETURN then
+  begin
+    ColumnPropertiesButtonClick(nil, 0);
+  end;
+end;
+
+procedure TGridItem.SetCellValue(ADBName: string; ARowIndex: Integer;
+  AValue: Variant);
+var
+  i: Integer;
+  aFieldName: string;
+begin
+  for i := 0 to Length(FColList) - 1 do
+  begin
+    aFieldName := FColList[i].FFieldName;
+    if UpperCase(aFieldName) = UpperCase(ADBName) then
+    begin
+      FGridTV.DataController.Values[ARowIndex, i] := AValue;
+      Break;
+    end;
+  end;
+end;
+
+procedure TGridItem.SetGoToNextCellOnEnter(ANextCellOnEnter: Boolean);
+begin
+  FGridTV.OptionsBehavior.FocusCellOnCycle := ANextCellOnEnter; //切换时可以循环
+  FGridTV.OptionsBehavior.GoToNextCellOnEnter := ANextCellOnEnter; //通过回车切换单元格
+end;
+
+function TGridItem.SelectedRowCount: Integer;
+begin
+  Result := FGridTV.Controller.SelectedRowCount;
+end;
+
+procedure TGridItem.MultiSelect(AMultiSelect: Boolean);
+begin
+  FGridTV.OptionsSelection.MultiSelect := AMultiSelect;
+end;
+
+procedure TGridItem.GridEditKeyPressEvent(Sender: TcxCustomGridTableView;
+  AItem: TcxCustomGridTableItem; AEdit: TcxCustomEdit; var Key: Char);
+var
+  i: Integer;
+  aColInfo: TColInfo;
+begin
+  if Assigned(FOldGridEditKeyPress) then FOldGridEditKeyPress(Sender, AItem, AEdit, Key);
+
+  if key = #13 then Exit;
+  
+  for i := 0 to Length(FColList) - 1 do
+  begin
+    aColInfo := FColList[i];
+    if aColInfo.FGridColumn = AItem then
+    begin
+      if aColInfo.FColShowType in [cfInt, cfPlusInt] then //整数的时候
+      begin
+        if not (key in ['0'..'9', #8]) then
+        begin
+          key := #0;
+        end;
+      end
+      else if aColInfo.FColShowType in [cfFloat, cfPlusFloat, cfQty, cfPrice, cfTotal, cfDiscount] then
+      begin
+        if not (key in ['0'..'9', #8, '.']) then
+        begin
+          key := #0;
+        end;
+      end
+      else if aColInfo.FColShowType in [cfDate, cfTime, cfDatime] then
+      begin
+        if not (key in ['0'..'9', #8, '.', '-']) then
+        begin
+          key := #0;
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TGridItem.ClearGridData;
+var
+  aCol: Integer;
+  aColItem: TColInfo;
+  aFindCol: Boolean;
+begin
+  try
+    FGridTV.DataController.RecordCount := 0;
+    FGridTV.DataController.RecordCount := 500;
+//    for aCol := 0 to Length(FColList) - 1 do
+//    begin
+//      aColItem := FColList[aCol];
+//      if UpperCase(aColItem.FFieldName) = UpperCase(ADBName) then
+//      begin
+//        Result := FGridTV.DataController.GetValue(ARowIndex, aColItem.FGridColumn.Index);
+//        aFindCol := True;
+//        Break;
+//      end;
+//    end;
+  finally
+
+  end;
+end;
 { TGridControl }
 
 procedure TGridControl.AddGradItem(AGridItem: TGridItem);
@@ -351,6 +575,7 @@ constructor TColInfo.Create(AGridColumn: TcxGridColumn;
 begin
   FGridColumn := AGridColumn;
   FFieldName := AFieldName;
+  FBasicType := btNo;
 end;
 
 destructor TColInfo.Destroy;

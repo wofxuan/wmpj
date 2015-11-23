@@ -55,10 +55,8 @@ procedure TfrmBaseDtypeList.IniGridField;
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled('DTypeId', 'DTypeId', -1);
-  FGridItem.AddFiled('DFullname', '部门名称', 200);
-  FGridItem.AddFiled('DUsercode', '部门编码', 200);
-  FGridItem.AddFiled('RowIndex', '序号', 50, gctInt);
+  FGridItem.AddFiled(btDtype);
+  FGridItem.AddFiled('RowIndex', '序号', 50, cfInt);
   FGridItem.AddCheckBoxCol('IsStop', '是否停用', 1, 0);
   FGridItem.InitGridData;
 end;

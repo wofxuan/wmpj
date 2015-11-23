@@ -55,10 +55,9 @@ procedure TfrmBasePtypeList.IniGridField;
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled('PTypeId', 'PTypeId', -1);
-  FGridItem.AddFiled('PFullname', '商品名称', 200);
+  FGridItem.AddFiled(btPtype);
   FGridItem.AddFiled('PUsercode', '商品编码', 200);
-  FGridItem.AddFiled('RowIndex', '序号', 50, gctInt);
+  FGridItem.AddFiled('RowIndex', '序号', 50, cfInt);
   FGridItem.AddCheckBoxCol('IsStop', '是否停用', 1, 0);
   FGridItem.InitGridData;
 end;

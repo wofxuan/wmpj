@@ -144,7 +144,7 @@ var
 begin
   if StringEmpty(CurTypeId) then Exit;
   
-  aOldRowIndex := gridTVMainShow.Controller.FocusedRowIndex;
+  aOldRowIndex := FGridItem.RowIndex;
   aParam := TParamObject.Create;
   try
     aParam.Add('cMode', GetEnumValue(TypeInfo(TDataChangeType), 'dctModif'));
@@ -155,7 +155,7 @@ begin
     if OpenInPutBase(aParam) then
     begin
       LoadGridData(Self.ParamList.AsString('ParId_Cur'));
-      gridTVMainShow.Controller.FocusedRowIndex := aOldRowIndex;
+      FGridItem.RowIndex := aOldRowIndex;
     end;
   finally
     aParam.Free;
@@ -236,7 +236,7 @@ var
   aRowIndex: Integer;
 begin
   Result := '';
-  aRowIndex := gridTVMainShow.Controller.FocusedRowIndex;
+  aRowIndex := FGridItem.RowIndex;
   if (aRowIndex < FGridItem.GetFirstRow) or (aRowIndex > FGridItem.GetLastRow) then
     Exit;
   if FModelBaseList.GetBasicType <> btNo then

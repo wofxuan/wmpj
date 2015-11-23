@@ -97,7 +97,7 @@ var
   aRowIndex: Integer;
 begin
   Result := '';
-  aRowIndex := gridTVMainShow.Controller.FocusedRowIndex;
+  aRowIndex := FGridItem.RowIndex;
   if (aRowIndex < FGridItem.GetFirstRow) or (aRowIndex > FGridItem.GetLastRow) then
     Exit;
 

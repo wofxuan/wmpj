@@ -1,4 +1,4 @@
-unit uFrmBillOrder;
+unit uFrmBillSale;
 
 interface
 
@@ -13,7 +13,7 @@ uses
   uModelFunIntf;
 
 type
-  TfrmBillOrder = class(TfrmMDIBill)
+  TfrmBillSale = class(TfrmMDIBill)
     lblBtype: TcxLabel;
     edtBtype: TcxButtonEdit;
     lbl2: TcxLabel;
@@ -28,7 +28,6 @@ type
     edtSummary: TcxButtonEdit;
     lbl7: TcxLabel;
     edtComment: TcxButtonEdit;
-    procedure btnSaveClick(Sender: TObject);
   private
     { Private declarations }
     procedure BeforeFormShow; override;
@@ -55,7 +54,7 @@ type
   end;
 
 var
-  frmBillOrder: TfrmBillOrder;
+  frmBillSale: TfrmBillSale;
 
 implementation
 
@@ -66,16 +65,13 @@ uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
 
 { TfrmBillOrder }
 
-procedure TfrmBillOrder.BeforeFormShow;
+procedure TfrmBillSale.BeforeFormShow;
 begin
-  FModelBill := IModelBillOrder((SysService as IModelControl).GetModelIntf(IModelBillOrder));
-  btnSave.ButtonStyle := bsDefault;
-  btnSaveDraft.Visible := ivNever;
-  btnSaveSettle.Visible := ivNever; 
+  FModelBill := IModelBillOrder((SysService as IModelControl).GetModelIntf(IModelBillSale));
   inherited;
 end;
 
-procedure TfrmBillOrder.DoSelectBasic(Sender: TObject;
+procedure TfrmBillSale.DoSelectBasic(Sender: TObject;
   ABasicType: TBasicType; ASelectBasicParam: TSelectBasicParam;
   ASelectOptions: TSelectBasicOptions; var ABasicDatas: TSelectBasicDatas;
   var AReturnCount: Integer);
@@ -97,7 +93,7 @@ begin
   end;
 end;
 
-procedure TfrmBillOrder.InitGrids(Sender: TObject);
+procedure TfrmBillSale.InitGrids(Sender: TObject);
 begin
   inherited;
   FGridItem.ClearField();
@@ -110,26 +106,15 @@ begin
   FGridItem.InitGridData;
 end;
 
-procedure TfrmBillOrder.InitMasterTitles(Sender: TObject);
+procedure TfrmBillSale.InitMasterTitles(Sender: TObject);
 begin
   inherited;
   MoudleNo := FVchType;
 
-  case FVchType of
-    VchType_Order_Buy:
-      begin
-        BillTitle := '进货订单';
-        lblBtype.Caption := '供货单位';
-        lblKtype.Caption := '收货仓库';
-      end;
-    VchType_Order_Sale:
-      begin
-        BillTitle := '销售订单';
-        lblBtype.Caption := '购买单位';
-        lblKtype.Caption := '发货仓库';
-      end;
-  end;
-  
+  BillTitle := '销售单';
+  lblBtype.Caption := '购买单位';
+  lblKtype.Caption := '发货仓库';
+
   DBComItem.AddItem(edtBtype, 'BTypeId', 'BTypeId', 'BUsercode', btBtype);
   DBComItem.AddItem(edtEtype, 'ETypeId', 'ETypeId', 'EUsercode', btEtype);
   DBComItem.AddItem(edtDtype, 'DTypeId', 'DTypeId', 'DUsercode', btDtype);
@@ -140,7 +125,7 @@ begin
   DBComItem.AddItem(edtComment, 'Comment');
 end;
 
-function TfrmBillOrder.LoadBillDataGrid: Boolean;
+function TfrmBillSale.LoadBillDataGrid: Boolean;
 begin
   if FVchcode = 0 then
   begin
@@ -154,7 +139,7 @@ begin
   end;
 end;
 
-function TfrmBillOrder.LoadBillDataMaster: Boolean;
+function TfrmBillSale.LoadBillDataMaster: Boolean;
 begin
   if FVchcode = 0 then
   begin
@@ -166,7 +151,7 @@ begin
   end;
 end;
 
-function TfrmBillOrder.LoadOnePtype(ARow: Integer; AData: TSelectBasicData;
+function TfrmBillSale.LoadOnePtype(ARow: Integer; AData: TSelectBasicData;
   IsImport: Boolean): Boolean;
 begin
   FGridItem.SetCellValue(GetBaseTypeid(btPtype), ARow, AData.TypeId);
@@ -174,7 +159,7 @@ begin
   FGridItem.SetCellValue(GetBaseTypeUsercode(btPtype), ARow, AData.Usercode);
 end;
 
-function TfrmBillOrder.LoadPtype(ABasicDatas: TSelectBasicDatas): Boolean;
+function TfrmBillSale.LoadPtype(ABasicDatas: TSelectBasicDatas): Boolean;
 var
   i, j: Integer;
   s: string;
@@ -199,13 +184,13 @@ begin
   end;
 end;
 
-function TfrmBillOrder.SaveDetailAccount(
+function TfrmBillSale.SaveDetailAccount(
   const ADetailAccountData: TPackData): integer;
 begin
 
 end;
 
-function TfrmBillOrder.SaveDetailData(
+function TfrmBillSale.SaveDetailData(
   const ABillDetailData: TPackData): Integer;
 var
   aPackData: TParamObject;
@@ -261,7 +246,7 @@ begin
   end;
 end;
 
-function TfrmBillOrder.SaveMasterData(
+function TfrmBillSale.SaveMasterData(
   const ABillMasterData: TBillData): Integer;
 begin
   ABillMasterData.ProcName := 'pbx_Bill_Is_Order_M';
@@ -283,7 +268,7 @@ begin
   ABillMasterData.Add('@GatheringDate', DBComItem.GetItemValue(deGatheringDate));
 end;
 
-function TfrmBillOrder.SaveToSettle: Boolean;
+function TfrmBillSale.SaveToSettle: Boolean;
 var
   aBillData: TBillData;
   aOutPutData: TParamObject;
@@ -314,14 +299,7 @@ begin
   end;
 end;
 
-procedure TfrmBillOrder.btnSaveClick(Sender: TObject);
-begin
-  inherited;
-  actSaveSettleExecute(actSaveSettle);
-end;
-
 initialization
-  gFormManage.RegForm(TfrmBillOrder, fnMdlBillOrderBuy);
-  gFormManage.RegForm(TfrmBillOrder, fnMdlBillOrderSale);
+  gFormManage.RegForm(TfrmBillSale, fnMdlBillSale);
 
 end.

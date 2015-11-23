@@ -95,7 +95,7 @@ AS
                                 AND Deleted = 0
                                 AND eSonNum = 0 ) 
             BEGIN
-                SET @net = -134
+                SET @ErrorValue = '经手人不存在或者已经删除'
                 GOTO ErrorGeneral
             END
     IF @DeptID <> '' 
@@ -105,7 +105,7 @@ AS
                                 AND Deleted = 0
                                 AND dSonNum = 0 ) 
             BEGIN
-                SET @net = -161
+                SET @ErrorValue = '部门不存在或者已经删除'
                 GOTO ErrorGeneral
             END
     IF @inputNo <> ''
@@ -116,7 +116,7 @@ AS
                                 AND Deleted = 0
                                 AND eSonNum = 0 ) 
             BEGIN
-                SET @net = -134
+                SET @ErrorValue = '制单人不存在或者已经删除'
                 GOTO ErrorGeneral
             END
 	
@@ -139,7 +139,7 @@ AS
                           OR pSonNum <> 0
                         )
 			
-            SET @ErrorValue = '商品已经分类或者已经删除！'
+            SET @ErrorValue = '商品不存在或者已经删除'
             GOTO ErrorGeneral		
 		
         END
@@ -199,7 +199,7 @@ AS
                           OR kSonNum <> 0
                         )			
 		
-            SET @net = -135
+            SET @ErrorValue = '仓库不存在或者已经删除'
             GOTO ErrorGeneral				
         END
 	
@@ -474,7 +474,7 @@ AS
     WHERE   Vchcode = @NewVchCode
     DELETE  FROM tbx_Bill_Order_M
     WHERE   Vchcode = @NewVchCode	 
-    RETURN -1  
+    RETURN -1   
     
     ErrorRollback:   --数据操作是错误，需要回滚
     ROLLBACK TRAN ndxORDER 

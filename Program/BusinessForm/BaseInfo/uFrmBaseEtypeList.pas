@@ -9,7 +9,7 @@ uses
   cxDBData, ActnList, DBClient, cxGridLevel, cxClasses, cxControls,
   cxGridCustomView, cxGridCustomTableView, cxGridTableView,
   cxGridDBTableView, cxGrid, StdCtrls, cxButtons, ExtCtrls, uFrmBaseInput,
-  ComCtrls, cxContainer, cxTreeView;
+  ComCtrls, cxContainer, cxTreeView, dxBar, dxBarExtItems, ImgList;
 
 type
   TfrmBaseEtypeList = class(TfrmMDIBaseType)
@@ -55,10 +55,8 @@ procedure TfrmBaseEtypeList.IniGridField;
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled('ETypeId', 'ETypeId', -1);
-  FGridItem.AddFiled('EFullname', '职员名称', 200);
-  FGridItem.AddFiled('EUsercode', '职员编码', 200);
-  FGridItem.AddFiled('RowIndex', '序号', 50, gctInt);
+  FGridItem.AddFiled(btEtype);
+  FGridItem.AddFiled('RowIndex', '序号', 50, cfInt);
   FGridItem.AddCheckBoxCol('IsStop', '是否停用', 1, 0);
   FGridItem.InitGridData;
 end;

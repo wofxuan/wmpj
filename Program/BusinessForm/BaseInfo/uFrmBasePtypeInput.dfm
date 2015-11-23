@@ -206,7 +206,7 @@ inherited frmBasePtypeInput: TfrmBasePtypeInput
           Kind = bkEllipsis
         end>
       TabOrder = 8
-      Text = 'edtUsefulLifeday'
+      Text = '0'
       Width = 137
     end
     object chkStop: TcxCheckBox

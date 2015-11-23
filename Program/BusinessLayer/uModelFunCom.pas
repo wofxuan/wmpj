@@ -27,7 +27,6 @@ type
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
 
-    function GetLocalValue(ABasicType: TBasicType; ADbName, ATypeid: string): string; 
   public
     constructor Create;
     destructor Destroy; override;
@@ -40,9 +39,12 @@ type
     function ExecProcByName(AProcName: string; AInParam: TParamObject): Integer;
     function ExecProcBackData(AProcName: string; AInParam: TParamObject = nil; ABackData: TClientDataSet = nil): Integer;
     procedure QuerySQL(const ASQLStr: string; AQueryData: TClientDataSet);
+
+    function GetLocalValue(ABasicType: TBasicType; ADbName, ATypeid: string): string;
     //显示提示消息
     function ShowMsgBox(AMsg: string; ACaption: string = ''; AMsgType: TMessageBoxType = mbtInformation; AButtons: TMessageBoxButtons = [mbbOk]): Integer;
 
+  published
     property OperatorID: string read FOperatorID write FOperatorID;
   end;
 

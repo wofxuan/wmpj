@@ -36,9 +36,12 @@ implementation
 initialization
   TSys_TbxType := TIDDisplayText.Create;
   TSys_TbxType.AddItem('-1', '未定义');
-  TSys_TbxType.AddItem('0', '基本信息');
-  TSys_TbxType.AddItem('1', '单据');
-  TSys_TbxType.AddItem('2', '其它');
+  TSys_TbxType.AddItem('0', '系统');
+  TSys_TbxType.AddItem('1', '基本信息');
+  TSys_TbxType.AddItem('2', '单据');
+  TSys_TbxType.AddItem('3', '报表');
+  TSys_TbxType.AddItem('4', '辅助功能');
+  TSys_TbxType.AddItem('5', '其它');
 
 finalization
   TSys_TbxType.Free;
