@@ -8,7 +8,7 @@ unit uDBAccess;
 
 interface
 
-uses SysUtils, DB, DBClient, Dialogs, uDBIntf, uSvcInfoIntf, WMServer_Intf, uParamObject;
+uses SysUtils, DB, DBClient, Dialogs, uDBIntf, uSvcInfoIntf, uParamObject, WMServer_Intf;
 
 type
   TDBOperation = class(TInterfacedObject, IDBAccess, ISvcInfo)
@@ -96,21 +96,9 @@ end;
 
 function TDBOperation.GetMoudleNoSQL(const AMoudleNo: Integer): string;
 var
-  aCdsTemp: TClientDataSet;
   aSQL: string;
 begin
   Result := '';
-  aSQL := 'SELECT a.SQLStr FROM dbo.tbx_Sys_DefSQL a WHERE a.SQLNo = ' + IntToStr(AMoudleNo);
-  aCdsTemp := TClientDataSet.Create(nil);
-  try
-    QuerySQL(aSQL, aCdsTemp);
-    if aCdsTemp.RecordCount > 0 then
-    begin
-      Result := Trim(aCdsTemp.fieldByName('SQLStr').AsString);
-    end;
-  finally
-    aCdsTemp.Free
-  end;
 end;
 
 function TDBOperation.ExecuteProcByName(AProcName: string;

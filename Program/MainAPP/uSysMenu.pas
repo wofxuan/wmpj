@@ -238,12 +238,17 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m20005000', '-', 'm2000', '', 0, nil);
     AddMenu('m20006000', '部门信息', 'm2000', '', fnMdlBaseDtypeList, nil);
 
-    AddMenu('m3000', '采购管理', '', '', 0, nil);
+    AddMenu('m3000', '业务录入', '', '', 0, nil);
     AddMenu('m30001000', '进货订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Buy), fnMdlBillOrderBuy, nil);
-    AddMenu('m30002000', '销售订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Sale), fnMdlBillOrderSale, nil);
-    AddMenu('m30003000', '进货单', 'm3000', 'Vchtype=' + IntToStr(VchType_Buy), fnMdlBillBuy, nil);
+    AddMenu('m30002000', '进货单', 'm3000', 'Vchtype=' + IntToStr(VchType_Buy), fnMdlBillBuy, nil);
+    AddMenu('m30003000', '销售订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Sale), fnMdlBillOrderSale, nil);
     AddMenu('m30004000', '销售单', 'm3000', 'Vchtype=' + IntToStr(VchType_Sale), fnMdlBillSale, nil);
 
+    AddMenu('m4000', '数据查询', '', '', 0, nil);
+    AddMenu('m40001000', '库存状况', 'm4000', '', fnMdlReportGoods, nil);
+    AddMenu('m40002000', '进货订单统计', 'm4000', '', fnMdlReportOrderBuy, nil);
+    AddMenu('m40003000', '进货单统计', 'm4000', '', fnMdlReportBuy, nil);
+    
     AddMenu('m9000', '帮助', '', '', 0, nil);
     AddMenu('m90001000', '在线帮助', 'm9000', '', fnMdlHelp_Online, nil);
     AddMenu('m90002000', '计算器', 'm9000', '', fnMdlHelp_Calc, nil, 'F5');

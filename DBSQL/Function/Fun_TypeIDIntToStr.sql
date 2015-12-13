@@ -1,8 +1,8 @@
-IF OBJECT_ID('dbo.pbx_Fun_TypeIDIntToStr') IS NOT NULL 
-    DROP PROCEDURE dbo.pbx_Fun_TypeIDIntToStr
+IF OBJECT_ID('dbo.Fun_TypeIDIntToStr') IS NOT NULL 
+    DROP PROCEDURE dbo.Fun_TypeIDIntToStr
 go
 
-CREATE PROCEDURE pbx_Fun_TypeIDIntToStr
+CREATE PROCEDURE Fun_TypeIDIntToStr
     (
       @nInput INT ,
       @szId VARCHAR(5) OUTPUT

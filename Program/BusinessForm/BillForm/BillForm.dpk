@@ -51,9 +51,8 @@ requires
   dxBarExtItemsD7;
 
 contains
-  uFrmBillSale in 'uFrmBillSale.pas' {frmBillSale},
+  uFrmBillBuy in 'uFrmBillBuy.pas' {frmBillBuy},
   uBillFormExport in 'uBillFormExport.pas',
-  uFrmBillOrder in 'uFrmBillOrder.pas' {frmBillOrder},
-  uFrmBillBuy in 'uFrmBillBuy.pas' {frmBillBuy};
+  uFrmBillOrder in 'uFrmBillOrder.pas' {frmBillOrder};
 
 end.

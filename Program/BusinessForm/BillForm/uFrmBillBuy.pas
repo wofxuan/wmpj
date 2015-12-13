@@ -35,7 +35,6 @@ type
     procedure InitMasterTitles(Sender: TObject); override;
     procedure InitGrids(Sender: TObject); override;
 
-    function LoadBillDataMaster: Boolean; override;
     function LoadBillDataGrid: Boolean; override;
 
     function SaveToSettle: Boolean; override;
@@ -115,39 +114,39 @@ begin
   lblBtype.Caption := '供货单位';
   lblKtype.Caption := '收货仓库';
 
+  DBComItem.AddItem(deBillDate, 'InputDate');
+  DBComItem.AddItem(edtBillNumber, 'Number');
+
   DBComItem.AddItem(edtBtype, 'BTypeId', 'BTypeId', 'BUsercode', btBtype);
   DBComItem.AddItem(edtEtype, 'ETypeId', 'ETypeId', 'EUsercode', btEtype);
   DBComItem.AddItem(edtDtype, 'DTypeId', 'DTypeId', 'DUsercode', btDtype);
   DBComItem.AddItem(edtKtype, 'KTypeId', 'KTypeId', 'KUsercode', btKtype);
-
+  
   DBComItem.AddItem(deGatheringDate, 'GatheringDate');
   DBComItem.AddItem(edtSummary, 'Summary');
   DBComItem.AddItem(edtComment, 'Comment');
 end;
 
 function TfrmBillBuy.LoadBillDataGrid: Boolean;
+var
+  szSql, szTemp: string;
 begin
-  if FVchcode = 0 then
+  inherited LoadBillDataGrid;
+  if FVchcode = 0 then //新单据
   begin
-    FGridItem.ClearGridData();
-    deBillDate.Date := Trunc(Now);
-    deGatheringDate.Date := Trunc(Now);
+    FGridItem.ClearData;
   end
   else
   begin
-
-  end;
-end;
-
-function TfrmBillBuy.LoadBillDataMaster: Boolean;
-begin
-  if FVchcode = 0 then
-  begin
-    DBComItem.ClearItemData();
-  end
-  else
-  begin
-
+    //加载单据
+//    if (nDraft = 1) or (nDraft > 3) then szTemp := GetDlyName(bosEdit, FVchType)
+//    else szTemp := GetDlyName(BillOpenState, FVchType);
+//    GridDataSet.Close;
+//    LoadDly(szTemp, FVchCode, GridDataSet);
+//    SetGridProperty(MainGrid);
+//    LoadLoadBillDataUnitData;
+//    ReadpgDetailData(MainGrid);
+//    ReadSnDetailData(MainGrid);
   end;
 end;
 
@@ -196,7 +195,7 @@ var
   aPackData: TParamObject;
   aRow: Integer;
 begin
-  ABillDetailData.ProcName := 'pbx_Bill_Is_D_Bak';
+  ABillDetailData.ProcName := 'pbx_Bill_Is_Buy_D';
   for aRow := FGridItem.GetFirstRow to FGridItem.GetLastRow do
   begin
     if VarIsEmpty(FGridItem.GetCellValue(GetBaseTypeid(btPtype), aRow)) then Continue;
@@ -225,36 +224,31 @@ begin
     aPackData.Add('@Discount', 1);
     aPackData.Add('@DiscountPrice', 2);
     aPackData.Add('@DiscountTotal', 3);
-    aPackData.Add('@TaxRate', 1);
-    aPackData.Add('@TaxPrice', 1);
-    aPackData.Add('@TaxTotal', 2);
+    aPackData.Add('@TaxRate', 4);
+    aPackData.Add('@TaxPrice', 5);
+    aPackData.Add('@TaxTotal', 6);
     aPackData.Add('@AssQty', FGridItem.GetCellValue('Qty', aRow));
     aPackData.Add('@AssPrice', FGridItem.GetCellValue('Price', aRow));
-    aPackData.Add('@AssDiscountPrice', 2);
-    aPackData.Add('@AssTaxPrice', 1);
-    aPackData.Add('@CostTotal', 2);
-    aPackData.Add('@CostPrice', 3);
-    aPackData.Add('@OrderCode', 4);
-    aPackData.Add('@OrderDlyCode', 1);
-    aPackData.Add('@OrderVchType', 3);
+    aPackData.Add('@AssDiscountPrice', 7);
+    aPackData.Add('@AssTaxPrice', 8);
+    aPackData.Add('@CostTotal', 9);
+    aPackData.Add('@CostPrice', 10);
+    aPackData.Add('@OrderCode', 0);
+    aPackData.Add('@OrderDlyCode', 0);
+    aPackData.Add('@OrderVchType', 0);
     aPackData.Add('@Comment', 'ssss');
     aPackData.Add('@InputDate', FormatDateTime('YYYY-MM-DD', deBillDate.Date));
     aPackData.Add('@Usedtype', '1');
     aPackData.Add('@Period', 0);
     aPackData.Add('@PStatus', 1);
     aPackData.Add('@YearPeriod', 1);
-
-    aPackData.Add('@VipCardId', 0);
-    aPackData.Add('@PromoVchcode', 0);
-    aPackData.Add('@InPrice', 0);
-    aPackData.Add('@InTotal', 0);
   end;
 end;
 
 function TfrmBillBuy.SaveMasterData(
   const ABillMasterData: TBillData): Integer;
 begin
-  ABillMasterData.ProcName := 'pbx_Bill_Is_M';
+  ABillMasterData.ProcName := 'pbx_Bill_Is_Buy_M';
   ABillMasterData.Add('@InputDate', FormatDateTime('YYYY-MM-DD', deBillDate.Date));
   ABillMasterData.Add('@Number', DBComItem.GetItemValue(edtBillNumber));
   ABillMasterData.Add('@VchType', FVchType);
@@ -271,10 +265,6 @@ begin
   ABillMasterData.Add('@RedWord', 'F');
   ABillMasterData.Add('@Defdiscount', 1);
   ABillMasterData.Add('@GatheringDate', DBComItem.GetItemValue(deGatheringDate));
-
-  ABillMasterData.Add('@Attach', 0);
-  ABillMasterData.Add('@InvoceTag', 0);
-  ABillMasterData.Add('@IsRetail', 0);
 end;
 
 function TfrmBillBuy.SaveToSettle: Boolean;
@@ -300,8 +290,8 @@ begin
     if aNewVchcode >= 0 then
     begin
       FModelBill.BillCreate(0, aBillData.Draft, FVchType, aNewVchcode, aBillData.VchCode, aOutPutData);
+      Result := True;
     end;
-    Result := True;
   finally
     aOutPutData.Free;
     aBillData.Free;

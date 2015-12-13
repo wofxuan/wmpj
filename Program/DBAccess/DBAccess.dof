@@ -101,7 +101,7 @@ DebugSourceDirs=
 UsePackages=0
 [Parameters]
 RunParams=
-HostApplication=..\..\bin\WMPJ.exe
+HostApplication=E:\code\delphi\wmpj\Bin\WMPJ.exe
 Launcher=
 UseLauncher=0
 DebugCWD=

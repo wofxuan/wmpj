@@ -84,7 +84,6 @@ end;
 procedure TfrmBasePtypeInput.ClearFrmData;
 begin
   inherited;
-  edtUsefulLifeday.Text := '0';
 end;
 
 procedure TfrmBasePtypeInput.GetFrmData(ASender: TObject;

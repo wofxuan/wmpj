@@ -8,7 +8,7 @@ unit uSysPluginMgr;
 
 interface
 
-uses SysUtils, Classes, Windows, Contnrs, uRegPluginIntf, uPluginBase, uDBIntf, uSysSvc;
+uses SysUtils, Classes, Windows, Contnrs, uRegPluginIntf, uPluginBase, uSysSvc, uOtherIntf;
 
 const
   BPLTYPE = 1;
@@ -59,7 +59,7 @@ var
 
 implementation
 
-uses DBClient, Dialogs, uPubFun, uOtherIntf;
+uses DBClient, Dialogs, uPubFun;
 
 { TPluginMgr }
 
@@ -144,21 +144,29 @@ end;
 
 procedure TPluginMgr.GetPackageList(APackageList: TStrings);
 var
-  aDBAC: IDBAccess;
   aCdsBpl: TClientDataSet;
   aExePath: string;
 begin
-  aDBAC := SysService as IDBAccess;
   aExePath := ExtractFilePath(ParamStr(0)); // E:\code\delphi\wmpj\Bin\
   aCdsBpl := TClientDataSet.Create(nil);
   try
-    aDBAC.QuerySQL('SELECT * FROM tbx_Base_PackageInfo where ITypeId <> ''00000'' ORDER BY RowIndex', aCdsBpl);
-    aCdsBpl.First;
-    while not aCdsBpl.Eof do
-    begin
-      APackageList.Add(aExePath + Trim(aCdsBpl.fieldByName('IFullname').AsString));
-      aCdsBpl.Next;
-    end;
+//    aDBAC.QuerySQL('SELECT * FROM tbx_Base_PackageInfo where ITypeId <> ''00000'' ORDER BY RowIndex', aCdsBpl);
+//    aCdsBpl.First;
+//    while not aCdsBpl.Eof do
+//    begin
+//      APackageList.Add(aExePath + Trim(aCdsBpl.fieldByName('IFullname').AsString));
+//      aCdsBpl.Next;
+//    end;
+    APackageList.Add(aExePath + 'Other.bpl');
+    APackageList.Add(aExePath + 'DBAccess.bpl');
+    APackageList.Add(aExePath + 'BusinessIntf.bpl');
+    APackageList.Add(aExePath + 'BusinessLayer.bpl');
+    APackageList.Add(aExePath + 'BaseForm.bpl');
+    APackageList.Add(aExePath + 'SysConfig.bpl');
+    APackageList.Add(aExePath + 'BaseInfo.bpl');
+    APackageList.Add(aExePath + 'BillForm.bpl');
+    APackageList.Add(aExePath + 'Testdll.dll');
+    APackageList.Add(aExePath + 'TestBpl.bpl');
   finally
     aCdsBpl.Free;
   end;

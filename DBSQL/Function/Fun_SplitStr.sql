@@ -1,9 +1,9 @@
-IF OBJECT_ID('dbo.pbx_Fun_SplitStr') IS NOT NULL 
-    DROP FUNCTION dbo.pbx_Fun_SplitStr
+IF OBJECT_ID('dbo.Fun_SplitStr') IS NOT NULL 
+    DROP FUNCTION dbo.Fun_SplitStr
 go
 
 
-CREATE FUNCTION pbx_Fun_SplitStr
+CREATE FUNCTION Fun_SplitStr
     (
       @Str VARCHAR(8000) ,   --待分拆的字符串
       @Split VARCHAR(10)     --数据分隔符

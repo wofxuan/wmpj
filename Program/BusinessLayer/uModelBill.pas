@@ -7,65 +7,39 @@ uses
   uBaseInfoDef, uModelParent, uModelBaseListIntf, uModelBillIntf;
 
 type
-  TModelBillOrder = class(TModelBill, IModelBillOrder) //单据-进货订单或者销售订单
-    function BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode: Integer; AOutPutData: TParamObject): Integer; override; //单据过账
+  TModelBillOrder = class(TModelBill, IModelBillOrder) //单据-订单
+    function GetBillCreateProcName: string; override;
   end;
 
-  TModelBillBuy = class(TModelBill, IModelBillBuy) //单据-进货单
-    function BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode: Integer; AOutPutData: TParamObject): Integer; override; //单据过账
+  TModelBillBuy = class(TModelBill, IModelBillBuy) //单据-销售单
+    function GetBillCreateProcName: string; override;
   end;
 
-  TModelBillSale = class(TModelBill, IModelBillSale) //单据-销售单
-    function BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode: Integer; AOutPutData: TParamObject): Integer; override; //单据过账
+  TModelBillSale = class(TModelBill, IModelBillSale) //单据-进货单
+  function GetBillCreateProcName: string; override;
   end;
+
 implementation
 
-uses uModelFunCom, uOtherIntf;
+{ TModelBillSale }
+
+function TModelBillSale.GetBillCreateProcName: string;
+begin
+  Result := 'pbx_Bill_Create';
+end;
 
 { TModelBillOrder }
 
-function TModelBillOrder.BillCreate(AModi, ADraft, AVchType, AVchcode,
-  AOldVchCode: Integer; AOutPutData: TParamObject): Integer;
-var
-  aList: TParamObject;
-  aRet: Integer;
-  aErrorMsg: string;
+function TModelBillOrder.GetBillCreateProcName: string;
 begin
-  aList := TParamObject.Create;
-  try
-    aList.Add('@NewVchCode', AVchcode);
-    aList.Add('@OldVchCode', AOldVchcode);
-    aList.Add('@errorValue', '');
-    aRet := gMFCom.ExecProcByName('pbx_Bill_Order_Create', aList);
-    if aRet <> 0 then
-    begin
-      aErrorMsg := aList.AsString('@errorValue');
-      gMFCom.ShowMsgBox(aErrorMsg, '错误', mbtError);
-    end
-    else
-    begin
-      gMFCom.ShowMsgBox('过账完成！', '提示', mbtError);
-    end;
-    Result := aRet;
-  finally
-    aList.Free;
-  end;
+  Result := 'pbx_Bill_Order_Create';
 end;
 
 { TModelBillBuy }
 
-function TModelBillBuy.BillCreate(AModi, ADraft, AVchType, AVchcode,
-  AOldVchCode: Integer; AOutPutData: TParamObject): Integer;
+function TModelBillBuy.GetBillCreateProcName: string;
 begin
-  inherited BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode, AOutPutData);
-end;
-
-{ TModelBillSale }
-
-function TModelBillSale.BillCreate(AModi, ADraft, AVchType, AVchcode,
-  AOldVchCode: Integer; AOutPutData: TParamObject): Integer;
-begin
-  inherited BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode, AOutPutData);
+  Result := 'pbx_Bill_Create';
 end;
 
 initialization

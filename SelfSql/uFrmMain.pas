@@ -81,7 +81,8 @@ var
   i: Integer;
 begin
   aExePath := ExtractFilePath(ParamStr(0));
-  aFileList := MakeFileList(aExePath + 'DBSQL\Procedure', '.*');
+  aFileList := MakeFileList(aExePath + 'DBSQL\Function', '.*');
+  aFileList.AddStrings(MakeFileList(aExePath + 'DBSQL\Procedure', '.*'));
   aOneFile := TStringList.Create;
   aHBFile := TStringList.Create;
   try

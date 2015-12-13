@@ -70,8 +70,8 @@ type
     constructor Create(AGridID: Integer; AGrid: TcxGrid; AGridTV: TcxGridTableView);
     destructor Destroy; override;
 
-    procedure ClearField;
-    procedure ClearGridData;//清空表格数据
+    procedure ClearField;//清空表格的所有列数据
+    procedure ClearData;//清空表格的所有行数据
     function AddFiled(AFileName, AShowCaption: string; AWidth: Integer = 100; AColShowType: TColField = cfString): TColInfo; overload;
     procedure AddFiled(ABasicType: TBasicType); overload;
     function AddCheckBoxCol(AFileName, AShowCaption: string; AValueChecked, ValueUnchecked: Variant): TColInfo;
@@ -527,29 +527,12 @@ begin
   end;
 end;
 
-procedure TGridItem.ClearGridData;
-var
-  aCol: Integer;
-  aColItem: TColInfo;
-  aFindCol: Boolean;
+procedure TGridItem.ClearData;
 begin
-  try
-    FGridTV.DataController.RecordCount := 0;
-    FGridTV.DataController.RecordCount := 500;
-//    for aCol := 0 to Length(FColList) - 1 do
-//    begin
-//      aColItem := FColList[aCol];
-//      if UpperCase(aColItem.FFieldName) = UpperCase(ADBName) then
-//      begin
-//        Result := FGridTV.DataController.GetValue(ARowIndex, aColItem.FGridColumn.Index);
-//        aFindCol := True;
-//        Break;
-//      end;
-//    end;
-  finally
-
-  end;
+  FGridTV.DataController.RecordCount := 0;
+  FGridTV.DataController.RecordCount := 500;
 end;
+
 { TGridControl }
 
 procedure TGridControl.AddGradItem(AGridItem: TGridItem);

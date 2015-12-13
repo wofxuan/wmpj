@@ -34,6 +34,7 @@ requires
 contains
   uOtherExport in 'uOtherExport.pas',
   uExDef in 'uExDef.pas',
-  uFrmMsgBox in 'uFrmMsgBox.pas' {frmMsgBox};
+  uFrmMsgBox in 'uFrmMsgBox.pas' {frmMsgBox},
+  uDBIntf in '..\Interfaces\uDBIntf.pas';
 
 end.

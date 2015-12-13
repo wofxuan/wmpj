@@ -138,7 +138,6 @@ begin
     if aItem.Component is TcxButtonEdit then
     begin
       TcxButtonEdit(aItem.Component).Text := '';
-      aItem.TypeId := '';
       if not IsSaveToLocal(aItem.BasicType) then
       begin
         TcxButtonEdit(aItem.Component).Properties.Buttons.Clear;

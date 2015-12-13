@@ -155,8 +155,5 @@ inherited frmBillOrder: TfrmBillOrder
       0
       48
       0)
-    inherited btnSave: TdxBarLargeButton
-      OnClick = btnSaveClick
-    end
   end
 end

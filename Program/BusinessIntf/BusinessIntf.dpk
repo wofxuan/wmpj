@@ -30,7 +30,8 @@ requires
   Core,
   dsnap,
   dbrtl,
-  vcl;
+  vcl,
+  Other;
 
 contains
   uModelBaseIntf in 'uModelBaseIntf.pas',

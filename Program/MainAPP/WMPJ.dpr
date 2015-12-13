@@ -16,21 +16,18 @@ var
   ProLoad: TLoad;
   ProInit: TInit;
   ProFinal: TFinal;
-  FCorePackageHandle: HMODULE;
-  FDBPackageHandle: HMODULE;
+  CorePackageHandle: HMODULE;
 begin
   Application.Initialize;
   Application.Title := 'WM主程序';
   Application.HintHidePause := 1000 * 10; //指定提示窗口在屏幕上显示的时间
   //加载核心包
   CorePackageFile := ShortString(ExtractFilePath(Paramstr(0)) + 'Core.bpl');
-  DBPackageFile := ShortString(ExtractFilePath(Paramstr(0)) + 'DBAccess.bpl');
   if FileExists(string(CorePackageFile)) then
   begin
-    FCorePackageHandle := LoadPackage(string(CorePackageFile));
-    FDBPackageHandle := LoadPackage(string(DBPackageFile));
-    @ProLoad := GetProcAddress(FCorePackageHandle, 'Load');
-    @ProInit := GetProcAddress(FCorePackageHandle, 'Init');
+    CorePackageHandle := LoadPackage(string(CorePackageFile));
+    @ProLoad := GetProcAddress(CorePackageHandle, 'Load');
+    @ProInit := GetProcAddress(CorePackageHandle, 'Init');
 
     Application.CreateForm(TFrmWMPG, FrmWMPG);//要在初始化Core后创建，不然不能注册IMainForm
     
@@ -59,7 +56,7 @@ begin
 
     Application.Run;
 //    程序结束
-    @ProFinal := GetProcAddress(FCorePackageHandle, 'Final');
+    @ProFinal := GetProcAddress(CorePackageHandle, 'Final');
     if assigned(ProFinal) then
     begin
       try
@@ -70,7 +67,7 @@ begin
       end;
     end;
 //    释放包
-    UnLoadPackage(FCorePackageHandle);
+    UnLoadPackage(CorePackageHandle);
   end
   else Application.MessageBox(pchar('找不到框架核心包[' + string(CorePackageFile)
       + ']，程序无法启动！'), '启动错误', MB_OK + MB_ICONERROR);

@@ -28,16 +28,12 @@ type
     edtSummary: TcxButtonEdit;
     lbl7: TcxLabel;
     edtComment: TcxButtonEdit;
-    procedure btnSaveClick(Sender: TObject);
   private
     { Private declarations }
     procedure BeforeFormShow; override;
 
     procedure InitMasterTitles(Sender: TObject); override;
     procedure InitGrids(Sender: TObject); override;
-
-    function LoadBillDataMaster: Boolean; override;
-    function LoadBillDataGrid: Boolean; override;
 
     function SaveToSettle: Boolean; override;
     function SaveMasterData(const ABillMasterData: TBillData): Integer; override;
@@ -69,9 +65,6 @@ uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
 procedure TfrmBillOrder.BeforeFormShow;
 begin
   FModelBill := IModelBillOrder((SysService as IModelControl).GetModelIntf(IModelBillOrder));
-  btnSave.ButtonStyle := bsDefault;
-  btnSaveDraft.Visible := ivNever;
-  btnSaveSettle.Visible := ivNever; 
   inherited;
 end;
 
@@ -129,41 +122,17 @@ begin
         lblKtype.Caption := '·¢»õ²Ö¿â';
       end;
   end;
-  
+  DBComItem.AddItem(deBillDate, 'InputDate');
+  DBComItem.AddItem(edtBillNumber, 'Number');
+
   DBComItem.AddItem(edtBtype, 'BTypeId', 'BTypeId', 'BUsercode', btBtype);
   DBComItem.AddItem(edtEtype, 'ETypeId', 'ETypeId', 'EUsercode', btEtype);
   DBComItem.AddItem(edtDtype, 'DTypeId', 'DTypeId', 'DUsercode', btDtype);
   DBComItem.AddItem(edtKtype, 'KTypeId', 'KTypeId', 'KUsercode', btKtype);
-
+  
   DBComItem.AddItem(deGatheringDate, 'GatheringDate');
   DBComItem.AddItem(edtSummary, 'Summary');
   DBComItem.AddItem(edtComment, 'Comment');
-end;
-
-function TfrmBillOrder.LoadBillDataGrid: Boolean;
-begin
-  if FVchcode = 0 then
-  begin
-    FGridItem.ClearGridData();
-    deBillDate.Date := Trunc(Now);
-    deGatheringDate.Date := Trunc(Now);
-  end
-  else
-  begin
-
-  end;
-end;
-
-function TfrmBillOrder.LoadBillDataMaster: Boolean;
-begin
-  if FVchcode = 0 then
-  begin
-    DBComItem.ClearItemData();
-  end
-  else
-  begin
-
-  end;
 end;
 
 function TfrmBillOrder.LoadOnePtype(ARow: Integer; AData: TSelectBasicData;
@@ -307,17 +276,10 @@ begin
     begin
       FModelBill.BillCreate(0, aBillData.Draft, FVchType, aNewVchcode, aBillData.VchCode, aOutPutData);
     end;
-    Result := True;
   finally
     aOutPutData.Free;
     aBillData.Free;
   end;
-end;
-
-procedure TfrmBillOrder.btnSaveClick(Sender: TObject);
-begin
-  inherited;
-  actSaveSettleExecute(actSaveSettle);
 end;
 
 initialization

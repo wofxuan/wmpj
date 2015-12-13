@@ -1,8 +1,8 @@
-IF OBJECT_ID('dbo.pbx_Fun_CovToPrice') IS NOT NULL 
-    DROP FUNCTION dbo.pbx_Fun_CovToPrice
+IF OBJECT_ID('dbo.Fun_CovToPrice') IS NOT NULL 
+    DROP FUNCTION dbo.Fun_CovToPrice
 go
 
-CREATE   FUNCTION pbx_Fun_CovToPrice( @nprice NUMERIC(22, 10) )
+CREATE   FUNCTION Fun_CovToPrice( @nprice NUMERIC(22, 10) )
 RETURNS NUMERIC(22, 10)
 AS 
     BEGIN

@@ -93,7 +93,7 @@ AS
         BEGIN 
             DECLARE @tempid VARCHAR(5) , @nreturn INT
             SELECT  @soncount = @soncount + 1
-            EXEC @nreturn= pbx_Fun_TypeIDIntToStr @soncount, @tempid OUT
+            EXEC @nreturn= Fun_TypeIDIntToStr @soncount, @tempid OUT
             IF @nreturn = -1 
                 BEGIN
                     CLOSE checkid_cursor

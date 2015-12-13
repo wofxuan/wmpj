@@ -22,6 +22,10 @@ del Program\BusinessForm\BaseInfo\*.~*
 del Program\BusinessForm\BaseInfo\*.dcu
 del Program\BusinessForm\BaseInfo\*.ddp
 
+del Program\BusinessForm\BillForm\*.~*
+del Program\BusinessForm\BillForm\*.dcu
+del Program\BusinessForm\BillForm\*.ddp
+
 del Program\BusinessLayer\*.~*
 del Program\BusinessLayer\*.dcu
 del Program\BusinessLayer\*.ddp
