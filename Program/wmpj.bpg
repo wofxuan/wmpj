@@ -10,8 +10,8 @@ DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
 PROJECTS = WMServer.exe Core.bpl Other.bpl DBAccess.bpl BusinessIntf.bpl \
-  BusinessLayer.bpl BaseForm.bpl BaseInfo.bpl BillForm.bpl SysConfig.bpl \
-  TestBpl.bpl Testdll.dll WMPJ.exe
+  BusinessLayer.bpl BaseForm.bpl BaseInfo.bpl BillForm.bpl Report.bpl \
+  SysConfig.bpl TestBpl.bpl Testdll.dll WMPJ.exe
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -53,6 +53,9 @@ BusinessIntf.bpl: BusinessIntf\BusinessIntf.dpk
   $(DCC)
 
 BillForm.bpl: BusinessForm\BillForm\BillForm.dpk
+  $(DCC)
+
+Report.bpl: BusinessForm\Report\Report.dpk
   $(DCC)
 
 

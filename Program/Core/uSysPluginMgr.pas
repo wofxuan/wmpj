@@ -165,6 +165,7 @@ begin
     APackageList.Add(aExePath + 'SysConfig.bpl');
     APackageList.Add(aExePath + 'BaseInfo.bpl');
     APackageList.Add(aExePath + 'BillForm.bpl');
+    APackageList.Add(aExePath + 'Report.bpl');  
     APackageList.Add(aExePath + 'Testdll.dll');
     APackageList.Add(aExePath + 'TestBpl.bpl');
   finally

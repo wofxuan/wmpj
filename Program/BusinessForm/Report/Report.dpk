@@ -1,4 +1,4 @@
-package BusinessLayer;
+package Report;
 
 {$R *.res}
 {$ALIGN 8}
@@ -27,22 +27,31 @@ package BusinessLayer;
 
 requires
   rtl,
-  dsnap,
-  dbrtl,
   vcl,
+  dbrtl,
+  dsnap,
+  vcljpg,
   vcldb,
-  BusinessIntf;
+  vclx,
+  BaseForm,
+  BusinessIntf,
+  Core,
+  Other,
+  cxLibraryVCLD7,
+  dxThemeD7,
+  dxGDIPlusD7,
+  cxEditorsVCLD7,
+  cxDataD7,
+  cxExtEditorsVCLD7,
+  cxGridD7,
+  cxPageControlVCLD7,
+  cxExportVCLD7,
+  dxBarD7,
+  dxComnD7,
+  dxBarExtItemsD7;
 
 contains
-  uBusinessLayerExport in 'uBusinessLayerExport.pas',
-  uModelFunCom in 'uModelFunCom.pas',
-  uBasicDataLocalClass in 'uBasicDataLocalClass.pas',
-  uModelParent in 'uModelParent.pas',
-  uModelBaseType in 'uModelBaseType.pas',
-  uModelBaseList in 'uModelBaseList.pas',
-  uBusinessLayer in 'uBusinessLayer.pas',
-  uModelSys in 'uModelSys.pas',
-  uModelReport in 'uModelReport.pas',
-  uModelBill in 'uModelBill.pas';
+  uReportExport in 'uReportExport.pas',
+  uFrmReportStockGoods in 'uFrmReportStockGoods.pas' {frmReportStockGoods};
 
 end.

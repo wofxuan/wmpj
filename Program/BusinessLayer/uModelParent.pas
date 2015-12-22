@@ -80,7 +80,7 @@ type
 
   end;
 
-  TModelBill = class(TModelBase, IModelBill)        //基本信息列表的业务父类
+  TModelBill = class(TModelBase, IModelBill)        //单据的业务父类
   private
     FVchType: Integer;
 
@@ -95,6 +95,15 @@ type
 
   end;
 
+  TModelReport = class(TModelBase, IModelReport)        //报表的业务父类
+  private
+
+  protected
+    procedure LoadGridData(AParam: TParamObject; ACdsBaseList: TClientDataSet); virtual;//查询数据
+  public
+
+  end;
+  
 implementation
 
 uses uSysSvc, uOtherIntf, uModelFunCom, uBasicDataLocalClass, Controls, Math;
@@ -633,6 +642,14 @@ begin
   finally
     aDetailData.Free;
   end;
+end;
+
+{ TModelReport }
+
+procedure TModelReport.LoadGridData(AParam: TParamObject;
+  ACdsBaseList: TClientDataSet);
+begin
+
 end;
 
 end.
