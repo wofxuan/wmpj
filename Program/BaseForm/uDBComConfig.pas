@@ -160,7 +160,7 @@ begin
     end
     else if aItem.Component is TcxDateEdit then
     begin
-      TcxDateEdit(aItem.Component).Text := '1980-01-01';
+      TcxDateEdit(aItem.Component).Text := FormatdateTime('YYYY-MM-DD', Now);
     end
     else
     begin

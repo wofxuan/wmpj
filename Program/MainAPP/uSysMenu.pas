@@ -130,7 +130,7 @@ begin
             aFrm.FrmShow;
             if Assigned(OnShowMDI) then OnShowMDI(Self, TMenuItem(Sender).Caption, aFrm);
           end
-          else if aFrm.FrmShowStyle = fssShow then
+          else if aFrm.FrmShowStyle = fssShowModal then
           begin
             try
               aFrm.FrmShowModal;
@@ -248,6 +248,8 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m40001000', '库存状况', 'm4000', '', fnMdlReportGoods, nil);
     AddMenu('m40002000', '进货订单统计', 'm4000', '', fnMdlReportOrderBuy, nil);
     AddMenu('m40003000', '进货单统计', 'm4000', '', fnMdlReportBuy, nil);
+    AddMenu('m40004000', '销售订单统计', 'm4000', '', fnMdlReportOrderSale, nil);
+    AddMenu('m40005000', '销售单统计', 'm4000', '', fnMdlReportSale, nil);
     
     AddMenu('m9000', '帮助', '', '', 0, nil);
     AddMenu('m90001000', '在线帮助', 'm9000', '', fnMdlHelp_Online, nil);

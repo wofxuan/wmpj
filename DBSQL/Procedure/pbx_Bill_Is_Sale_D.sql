@@ -1,13 +1,13 @@
-IF OBJECT_ID('dbo.pbx_Bill_Is_Buy_D') IS NOT NULL 
-    DROP PROCEDURE dbo.pbx_Bill_Is_Buy_D
+IF OBJECT_ID('dbo.pbx_Bill_Is_Sale_D') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Is_Sale_D
 go
 
 --  ********************************************************************************************                                                                                  
---  ||   过程名称：pbx_Bill_Is_Buy_D                                               
---  ||   过程功能：添加进货单的明细信息
+--  ||   过程名称：pbx_Bill_Is_Sale_D                                               
+--  ||   过程功能：添加销售单的明细信息
 --  ********************************************************************************************
 
-CREATE  PROCEDURE [pbx_Bill_Is_Buy_D]
+CREATE  PROCEDURE [pbx_Bill_Is_Sale_D]
     (
       @RowId VARCHAR(8000) ,
       @VchCode VARCHAR(50) ,
@@ -65,8 +65,7 @@ AS
     DECLARE @Splitstr VARCHAR(10)
     SET @Splitstr = 'ǎǒǜ'
 
-	SELECT @Ret = -1
-	
+
     BEGIN TRAN OrderSaveDly
 
     SELECT  @BeginOrderDly = ISNULL(MAX(DlyOrder), 0)
@@ -200,8 +199,8 @@ AS
                     LEFT JOIN dbo.Fun_SplitStr(@Comment, @splitstr) Comment ON szRowId.Id = Comment.Id
                     LEFT JOIN ( SELECT  pu.Id ,
                                         pu.PtypeId ,
-                                        1.0 Unit ,--URate
-                                        1.0 URate --ISNULL(URate, 1) URate --URate必须是1.0，不然在Fun_CovToQty时参数不能转换为NUMERIC类型
+                                        1 Unit ,
+                                        1.0 URate --ISNULL(URate, 1) URate
                                 FROM    ( SELECT    PtypeIdlist.Id ,
                                                     PtypeIdlist.col PtypeId ,
                                                     1 unit--unit.col unit

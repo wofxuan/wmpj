@@ -5,13 +5,16 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, uFactoryFormIntf, uParamObject, ExtCtrls,
-  ActnList, uBaseInfoDef, uGridConfig, uDBComConfig, uDefCom, uModelFunIntf;
+  ActnList, uBaseInfoDef, uGridConfig, uDBComConfig, uDefCom, uModelFunIntf,
+  cxGridLevel, cxClasses, cxControls, cxGridCustomView,
+  cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGrid;
 
 type
   TfrmParent = class(TForm, IFormIntf)
     actlstEvent: TActionList;
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
 
@@ -43,6 +46,9 @@ type
     procedure SetTitle(const Value: string); virtual;
     procedure IniView; virtual; //初始化视图
     procedure IniData; virtual;
+
+    procedure InitialAllComponent; virtual;
+    procedure InitcxGridClass(AComp: TComponent);
   public
     { Public declarations }
     constructor CreateFrmParamList(AOwner: TComponent; AParam: TParamObject); virtual; //带参数的创建
@@ -73,7 +79,7 @@ end;
 procedure TfrmParent.BeforeFormShow;
 begin
   if Self.GetMdlDisName <> '' then
-    Self.Title := Self.GetMdlDisName;
+    Title := Self.GetMdlDisName;
 
   IniView;
 end;
@@ -142,6 +148,7 @@ end;
 procedure TfrmParent.SetTitle(const Value: string);
 begin
   FTitle := Value;
+  Caption := Value;
 end;
 
 procedure TfrmParent.IniData;
@@ -183,6 +190,28 @@ begin
     ASelectBasicParam.SearchString := '';
   AReturnCount := SelectBasicData(ABasicType, ASelectBasicParam,
     ASelectOptions, ABasicDatas);
+end;
+
+procedure TfrmParent.InitialAllComponent;
+var i: Integer;
+begin
+  for i := 0 to ComponentCount - 1 do
+  begin
+    if (Components[i] is TcxGridTableView) then InitcxGridClass(Components[i]);
+  end;
+end;
+
+procedure TfrmParent.FormCreate(Sender: TObject);
+begin
+  InitialAllComponent();
+end;
+
+procedure TfrmParent.InitcxGridClass(AComp: TComponent);
+var
+  aCxGrid: TcxGridTableView;
+begin
+  aCxGrid := TcxGridTableView(AComp);
+  aCxGrid.OptionsView.DataRowHeight := 25;
 end;
 
 initialization

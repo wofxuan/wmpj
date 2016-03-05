@@ -28,7 +28,10 @@ type
     gridTVMainShow: TcxGridTableView;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure actCloseExecute(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
+    FIsActClose: Boolean;//是否是从act去关闭界面
+    
     function FrmShowStyle: TShowStyle; override;
   protected
     { Private declarations }
@@ -73,6 +76,7 @@ begin
   FGridItem.OnSelectBasic := DoSelectBasic;
   FDBAC := SysService as IDBAccess;
   FModelFun := SysService as IModelFun;
+  FIsActClose := False;
 end;
 
 procedure TfrmMDI.IniGridField;
@@ -114,8 +118,27 @@ var
 begin
   inherited;
   aMainForm := SysService as IMainForm;
-  OutputDebugString(PAnsiChar(Self.Caption));
   aMainForm.CloseFom(Self, aCanClose);
+  
+  if aCanClose then
+  begin
+    FIsActClose := True;
+    FrmClose;
+  end;
+end;
+
+procedure TfrmMDI.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+var
+  aMainForm: IMainForm;
+  aCanClose: Boolean;
+begin
+  inherited;
+  if not FIsActClose then
+  begin
+    aMainForm := SysService as IMainForm;
+    aMainForm.CloseFom(Self, aCanClose);
+    CanClose := aCanClose;
+  end;
 end;
 
 end.

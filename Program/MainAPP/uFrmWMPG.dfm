@@ -29,7 +29,7 @@ object FrmWMPG: TFrmWMPG
   end
   object statList: TStatusBar
     Left = 0
-    Top = 460
+    Top = 459
     Width = 1060
     Height = 19
     Panels = <

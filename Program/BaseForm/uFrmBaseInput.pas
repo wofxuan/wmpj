@@ -134,7 +134,7 @@ begin
   begin
     SetReadOnly(True);
   end;
-  Self.Title := Self.Caption; //默认title和caption是一样的。如果要设置为不一样的，可以在子类重写SetTitle方法
+  Title := Caption; //默认title和caption是一样的。如果要设置为不一样的，可以在子类重写SetTitle方法
 end;
 
 function TfrmBaseInput.SaveData: Boolean;

@@ -1,5 +1,5 @@
-inherited frmMDIReport: TfrmMDIReport
-  Caption = 'frmMDIReport'
+inherited frmReportBuy: TfrmReportBuy
+  Caption = 'frmReportBuy'
   PixelsPerInch = 96
   TextHeight = 13
   inherited imglstBtn: TcxImageList

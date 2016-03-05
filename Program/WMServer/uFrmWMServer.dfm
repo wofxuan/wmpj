@@ -10,7 +10,9 @@ object FrmWMServer: TFrmWMServer
   Menu = mmServer
   OldCreateOrder = False
   Position = poScreenCenter
+  OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object ROMessage: TROBinMessage
@@ -51,6 +53,18 @@ object FrmWMServer: TFrmWMServer
         Caption = #26381#21153#31471#35774#32622
         OnClick = mniServerSetClick
       end
+    end
+  end
+  object pmList: TPopupMenu
+    Left = 112
+    Top = 48
+    object mniShowFrm: TMenuItem
+      Caption = #26174#31034#20027#30028#38754
+      OnClick = mniShowFrmClick
+    end
+    object mniClose: TMenuItem
+      Caption = #20851#38381#31243#24207
+      OnClick = mniCloseClick
     end
   end
 end

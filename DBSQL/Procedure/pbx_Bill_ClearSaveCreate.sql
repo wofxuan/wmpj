@@ -22,7 +22,7 @@ AS
 
     BEGIN TRAN DelBak
 
-    IF @VchType IN ( 7, 8 ) --进货，销售订单
+    IF @VchType IN ( 1, 2 ) --进货订单，销售订单
         BEGIN
             DELETE  FROM tbx_Bill_Order_M
             WHERE   VchCode = @NewVchCode
@@ -30,6 +30,15 @@ AS
             DELETE  FROM dbo.tbx_Bill_Order_D
             WHERE   VchCode = @NewVchCode	
         END
+    ELSE 
+        IF @VchType IN ( 3, 4 ) --进货单，销售单
+            BEGIN
+                DELETE  FROM tbx_Bill_M
+                WHERE   VchCode = @NewVchCode
+	
+                DELETE  FROM dbo.tbx_Bill_D_Bak
+                WHERE   VchCode = @NewVchCode	
+            END
 
 
     COMMIT TRAN DelBak

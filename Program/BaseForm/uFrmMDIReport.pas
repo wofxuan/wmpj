@@ -10,27 +10,38 @@ uses
   cxGridCustomTableView, cxGridTableView, cxGrid, ExtCtrls, uModelBaseIntf;
 
 type
-  TfrmMDIRepor = class(TfrmMDI)
+  TfrmMDIReport = class(TfrmMDI)
   private
     { Private declarations }
   protected
     FModelReport: IModelReport;
 
     procedure LoadGridData(ATypeid: string = ''); override;
+    procedure BeforeFormShow; override;
   public
     { Public declarations }
+
   end;
 
 var
-  frmMDIRepor: TfrmMDIRepor;
+  frmMDIReport: TfrmMDIReport;
 
 implementation
+
+uses uDefCom;
 
 {$R *.dfm}
 
 { TfrmMDIRepor }
 
-procedure TfrmMDIRepor.LoadGridData(ATypeid: string);
+procedure TfrmMDIReport.BeforeFormShow;
+begin
+  inherited;
+  IniGridField();
+  LoadGridData(ROOT_ID);
+end;
+
+procedure TfrmMDIReport.LoadGridData(ATypeid: string);
 begin
   inherited;
   FModelReport.LoadGridData(nil, cdsMainShow);

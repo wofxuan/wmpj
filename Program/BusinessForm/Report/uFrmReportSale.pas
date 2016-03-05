@@ -1,4 +1,4 @@
-unit uFrmReportStockGoods;
+unit uFrmReportSale;
 
 interface
 
@@ -10,7 +10,7 @@ uses
   cxGridCustomTableView, cxGridTableView, cxGrid, ExtCtrls;
 
 type
-  TfrmReportStockGoods = class(TfrmMDIReport)
+  TfrmReportSale = class(TfrmMDIReport)
   private
     { Private declarations }
     procedure BeforeFormShow; override;
@@ -21,7 +21,7 @@ type
   end;
 
 var
-  frmReportStockGoods: TfrmReportStockGoods;
+  frmReportSale: TfrmReportSale;
 
 implementation
 
@@ -31,31 +31,30 @@ uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelReportIntf,
 
 { TfrmReportStockGoods }
 
-procedure TfrmReportStockGoods.BeforeFormShow;
+procedure TfrmReportSale.BeforeFormShow;
 begin
-  FModelReport := IModelReportStockGoods((SysService as IModelControl).GetModelIntf(IModelReportStockGoods));
+  FModelReport := IModelReportSale((SysService as IModelControl).GetModelIntf(IModelReportSale));
   inherited;
 end;
 
-procedure TfrmReportStockGoods.IniGridField;
+procedure TfrmReportSale.IniGridField;
 begin
   inherited;
-  FGridItem.BasicType := btPtype;
   FGridItem.ClearField();
-  FGridItem.AddFiled(btPtype);
-  FGridItem.AddFiled('Qty', '数量', 50, cfQty);
-  FGridItem.AddFiled('Price', '单价', 50, cfPrice);
-  FGridItem.AddFiled('Total', '金额', 50, cfTotal);
+  FGridItem.AddFiled('VchType', '单据类型', 50, cfString);
+  FGridItem.AddFiled('InputDate', '日期', 50, cfDate);
+  FGridItem.AddFiled('Savedate', '存盘时间', 50, cfDatime);
+  FGridItem.AddFiled('Number', '订单编号', 50, cfString);
   FGridItem.InitGridData;
 end;
 
-procedure TfrmReportStockGoods.InitParamList;
+procedure TfrmReportSale.InitParamList;
 begin
   inherited;
-  MoudleNo := fnMdlReportGoods;
+  MoudleNo := fnMdlReportOrderSale;
 end;
 
 initialization
-  gFormManage.RegForm(TfrmReportStockGoods, fnMdlReportGoods);
+  gFormManage.RegForm(TfrmReportSale, fnMdlReportSale);
   
 end.

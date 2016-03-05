@@ -93,15 +93,21 @@ begin
 end;
 
 procedure TfrmBillBuy.InitGrids(Sender: TObject);
+var
+  aColInfo: TColInfo;
 begin
   inherited;
   FGridItem.ClearField();
   FGridItem.AddFiled(btPtype);
   FGridItem.AddFiled('Unit', '单位');
-  FGridItem.AddFiled('Qty', '数量', 100, cfQty);
-  FGridItem.AddFiled('Price', '单价', 100, cfPrice);
-  FGridItem.AddFiled('Total', '金额', 100, cfTotal);
-  FGridItem.AddFiled('Comment', '备注');   
+
+  aColInfo := FGridItem.AddFiled('Qty', '数量', 100, cfQty);
+  aColInfo := FGridItem.AddFiled('Price', '单价', 100, cfPrice);
+
+  aColInfo := FGridItem.AddFiled('Total', '金额', 100, cfTotal);
+  aColInfo.AddExpression('[Qty]*[Price]');
+
+  FGridItem.AddFiled('Comment', '备注');
   FGridItem.InitGridData;
 end;
 
@@ -110,7 +116,7 @@ begin
   inherited;
   MoudleNo := FVchType;
 
-  BillTitle := '进货单';
+  Title := '进货单';
   lblBtype.Caption := '供货单位';
   lblKtype.Caption := '收货仓库';
 
@@ -132,22 +138,6 @@ var
   szSql, szTemp: string;
 begin
   inherited LoadBillDataGrid;
-  if FVchcode = 0 then //新单据
-  begin
-    FGridItem.ClearData;
-  end
-  else
-  begin
-    //加载单据
-//    if (nDraft = 1) or (nDraft > 3) then szTemp := GetDlyName(bosEdit, FVchType)
-//    else szTemp := GetDlyName(BillOpenState, FVchType);
-//    GridDataSet.Close;
-//    LoadDly(szTemp, FVchCode, GridDataSet);
-//    SetGridProperty(MainGrid);
-//    LoadLoadBillDataUnitData;
-//    ReadpgDetailData(MainGrid);
-//    ReadSnDetailData(MainGrid);
-  end;
 end;
 
 function TfrmBillBuy.LoadOnePtype(ARow: Integer; AData: TSelectBasicData;
@@ -289,8 +279,10 @@ begin
     aNewVchcode := FModelBill.SaveBill(aBillData, aOutPutData);
     if aNewVchcode >= 0 then
     begin
-      FModelBill.BillCreate(0, aBillData.Draft, FVchType, aNewVchcode, aBillData.VchCode, aOutPutData);
-      Result := True;
+      if FModelBill.BillCreate(0, aBillData.Draft, FVchType, aNewVchcode, aBillData.VchCode, aOutPutData) = 0 then
+      begin
+        Result := True;
+      end;
     end;
   finally
     aOutPutData.Free;

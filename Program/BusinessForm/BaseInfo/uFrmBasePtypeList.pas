@@ -56,6 +56,7 @@ begin
   inherited;
   FGridItem.ClearField();
   FGridItem.AddFiled(btPtype);
+  FGridItem.AddFiled('PUsercode', '商品编码', 200);
   FGridItem.AddFiled('RowIndex', '序号', 50, cfInt);
   FGridItem.AddCheckBoxCol('IsStop', '是否停用', 1, 0);
   FGridItem.InitGridData;

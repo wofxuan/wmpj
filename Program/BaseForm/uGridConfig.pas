@@ -12,6 +12,9 @@ uses
   Windows, Classes, Db, DBClient, SysUtils, Controls, cxGrid, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
   cxGridDBTableView, cxGraphics, uBaseInfoDef, uModelBaseIntf, uModelFunIntf, uModelOtherSet, cxEdit, uDefCom;
 
+const
+  SpecialCharList: array[0..1] of string = ('[', ']');
+
 type
   //表格单元格双击事件
   TCellDblClickEvent = procedure(Sender: TcxCustomGridTableView;
@@ -28,10 +31,12 @@ type
     FFieldName: string;
     FColShowType: TColField; //字段类型
     FBasicType: TBasicType; //点击列单元格的时候显示哪种TC
+    FExpression: string; //自定义的公式 bb*cc
 
     FDataToDisplay: TStringList; //字段显示与查询数据对应列表
     procedure GetDisplayText(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AText: string);
   public
+    procedure AddExpression(AExpression: string);
     procedure SetDisplayText(ADisplayText: TIDDisplayText); //设置查询数据与显示数据的对应关系
     constructor Create(AGridColumn: TcxGridColumn; AFieldName: string);
     destructor Destroy; override;
@@ -50,6 +55,7 @@ type
     FBasicType: TBasicType; //表格如果要分组的需要根据类型在去ptypeid等的儿子数来看是否显示*
     FColList: array of TColInfo; //记录添加的所以列信息
     FTypeClassList: TStringList; //记录ID对应的商品是否有子类格式 00001=0 or 00001=1,0没有儿子，1有儿子;为了减少每行的查询操作
+
     FOnSelectBasic: TSelectBasicinfoEvent; //弹出TC类选择框
     FOldCellDblClick: TCellDblClickEvent; //表格单元格原来的双击事件
     FOldGridEditKey: TcxGridEditKeyEvent; //表格单元格原来的按键事件
@@ -66,18 +72,20 @@ type
     procedure ColumnPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer); //添加基本信息时，单元格内的按钮点击事件
     function GetRowIndex: Integer; //获取当前选中的行
     procedure SetRowIndex(Value: Integer); //设置选中的行
+    procedure GridColEditValueChanged(Sender: TObject); //设置公式字段后，单元格值改变事件时计算公式
   public
     constructor Create(AGridID: Integer; AGrid: TcxGrid; AGridTV: TcxGridTableView);
     destructor Destroy; override;
 
-    procedure ClearField;//清空表格的所有列数据
-    procedure ClearData;//清空表格的所有行数据
+    procedure ClearField; //清空表格的所有列数据
+    procedure ClearData; //清空表格的所有行数据
     function AddFiled(AFileName, AShowCaption: string; AWidth: Integer = 100; AColShowType: TColField = cfString): TColInfo; overload;
     procedure AddFiled(ABasicType: TBasicType); overload;
     function AddCheckBoxCol(AFileName, AShowCaption: string; AValueChecked, ValueUnchecked: Variant): TColInfo;
     function GetCellValue(ADBName: string; ARowIndex: Integer): Variant; //获取单元格值
     procedure SetCellValue(ADBName: string; ARowIndex: Integer; AValue: Variant); //设置单元格值
     procedure InitGridData;
+    procedure InitExpression; //初始化公式设置
 
     function GetFirstRow: Integer; //获取行的首行
     function GetLastRow: Integer; //获取行的末行
@@ -108,7 +116,7 @@ var
 
 implementation
 
-uses uSysSvc, uOtherIntf, cxDataStorage, cxCheckBox, cxButtonEdit, uPubFun, Graphics, Variants;
+uses uSysSvc, uOtherIntf, cxDataStorage, cxCheckBox, cxButtonEdit, cxTextEdit, uPubFun, Graphics, Variants, uCalcExpress;
 
 { TGridItem }
 
@@ -117,10 +125,24 @@ function TGridItem.AddFiled(AFileName, AShowCaption: string;
 var
   aCol: TcxGridColumn;
   aColInfo: TColInfo;
+  i: Integer;
+  aStrSpecial: string;
 begin
+  for i := 0 to Length(SpecialCharList) - 1 do
+  begin
+    aStrSpecial := SpecialCharList[i];
+    if Pos(aStrSpecial, AShowCaption) >= 1 then
+    begin
+      raise(SysService as IExManagement).CreateSysEx('表格列显示名称"' + AShowCaption + '"错误,请重新设置！');
+    end;
+  end;
+
   aCol := FGridTV.CreateColumn;
-//  aCol.DataBinding.FieldName := AFileName;
   aCol.Caption := AShowCaption;
+
+  aCol.PropertiesClass := TcxTextEditProperties;
+  aCol.Properties.Alignment.Vert := taVCenter; //单元格内容上下居中
+
   aCol.Width := AWidth;
   if AWidth <= 0 then aCol.Visible := False;
 
@@ -239,6 +261,9 @@ end;
 
 procedure TGridItem.InitGridData;
 begin
+  //设置公式
+  InitExpression();
+
   FGridTV.DataController.RecordCount := 500;
 end;
 
@@ -376,6 +401,8 @@ begin
     aColInfo.FBasicType := btPtype;
     (aColInfo.FGridColumn.Properties as TcxButtonEditProperties).OnButtonClick := ColumnPropertiesButtonClick; //关联点击事件
 
+    aColInfo.FGridColumn.Properties.Alignment.Vert := taVCenter; //单元格内容上下居中
+
     AddFiled('PUsercode', '商品编码');
   end
   else if ABasicType = btBtype then
@@ -496,7 +523,7 @@ begin
   if Assigned(FOldGridEditKeyPress) then FOldGridEditKeyPress(Sender, AItem, AEdit, Key);
 
   if key = #13 then Exit;
-  
+
   for i := 0 to Length(FColList) - 1 do
   begin
     aColInfo := FColList[i];
@@ -533,6 +560,93 @@ begin
   FGridTV.DataController.RecordCount := 500;
 end;
 
+procedure TGridItem.GridColEditValueChanged(Sender: TObject);
+var
+  i, j, aIndex, aArgsIndex: Integer;
+  aExpression, aExpFieldName, aFieldName, aFormula: string;
+  aRow, aCol: Integer;
+  aParamValue: Variant;
+  aCalc: TCalcExpress;
+  aArgs: array[0..100] of Extended; // array of arguments - variable values
+  aVariables: TStringList;
+begin
+  aRow := RowIndex;
+  if (aRow < GetFirstRow) or (aRow > GetLastRow) then Exit;
+
+  FGridTV.DataController.Post; //必须先提交，不然修改和取值的数据会乱
+
+  //计算公式
+  for i := 0 to Length(FColList) - 1 do
+  begin
+    aExpression := Trim(FColList[i].FExpression);
+    if aExpression <> EmptyStr then
+    begin
+      aFormula := aExpression;
+      aArgsIndex := 0;
+      
+      aVariables := TStringList.Create;
+      try
+        for j := 0 to Length(FColList) - 1 do
+        begin
+          aFieldName := FColList[j].FFieldName;
+          aExpFieldName := '[' + aFieldName + ']';
+          aIndex := Pos(aExpFieldName, aExpression);
+          if aIndex > 0 then
+          begin
+            aParamValue := GetCellValue(aFieldName, aRow);
+            if VarIsNull(aParamValue) then Exit;
+
+            aVariables.Add(aFieldName);
+            aArgs[aArgsIndex] := aParamValue;
+            Inc(aArgsIndex);
+          end;
+        end;
+        aFormula := StringReplace(aFormula, '[', '', [rfReplaceAll]);
+        aFormula := StringReplace(aFormula, ']', '', [rfReplaceAll]);
+
+        aCalc := TCalcExpress.Create;
+        try
+          aCalc.Formula := aFormula;
+          aCalc.Variables := aVariables;
+
+          SetCellValue(FColList[i].FFieldName, aRow, aCalc.calc(aArgs));
+        finally
+          aCalc.Free;
+        end;
+      finally
+        aVariables.Free;
+      end;
+    end;
+  end;
+end;
+
+procedure TGridItem.InitExpression;
+var
+  i, j, aIndex: Integer;
+  aExpression, aFieldName: string;
+begin
+  //设置公式
+  for i := 0 to Length(FColList) - 1 do
+  begin
+    aExpression := Trim(FColList[i].FExpression);
+    if aExpression <> EmptyStr then
+    begin
+      FColList[i].FGridColumn.Properties.OnEditValueChanged := GridColEditValueChanged;
+
+      for j := 0 to Length(FColList) - 1 do
+      begin
+        aFieldName := FColList[j].FFieldName;
+        aFieldName := '[' + aFieldName + ']';
+        aIndex := Pos(aFieldName, aExpression);
+        if aIndex > 0 then
+        begin
+          FColList[j].FGridColumn.Properties.OnEditValueChanged := GridColEditValueChanged;
+        end;
+      end;
+    end;
+  end;
+end;
+
 { TGridControl }
 
 procedure TGridControl.AddGradItem(AGridItem: TGridItem);
@@ -552,6 +666,11 @@ begin
 end;
 
 { TColInfo }
+
+procedure TColInfo.AddExpression(AExpression: string);
+begin
+  FExpression := Trim(AExpression);
+end;
 
 constructor TColInfo.Create(AGridColumn: TcxGridColumn;
   AFieldName: string);

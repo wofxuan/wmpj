@@ -58,7 +58,7 @@ begin
     if TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI = AFormIntf then
     begin
       OutputDebugString(PAnsiChar('aIndex=' + IntToStr(aIndex)));
-      TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.FrmClose;
+//      TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.FrmClose;
       TFrmObj(tclFrmList.Tabs.Objects[aIndex]).Free;
       tclFrmList.Tabs.Delete(aIndex);
       ACanClose := True;
@@ -138,13 +138,13 @@ begin
   aIndex := tclFrmList.TabIndex;
   if aIndex > 0 then
   begin
-    Perform(WM_SETREDRAW, 0, 0); //锁屏幕, 防止在切换MDI窗体的时候闪烁
-    try
+//    Perform(WM_SETREDRAW, 0, 0); //锁屏幕, 防止在切换MDI窗体的时候闪烁
+//    try
       TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.FrmShow;
-    finally
-      Perform(WM_SETREDRAW, 1, 0); //解锁屏幕并重画
-      RedrawWindow(Handle, nil, 0, RDW_FRAME + RDW_INVALIDATE + RDW_ALLCHILDREN + RDW_NOINTERNALPAINT);//重绘客户区
-    end;
+//    finally
+//      Perform(WM_SETREDRAW, 1, 0); //解锁屏幕并重画
+//      RedrawWindow(Handle, nil, 0, RDW_FRAME + RDW_INVALIDATE + RDW_ALLCHILDREN + RDW_NOINTERNALPAINT);//重绘客户区
+//    end;
   end;
 end;
 

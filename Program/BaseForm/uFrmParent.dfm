@@ -13,6 +13,7 @@ object frmParent: TfrmParent
   OldCreateOrder = False
   Position = poDefault
   Visible = True
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 96

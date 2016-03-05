@@ -106,7 +106,7 @@ type
   
 implementation
 
-uses uSysSvc, uOtherIntf, uModelFunCom, uBasicDataLocalClass, Controls, Math;
+uses uSysSvc, uOtherIntf, uModelFunCom, uBasicDataLocalClass, Controls, Math, uVchTypeDef;
 
 { TModelBase }
 
@@ -516,7 +516,7 @@ function TModelBill.BillCreate(AModi, ADraft, AVchType, AVchcode,
 var
   aList: TParamObject;
   aRet: Integer;
-  aErrorMsg: string;
+  aShowMsg: string;
 begin
   aList := TParamObject.Create;
   try
@@ -526,12 +526,17 @@ begin
     aRet := gMFCom.ExecProcByName(GetBillCreateProcName, aList);
     if aRet <> 0 then
     begin
-      aErrorMsg := aList.AsString('@errorValue');
-      gMFCom.ShowMsgBox(aErrorMsg, '错误', mbtError);
+      aShowMsg := aList.AsString('@errorValue');
+      gMFCom.ShowMsgBox(aShowMsg, '错误', mbtError);
     end
     else
     begin
-      gMFCom.ShowMsgBox('过账成功', '提示', mbtInformation);
+      if AVchType in OrderVchtypes then
+        aShowMsg := '保存成功'
+      else
+        aShowMsg := '过账成功';
+        
+      gMFCom.ShowMsgBox(aShowMsg, '提示', mbtInformation);
     end;
     Result := aRet;
   finally
@@ -566,14 +571,14 @@ var
   aAccountData: TParamObject;
 begin
   Result := 0;
-  if StringEmpty(APackData.ProcName) then Exit;
-  aAccountData :=  TParamObject.Create;
-  try
-    APackData.GetChildAllParam(aAccountData);
-    Result := gMFCom.ExecProcByName(APackData.ProcName, aAccountData);
-  finally
-    aAccountData.Free;
-  end;
+//  if StringEmpty(APackData.ProcName) then Exit;
+//  aAccountData :=  TParamObject.Create;
+//  try
+//    APackData.GetChildAllParam(aAccountData);
+//    Result := gMFCom.ExecProcByName(APackData.ProcName, aAccountData);
+//  finally
+//    aAccountData.Free;
+//  end;
 end;
 
 function TModelBill.SaveBill(const ABillData: TBillData; AOutPutData: TParamObject): Integer;
@@ -631,15 +636,21 @@ function TModelBill.SaveDetail(AVchCode: Integer;
   APackData: TPackData): Integer;
 var
   aDetailData: TParamObject;
+  aRet: Integer;
 begin
-  Result := 0;
+  aRet := -1;
   aDetailData :=  TParamObject.Create;
   try
-    APackData.GetChildAllParam(aDetailData);
-    aDetailData.Add('@VchType', FVchType);
-    aDetailData.Add('@VchCode', AVchCode);
-    Result := gMFCom.ExecProcByName(APackData.ProcName, aDetailData);
+    try
+      APackData.GetChildAllParam(aDetailData);
+      aDetailData.Add('@VchType', FVchType);
+      aDetailData.Add('@VchCode', AVchCode);
+      aRet := gMFCom.ExecProcByName(APackData.ProcName, aDetailData);
+    except
+
+    end;
   finally
+    Result := aRet;
     aDetailData.Free;
   end;
 end;

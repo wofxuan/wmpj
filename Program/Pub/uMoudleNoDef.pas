@@ -45,6 +45,8 @@ const
   fnMdlReportGoods = fnReport + 0001; //商品库存情况
   fnMdlReportOrderBuy = fnReport + 0002; //进货订单统计
   fnMdlReportBuy = fnReport + 0003; //进货单统计
+  fnMdlReportOrderSale = fnReport + 0004; //销售订单统计
+  fnMdlReportSale = fnReport + 0005; //销售单统计
 
   //系统设置-------------------------------4000---------------------
   fnMdlLoadItemSet = fnSystem + 0001; //加载包设置

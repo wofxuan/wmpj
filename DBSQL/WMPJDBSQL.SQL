@@ -551,6 +551,79 @@ IF OBJECT_ID('dbo.tbx_Bill_Buy_D') IS NULL
         
 GO
 
+--单据-销售单的从表
+IF OBJECT_ID('dbo.tbx_Bill_Sale_D') IS NULL 
+    CREATE TABLE [dbo].[tbx_Bill_Sale_D]
+        (  
+		  [VchCode] INT NOT NULL DEFAULT (0), --主表单据Id
+          [VchType] INT NOT NULL DEFAULT (0) ,--单据类型
+          [DlyOrder] INT NOT NULL IDENTITY(1, 1),--数据库中行序号,可以用来关联行的其它相关信息
+          [ColRowNo] INT NOT NULL DEFAULT (0),--界面显示的行顺序
+          [AtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--会计科目
+		  [BtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--供货或收货单位
+		  [EtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--经手人
+		  [DtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--部门
+		  [KtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库
+		  [KtypeId2] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库,调拨单等时候
+		  [PtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--商品
+		  
+		  [Costmode] INT NOT NULL DEFAULT (0),--商品成本算法
+		  [Unit] INT NOT NULL DEFAULT (1),--多单位的时候对应的单位
+		  [UnitRate] NUMERIC(22, 10) NOT NULL DEFAULT (0),--此单位跟基本单位的换算关系
+		  
+		  [BlockNo] VARCHAR(20) NOT NULL DEFAULT (''),--批号
+		  [ProDate] VARCHAR(10) NOT NULL DEFAULT (''),--生产日期
+		  [UsefulEndDate] VARCHAR(10) NOT NULL DEFAULT (''),--有效期至
+		  [JhDate] VARCHAR(50) NOT NULL DEFAULT (''),--交货日期
+			
+		  [GoodsNo] INT NOT NULL DEFAULT (0),--当时出库类单据选择手工指定发的时候，记录对应选择的库存表的GoodsOrder
+
+		  [Qty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--数量,记录基本数量
+		  [Price] NUMERIC(22, 10) NOT NULL DEFAULT (0),--价格,记录基本数量对应的价格
+		  [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),--金额
+		  
+		  [DisCount] NUMERIC(22, 10) NOT NULL DEFAULT (1),--折扣
+		  [DisCountPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后单价
+		  [DisCountTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后金额
+		  
+		  [TaxRate] NUMERIC(22, 10) NOT NULL DEFAULT (0),--税率
+		  [TaxPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税单价
+		  [TaxTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税金额
+
+		  [AssQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--数量,多单位等时显示换算后的数量
+		  [AssPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--价格,多单位等是显示换算后的价格
+		  [AssDiscountPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后单价，多单位等是显示换算后的价格
+		  [AssTaxPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税单价，多单位等是显示换算后的价格
+
+		  [CostPrice] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本单价
+		  [CostTotal] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本金额
+		
+		  [OrderVchType] INT NOT NULL DEFAULT (0),--调用的其它单据的类型(调用询价单或者销售订单等)
+		  [OrderCode] INT NOT NULL DEFAULT (0),--调用的其它单据的主表ID
+		  [OrderDlyCode] INT NOT NULL DEFAULT (0),--调用的其它单据的从表ID
+		  
+		  [PStutas] INT NOT NULL DEFAULT (0),--是否是赠品；0不是；1是
+		  [ToQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--到货数量
+		  [Redword] CHAR(2) NOT NULL DEFAULT ('F'),--是否是红冲生成的单据 F不是,T是
+		  [InputDate] VARCHAR(10)NOT NULL DEFAULT (''),--主表的录单日期
+		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
+		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
+		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 2是系统生成的记录
+		  [Comment] VARCHAR(256) NOT NULL DEFAULT (''),--备注
+		  
+		  [VipCardId] INT NOT NULL DEFAULT (0),--会员卡号
+		  [PromoVchcode] NUMERIC(10, 0) NOT NULL DEFAULT (0),--促销单号
+		  [InPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--入库单价
+		  [InTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--入库金额
+		  --[SideQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--副单位数量,五金建材版的时候使用
+		  --[Pgholqty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--件数,布匹版
+		  --[PgholInqty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--总件数,布匹版
+		  --[InvoceTag] [int] NOT NULL DEFAULT (0),--对账标志
+		  --[InvoceTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--开票金额
+          CONSTRAINT PK_tbx_Bill_Sale_D PRIMARY KEY ( [DlyOrder] )
+        )
+        
+GO
 --库存信息表
 IF OBJECT_ID('dbo.tbx_Stock_Goods') IS NULL 
     CREATE TABLE [dbo].[tbx_Stock_Goods]

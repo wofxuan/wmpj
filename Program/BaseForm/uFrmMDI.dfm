@@ -3,12 +3,13 @@ inherited frmMDI: TfrmMDI
   Caption = 'frmMDI'
   FormStyle = fsMDIChild
   OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   PixelsPerInch = 96
   TextHeight = 13
   object splOP: TSplitter [0]
     Left = 0
     Top = 82
-    Height = 236
+    Height = 235
   end
   object pnlTop: TPanel [1]
     Left = 0
@@ -23,7 +24,7 @@ inherited frmMDI: TfrmMDI
     Left = 3
     Top = 82
     Width = 733
-    Height = 236
+    Height = 235
     Align = alClient
     TabOrder = 1
     object gridTVMainShow: TcxGridTableView
@@ -138,7 +139,7 @@ inherited frmMDI: TfrmMDI
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
-    Font.Name = #24494#36719#38597#40657
+    Font.Name = 'Microsoft YaHei UI'
     Font.Style = []
     Categories.Strings = (
       'Default')

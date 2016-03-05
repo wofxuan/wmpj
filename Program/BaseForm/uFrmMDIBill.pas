@@ -33,11 +33,9 @@ type
     procedure actSaveSettleExecute(Sender: TObject);
   private
     { Private declarations }
-    FBillTitle: string; //单据显示的标题
     FBillSaveState: TBillSaveState; //单据保存类型状态
     FBillOpenState: TBillOpenState; //单据是以什么状态打开
-
-    procedure SetBillTitle(const Value: string);
+    
   protected
     FVchcode, FVchtype: Integer;//单据ID，单据类型
     FModelBill: IModelBill;
@@ -46,9 +44,10 @@ type
     procedure BeforeFormDestroy; override;
     
     procedure InitParamList; override;
+    procedure SetTitle(const Value: string); override;
 
-    function LoadBillDataMaster: Boolean; virtual;
-    function LoadBillDataGrid: Boolean; virtual;
+    function LoadBillDataMaster: Boolean; virtual;//加载表头数据
+    function LoadBillDataGrid: Boolean; virtual;//加载表格数据
 
     procedure InitMasterTitles(Sender: TObject); virtual; //初始化表头
     procedure InitGrids(Sender: TObject); virtual; //初始化表体
@@ -67,7 +66,6 @@ type
     function LoadOnePtype(ARow: Integer; AData: TSelectBasicData; IsImport: Boolean = False): Boolean; virtual;//加载一条记录
   public
     { Public declarations }
-     property BillTitle: string read FBillTitle write SetBillTitle;
      property BillSaveState: TBillSaveState read FBillSaveState write FBillSaveState;
      property BillOpenState: TBillOpenState read FBillOpenState write FBillOpenState; 
 
@@ -128,7 +126,7 @@ end;
 
 procedure TfrmMDIBill.InitMasterTitles(Sender: TObject);
 begin
-
+  deBillDate.Text := FormatdateTime('YYYY-MM-DD', Now);
 end;
 
 procedure TfrmMDIBill.InitMenuItem(Sender: TObject);
@@ -149,7 +147,22 @@ end;
 
 function TfrmMDIBill.LoadBillDataGrid: Boolean;
 begin
-
+  if FVchcode = 0 then //新单据
+  begin
+    FGridItem.ClearData;
+  end
+  else
+  begin
+    //加载单据
+//    if (nDraft = 1) or (nDraft > 3) then szTemp := GetDlyName(bosEdit, FVchType)
+//    else szTemp := GetDlyName(BillOpenState, FVchType);
+//    GridDataSet.Close;
+//    LoadDly(szTemp, FVchCode, GridDataSet);
+//    SetGridProperty(MainGrid);
+//    LoadLoadBillDataUnitData;
+//    ReadpgDetailData(MainGrid);
+//    ReadSnDetailData(MainGrid);
+  end;
 end;
 
 function TfrmMDIBill.LoadBillDataMaster: Boolean;
@@ -210,21 +223,21 @@ begin
   begin
     FVchcode := 0;
     BillOpenState := bosNew;
+    LoadBillDataMaster();
     LoadBillDataGrid();
   end;
-end;
-
-procedure TfrmMDIBill.SetBillTitle(const Value: string);
-begin
-  FBillTitle := Value;
-  lblBillTitle.Caption := Value;
-  Caption := Value;
 end;
 
 function TfrmMDIBill.LoadOnePtype(ARow: Integer; AData: TSelectBasicData;
   IsImport: Boolean): Boolean;
 begin
 
+end;
+
+procedure TfrmMDIBill.SetTitle(const Value: string);
+begin
+  inherited;
+  lblBillTitle.Caption := Value;
 end;
 
 end.
