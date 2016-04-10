@@ -168,7 +168,7 @@ begin
   inherited;
   if SaveData() then
   begin
-    Self.ModalResult := mrOk;
+    ModalResult := mrOk;
   end;
 end;
 

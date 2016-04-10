@@ -11,7 +11,7 @@ uses SysUtils, uDefCom;
 
 type
   //消息对话框定义
-  //消息类型        警告        错误          信息                            自定义
+  //消息类型        警告        错误          信息           询问                 自定义
   TMessageBoxType = (mbtWarning, mbtError, mbtInformation, mbtConfirmation, mbtCustom);
   //消息按钮          保存单据   存入草稿   废弃退出   是     否      确定   取消
   TMessageBoxButton = (mbbSett, mbbDraft, mbbClose, mbbYes, mbbNo, mbbOK, mbbCancel);

@@ -12,9 +12,11 @@ inherited frmBillOrder: TfrmBillOrder
       end
       inherited edtBillNumber: TcxButtonEdit
         Left = 600
+        TabOrder = 2
       end
       inherited deBillDate: TcxDateEdit
         Left = 416
+        TabOrder = 1
       end
       inherited lblBillDate: TcxLabel
         Left = 360
@@ -54,7 +56,7 @@ inherited frmBillOrder: TfrmBillOrder
             Default = True
             Kind = bkEllipsis
           end>
-        TabOrder = 3
+        TabOrder = 2
         Width = 121
       end
       object lbl3: TcxLabel
@@ -70,7 +72,7 @@ inherited frmBillOrder: TfrmBillOrder
             Default = True
             Kind = bkEllipsis
           end>
-        TabOrder = 5
+        TabOrder = 3
         Width = 121
       end
       object lbl4: TcxLabel
@@ -83,7 +85,7 @@ inherited frmBillOrder: TfrmBillOrder
         Top = 11
         EditValue = 36892d
         Properties.DateButtons = [btnClear, btnToday]
-        TabOrder = 7
+        TabOrder = 4
         Width = 121
       end
       object lblKtype: TcxLabel
@@ -115,7 +117,7 @@ inherited frmBillOrder: TfrmBillOrder
             Default = True
             Kind = bkEllipsis
           end>
-        TabOrder = 11
+        TabOrder = 10
         Width = 288
       end
       object lbl7: TcxLabel
@@ -131,13 +133,14 @@ inherited frmBillOrder: TfrmBillOrder
             Default = True
             Kind = bkEllipsis
           end>
-        TabOrder = 13
+        TabOrder = 11
         Width = 121
       end
     end
   end
   inherited gridMainShow: TcxGrid
     Width = 821
+    TabOrder = 3
     inherited gridTVMainShow: TcxGridTableView
       OptionsSelection.InvertSelect = False
     end
@@ -153,7 +156,13 @@ inherited frmBillOrder: TfrmBillOrder
     DockControlHeights = (
       0
       0
-      48
+      44
       0)
+    inherited btnNewBill: TdxBarLargeButton
+      ImageIndex = 2
+    end
+    inherited btnSave: TdxBarLargeButton
+      ImageIndex = 3
+    end
   end
 end

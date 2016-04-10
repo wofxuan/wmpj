@@ -78,6 +78,21 @@ BEGIN
 END
 GO 
 	
+--商品的多单位信息
+IF OBJECT_ID('dbo.tbx_Base_PtypeUnit') IS NULL 
+	CREATE TABLE [dbo].[tbx_Base_PtypeUnit]
+	(
+		[PTypeId] VARCHAR(50) NOT NULL  DEFAULT (''),
+		[UnitName] VARCHAR (10) NOT NULL  DEFAULT (''),--辅助单位的名称
+		[URate] NUMERIC(22, 10) NOT NULL DEFAULT (0),--和基本单位的比例如1:100
+		[IsBase] INT NOT NULL  DEFAULT (0),--是否是系统基本的单位
+		[BarCode] VARCHAR(60) NOT NULL  DEFAULT (''),--商品对应的条码
+		[Comment] VARCHAR (200) NOT NULL  DEFAULT (''),
+		[OrdId] VARCHAR (21) NOT NULL  DEFAULT ('')	--顺序，0：系统默认，1：辅助单位1,2：辅助单位2
+		CONSTRAINT PK_tbx_Base_PtypeUnit PRIMARY KEY ([PTypeId], [OrdId]) ON [PRIMARY]
+		)
+GO
+	
 --单位信息
 IF OBJECT_ID('dbo.tbx_Base_Btype') IS NULL 
 BEGIN
@@ -210,13 +225,68 @@ BEGIN
 		[Deleted] BIT NOT NULL DEFAULT 0,
 		[Updatetag] INT NOT NULL DEFAULT 0,
 		
-		[IsStop] int  NOT NULL DEFAULT (0)--是否停用 
+		[IsStop] INT  NOT NULL DEFAULT (0)--是否停用 
 		CONSTRAINT PK_tbx_Base_Dtype PRIMARY KEY ([DTypeId])
 	)
 	INSERT dbo.tbx_Base_Dtype( DTypeId ,Parid ,Leveal ,DUsercode ,DFullname)
 	VALUES  ( '00000' ,'0' ,0 ,'000000000' ,'全部部门')
 END
 GO 
+
+--单据类型
+IF OBJECT_ID('dbo.tbx_Base_Vtype') IS NULL 
+BEGIN
+	CREATE TABLE tbx_Base_Vtype
+	(
+		[VTypeId] VARCHAR(50) ,
+		[Parid] VARCHAR(50) NOT NULL DEFAULT '' ,
+		[VSonnum] INT NOT NULL DEFAULT 0 ,
+		[Soncount] INT NOT NULL DEFAULT 0 , 
+		[Leveal] INT NOT NULL DEFAULT 1 ,
+		[VUsercode] VARCHAR(20) NOT NULL DEFAULT '' ,
+		[VFullname] VARCHAR(20) NOT NULL DEFAULT '' ,
+		[VComment] VARCHAR(255) NOT NULL DEFAULT '' ,
+		[VNamepy] VARCHAR(66) NOT NULL DEFAULT (''),
+		[VRec] INT NOT NULL IDENTITY(1, 1),
+		[Parrec] INT NOT NULL DEFAULT 0,
+		[RowIndex] INT NOT NULL DEFAULT 0 ,
+		[Deleted] BIT NOT NULL DEFAULT 0,
+		[Updatetag] INT NOT NULL DEFAULT 0,
+		
+		[VchType] INT  NOT NULL DEFAULT (0), --定义的单据MoudleNo好
+		[NumberPrefix] VARCHAR(255) NOT NULL DEFAULT '', --单据编号前缀 如:XS
+		[SNFormat] VARCHAR(255) NOT NULL DEFAULT '' --单据编号生成格式 如:"XS" - yyyy - mm - dd - [000] 
+		CONSTRAINT PK_tbx_Base_Vtype PRIMARY KEY ([VTypeId])
+	)
+	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VSonnum, Soncount)
+	VALUES  ( '00000' ,'0' ,0 ,'000000000' ,'全部单据', 5, 4)
+	
+	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VchType, NumberPrefix, SNFormat)
+	VALUES  ( '00001' ,'00000' ,1 ,'00001' ,'进货订单', 1, 'JHD', '"JHD" - yyyy - mm - dd - [000]')
+	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VchType, NumberPrefix, SNFormat)
+	VALUES  ( '00002' ,'00000' ,1 ,'00002' ,'销售订单', 2, 'XSD', '"SHD" - yyyy - mm - dd - [000]')
+	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VchType, NumberPrefix, SNFormat)
+	VALUES  ( '00003' ,'00000' ,1 ,'00003' ,'进货单', 3, 'JH', '"JH" - yyyy - mm - dd - [000]')
+	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VchType, NumberPrefix, SNFormat)
+	VALUES  ( '00004' ,'00000' ,1 ,'00004' ,'销售单', 4, 'XS', '"XS" - yyyy - mm - dd - [000]')
+	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VchType, NumberPrefix, SNFormat)
+	VALUES  ( '00005' ,'00000' ,1 ,'00005' ,'调拨单', 5, 'DB', '"DB" - yyyy - mm - dd - [000]')
+END
+GO 
+
+--单据-单据号的记录
+IF OBJECT_ID('dbo.tbx_Bill_NumberRecords') IS NULL 
+    CREATE TABLE [dbo].[tbx_Bill_NumberRecords]
+        (
+          [ComputerID] VARCHAR(10) NOT NULL ,--计算机号,可以在所有单据中加前缀
+          [VchType] INT NOT NULL DEFAULT ( 0 ) ,--单据类型
+          [LoopType] INT NOT NULL DEFAULT ( 1 ) ,--编号循环类型，是一天0，一月1，还是一年2，开始重新生成
+          [Period] INT NOT NULL DEFAULT ( 0 ) ,--此记录所在的循环期间
+          [MaxNo] INT NOT NULL DEFAULT ( 0 ) ,--此记录条件下产生的最大单据号
+          CONSTRAINT PK_tbx_Bill_NumberRecords PRIMARY KEY ( [ComputerID], [VchType], [MaxNo] ) ON [PRIMARY]
+        )
+        
+GO
 
 --系统-所有用户表格定义的相关信息
 IF OBJECT_ID('dbo.tbx_Sys_TbxCfg') IS NULL 
@@ -229,8 +299,7 @@ IF OBJECT_ID('dbo.tbx_Sys_TbxCfg') IS NULL
           [TbxRowIndex] INT NOT NULL DEFAULT 0 ,--排列顺序
           [TbxComment] VARCHAR(200) NOT NULL DEFAULT '' , 
           CONSTRAINT PK_tbx_Sys_TbxCfg PRIMARY KEY ( TbxId )
-        )
-        
+        )  
 GO
 
 --系统-数量，单价，金额，折扣，税率，关系和比率(%)的小数位数配置
@@ -244,6 +313,22 @@ IF OBJECT_ID('dbo.tbx_Sys_DitDef') IS NULL
 		) ON [PRIMARY]
 	GO
 
+--系统-相关的配置参数
+IF OBJECT_ID('dbo.tbx_Sys_Param') IS NULL 
+BEGIN
+    CREATE TABLE [dbo].[tbx_Sys_Param]
+        (
+          [PKey] VARCHAR(50) NOT NULL DEFAULT NEWID() ,
+          [PName] VARCHAR(50) NOT NULL DEFAULT '' ,--名称
+          [PValue] VARCHAR(1024) NOT NULL DEFAULT '' ,--参数值
+          [RowIndex] INT NOT NULL DEFAULT 0 ,--排列顺序
+          [PComment] VARCHAR(512) NOT NULL DEFAULT '' ,--备注
+          CONSTRAINT PK_tbx_Sys_Param PRIMARY KEY ( PKey )
+        )
+	 INSERT dbo.tbx_Sys_Param ( PKey, PName, PValue, PComment )
+	 VALUES ( '6803F1DE-3B23-481E-92FE-A4F4107E55F7', 'InitOver', '0', '开账标志,1开账,0未开账' ) 
+END
+GO
 
 --单据-进货或者销售订单主表
 IF OBJECT_ID('dbo.tbx_Bill_Order_M') IS NULL 
@@ -341,7 +426,7 @@ IF OBJECT_ID('dbo.tbx_Bill_Order_D') IS NULL
 		  [InputDate] VARCHAR(10)NOT NULL DEFAULT (''),--主表的录单日期
 		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
 		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
-		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 2是系统生成的记录
+		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 空是系统生成的记录
 		  [Comment] VARCHAR(256) NOT NULL DEFAULT (''),--备注
 		  
 		  --[SideQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--副单位数量,五金建材版的时候使用
@@ -460,7 +545,7 @@ IF OBJECT_ID('dbo.tbx_Bill_D_Bak') IS NULL
 		  [InputDate] VARCHAR(10)NOT NULL DEFAULT (''),--主表的录单日期
 		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
 		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
-		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 2是系统生成的记录
+		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 空是系统生成的记录
 		  [Comment] VARCHAR(256) NOT NULL DEFAULT (''),--备注
 		  
 		  [VipCardId] INT NOT NULL DEFAULT (0),--会员卡号
@@ -534,7 +619,7 @@ IF OBJECT_ID('dbo.tbx_Bill_Buy_D') IS NULL
 		  [InputDate] VARCHAR(10)NOT NULL DEFAULT (''),--主表的录单日期
 		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
 		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
-		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 2是系统生成的记录
+		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 空是系统生成的记录
 		  [Comment] VARCHAR(256) NOT NULL DEFAULT (''),--备注
 		  
 		  [VipCardId] INT NOT NULL DEFAULT (0),--会员卡号
@@ -608,7 +693,7 @@ IF OBJECT_ID('dbo.tbx_Bill_Sale_D') IS NULL
 		  [InputDate] VARCHAR(10)NOT NULL DEFAULT (''),--主表的录单日期
 		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
 		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
-		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 2是系统生成的记录
+		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 空是系统生成的记录
 		  [Comment] VARCHAR(256) NOT NULL DEFAULT (''),--备注
 		  
 		  [VipCardId] INT NOT NULL DEFAULT (0),--会员卡号
@@ -624,6 +709,97 @@ IF OBJECT_ID('dbo.tbx_Bill_Sale_D') IS NULL
         )
         
 GO
+
+--单据-调拨单等的从表
+IF OBJECT_ID('dbo.tbx_Bill_Other_D') IS NULL 
+    CREATE TABLE [dbo].[tbx_Bill_Other_D]
+        (  
+		  [VchCode] INT NOT NULL DEFAULT (0), --主表单据Id
+          [VchType] INT NOT NULL DEFAULT (0) ,--单据类型
+          [DlyOrder] INT NOT NULL IDENTITY(1, 1),--数据库中行序号,可以用来关联行的其它相关信息
+          [ColRowNo] INT NOT NULL DEFAULT (0),--界面显示的行顺序
+          [AtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--会计科目
+		  [BtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--供货或收货单位
+		  [EtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--经手人
+		  [DtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--部门
+		  [KtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库
+		  [KtypeId2] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库,调拨单等时候
+		  [PtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--商品
+		  
+		  [Costmode] INT NOT NULL DEFAULT (0),--商品成本算法
+		  [Unit] INT NOT NULL DEFAULT (1),--多单位的时候对应的单位
+		  [UnitRate] NUMERIC(22, 10) NOT NULL DEFAULT (0),--此单位跟基本单位的换算关系
+		  
+		  [BlockNo] VARCHAR(20) NOT NULL DEFAULT (''),--批号
+		  [ProDate] VARCHAR(10) NOT NULL DEFAULT (''),--生产日期
+		  [UsefulEndDate] VARCHAR(10) NOT NULL DEFAULT (''),--有效期至
+		  [JhDate] VARCHAR(50) NOT NULL DEFAULT (''),--交货日期
+			
+		  [GoodsNo] INT NOT NULL DEFAULT (0),--当时出库类单据选择手工指定发的时候，记录对应选择的库存表的GoodsOrder
+
+		  [Qty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--数量,记录基本数量
+		  [Price] NUMERIC(22, 10) NOT NULL DEFAULT (0),--价格,记录基本数量对应的价格
+		  [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),--金额
+		  
+		  [DisCount] NUMERIC(22, 10) NOT NULL DEFAULT (1),--折扣
+		  [DisCountPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后单价
+		  [DisCountTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后金额
+		  
+		  [TaxRate] NUMERIC(22, 10) NOT NULL DEFAULT (0),--税率
+		  [TaxPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税单价
+		  [TaxTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税金额
+
+		  [AssQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--数量,多单位等时显示换算后的数量
+		  [AssPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--价格,多单位等是显示换算后的价格
+		  [AssDiscountPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--折后单价，多单位等是显示换算后的价格
+		  [AssTaxPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--含税单价，多单位等是显示换算后的价格
+
+		  [CostPrice] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本单价
+		  [CostTotal] NUMERIC (22, 10) NOT NULL DEFAULT (0),--成本金额
+		
+		  [OrderVchType] INT NOT NULL DEFAULT (0),--调用的其它单据的类型(调用询价单或者销售订单等)
+		  [OrderCode] INT NOT NULL DEFAULT (0),--调用的其它单据的主表ID
+		  [OrderDlyCode] INT NOT NULL DEFAULT (0),--调用的其它单据的从表ID
+		  
+		  [PStutas] INT NOT NULL DEFAULT (0),--是否是赠品；0不是；1是
+		  [ToQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--到货数量
+		  [Redword] CHAR(2) NOT NULL DEFAULT ('F'),--是否是红冲生成的单据 F不是,T是
+		  [InputDate] VARCHAR(10)NOT NULL DEFAULT (''),--主表的录单日期
+		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
+		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
+		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 空是系统生成的记录
+		  [Comment] VARCHAR(256) NOT NULL DEFAULT (''),--备注
+		  
+		  [VipCardId] INT NOT NULL DEFAULT (0),--会员卡号
+		  [PromoVchcode] NUMERIC(10, 0) NOT NULL DEFAULT (0),--促销单号
+		  [InPrice] NUMERIC(22, 10) NOT NULL DEFAULT (0),--入库单价
+		  [InTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--入库金额
+		  --[SideQty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--副单位数量,五金建材版的时候使用
+		  --[Pgholqty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--件数,布匹版
+		  --[PgholInqty] NUMERIC(22, 10) NOT NULL DEFAULT (0),--总件数,布匹版
+		  --[InvoceTag] [int] NOT NULL DEFAULT (0),--对账标志
+		  --[InvoceTotal] NUMERIC(22, 10) NOT NULL DEFAULT (0),--开票金额
+          CONSTRAINT PK_tbx_Bill_Other_D PRIMARY KEY ( [DlyOrder] )
+        )   
+GO
+
+--期初库存信息表
+IF OBJECT_ID('dbo.tbx_Stock_Goods_Ini') IS NULL 
+    CREATE TABLE [dbo].[tbx_Stock_Goods_Ini]
+        (
+          [GoodsOrderId] INT NOT NULL IDENTITY(1, 1) ,
+          [PTypeId] VARCHAR(50) NOT NULL DEFAULT '' ,
+          [KTypeId] VARCHAR(50) NOT NULL DEFAULT '' ,
+		  [JobNumber] VARCHAR(20)  NOT NULL DEFAULT (''),
+		  [OutFactoryDate] VARCHAR(13)  NOT NULL DEFAULT (''),
+		  [Qty] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [Price] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [GoodsOrder] INT NOT NULL DEFAULT (0)	--显示顺序
+          CONSTRAINT PK_tbx_Stock_Goods_Ini PRIMARY KEY ( [PTypeId], [KTypeId] )
+        )     
+GO
+
 --库存信息表
 IF OBJECT_ID('dbo.tbx_Stock_Goods') IS NULL 
     CREATE TABLE [dbo].[tbx_Stock_Goods]
@@ -660,6 +836,30 @@ IF OBJECT_ID('dbo.tbx_Stock_Glide') IS NULL
 		  [GoodsOrder] INT NOT NULL DEFAULT (0)	--显示顺序
           CONSTRAINT PK_tbx_Stock_Glide PRIMARY KEY ( [GoodsID])
         )      
+GO
+
+--库存盘点表
+IF OBJECT_ID('dbo.tbx_Stock_Check]') IS NULL 
+BEGIN
+	CREATE TABLE [dbo].[tbx_Stock_Check]
+	(
+	[KTypeId] VARCHAR(50) NOT NULL DEFAULT (''),
+	[PTypeId] VARCHAR(50) NOT NULL DEFAULT (''),
+	[GoodsOrder] INT NOT NULL DEFAULT (0), --对应库存表中的Goodsorder字段
+	[CostMode] INT NOT NULL DEFAULT (0),--商品算法
+	[CheckedQty] NUMERIC(22, 10)	NOT NULL DEFAULT (0),--盘点数量
+	[UpdateTag] INT NOT NULL DEFAULT (0),--盘点号
+	[StockQty] NUMERIC(22, 10)	NOT NULL DEFAULT (0),--库存量
+	[CheckDate] VARCHAR (10) NOT NULL DEFAULT (''),--盘点日期
+	[SCId] INT NOT NULL IDENTITY(1, 1),--
+	[JobNumber] VARCHAR (20) NOT NULL DEFAULT (''),--批号
+	[OutFactoryDate] VARCHAR(13) NOT NULL DEFAULT (''),--生产日期
+	[Total] NUMERIC (22, 10) NOT NULL DEFAULT (0),--
+	[ETypeId] VARCHAR (50) NOT NULL DEFAULT (''),--操作员
+	[CheckedMode] INT NOT NULL DEFAULT (0), --盘点模式--总量盘点,分量盘点
+	[History] INT NOT NULL DEFAULT (0)--0当前执行的盘点,1历史记录
+	) 	
+END
 GO
 
 --记录MoudleNo对应的窗体和默认参数
@@ -699,7 +899,7 @@ TRUNCATE TABLE  dbo.tbx_Base_PackageInfo
 GO 
 ---初始化加载项
 INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUsercode ,IFullname ,INamepy ,IComment ,ISystem ,RowIndex)
-VALUES  ( '00000' ,'' ,7 ,7 ,0 ,'全部加载项' ,'全部加载项' ,'全部加载项' ,'全部加载项' ,1, 0)
+VALUES  ( '00000' ,'' ,10 ,9 ,0 ,'全部加载项' ,'全部加载项' ,'全部加载项' ,'全部加载项' ,1, 0)
 INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUsercode ,IFullname ,INamepy ,IComment ,ISystem ,RowIndex)
 VALUES  ( '00001' ,'00000' ,0 ,0 ,1 ,'Other.bpl' ,'Other.bpl' ,'Other.bpl' ,'其它操作' ,1, 0)
 INSERT dbo.tbx_Base_PackageInfo ( ITypeId ,Parid ,ISonnum ,Soncount ,Leveal ,IUsercode ,IFullname ,INamepy ,IComment ,ISystem ,RowIndex)

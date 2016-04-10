@@ -16,6 +16,7 @@ uses
 
 begin
   Application.Initialize;
+  Application.Title := 'WM·þÎñ¶Ë';
   Application.CreateForm(TFrmWMServer, FrmWMServer);
   Application.Run;
 end.

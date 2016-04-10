@@ -59,6 +59,12 @@ type
   //窗体显示方式
   TShowStyle = (fssShow, fssShowModal);
 
+
+var
+  OperatorID: string; //操作员ID
+  OperatorName: string; //操作员名称
+  OperatorPass: string; //操作员密码
+
 function GetDataChangeType(AMode: string): TDataChangeType; //数据操作数据变化转化
 
 implementation

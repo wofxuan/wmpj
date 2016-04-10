@@ -35,7 +35,7 @@ inherited frmBasePtypeInput: TfrmBasePtypeInput
       Height = 13
       Alignment = taRightJustify
       AutoSize = False
-      Caption = #21830#21697#32534#21495
+      Caption = #21830#21697#32534#30721
     end
     object Label1: TLabel
       Left = 223
@@ -232,14 +232,15 @@ inherited frmBasePtypeInput: TfrmBasePtypeInput
           Height = 133
           Align = alClient
           TabOrder = 0
-          object gridDTVPtypeUnit: TcxGridDBTableView
+          object gridTVPtypeUnit: TcxGridTableView
             NavigatorButtons.ConfirmDelete = False
+            OnEditing = gridTVPtypeUnitEditing
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
             DataController.Summary.SummaryGroups = <>
           end
           object gridLVPtypeUnit: TcxGridLevel
-            GridView = gridDTVPtypeUnit
+            GridView = gridTVPtypeUnit
           end
         end
       end

@@ -26,12 +26,11 @@ type
     barTool: TdxBar;
     btnClose: TdxBarLargeButton;
     gridTVMainShow: TcxGridTableView;
+    actReturn: TAction;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure actCloseExecute(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure actReturnExecute(Sender: TObject);
   private
-    FIsActClose: Boolean;//是否是从act去关闭界面
-    
     function FrmShowStyle: TShowStyle; override;
   protected
     { Private declarations }
@@ -41,7 +40,7 @@ type
 
     procedure IniGridField; virtual;
     procedure LoadGridData(ATypeid: string = ''); virtual;
-    function LoadParGridData: Boolean; virtual;//加载当前行父类的父类数据
+    procedure DoLoadUpDownData(Sender: TObject; ATypeid: string); virtual; ///双击表格时回调的函数
 
     procedure BeforeFormShow; override;
     procedure BeforeFormDestroy; override;
@@ -74,9 +73,9 @@ begin
   inherited;
   FGridItem := TGridItem.Create(MoudleNo, gridMainShow, gridTVMainShow);
   FGridItem.OnSelectBasic := DoSelectBasic;
+  FGridItem.OnLoadUpDownData := DoLoadUpDownData;
   FDBAC := SysService as IDBAccess;
   FModelFun := SysService as IModelFun;
-  FIsActClose := False;
 end;
 
 procedure TfrmMDI.IniGridField;
@@ -95,11 +94,6 @@ begin
 
 end;
 
-function TfrmMDI.LoadParGridData: Boolean;
-begin
-  Result := True;
-end;
-
 procedure TfrmMDI.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   inherited;
@@ -112,33 +106,37 @@ begin
 end;
 
 procedure TfrmMDI.actCloseExecute(Sender: TObject);
-var
-  aMainForm: IMainForm;
-  aCanClose: Boolean;
 begin
   inherited;
-  aMainForm := SysService as IMainForm;
-  aMainForm.CloseFom(Self, aCanClose);
-  
-  if aCanClose then
-  begin
-    FIsActClose := True;
-    FrmClose;
+  FrmClose();
+end;
+
+procedure TfrmMDI.DoLoadUpDownData(Sender: TObject; ATypeid: string);
+begin
+  LoadGridData(ATypeid);
+  bmList.BeginUpdate;
+  try
+    if ATypeid > ROOT_ID then
+    begin
+      btnClose.Action := actReturn;
+      btnClose.LargeImageIndex := 0;
+      btnClose.ImageIndex := 0;
+    end
+    else
+    begin
+      btnClose.Action := actClose;
+      btnClose.LargeImageIndex := 1;
+      btnClose.ImageIndex := 1;
+    end;
+  finally
+    bmList.EndUpdate;
   end;
 end;
 
-procedure TfrmMDI.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-var
-  aMainForm: IMainForm;
-  aCanClose: Boolean;
+procedure TfrmMDI.actReturnExecute(Sender: TObject);
 begin
   inherited;
-  if not FIsActClose then
-  begin
-    aMainForm := SysService as IMainForm;
-    aMainForm.CloseFom(Self, aCanClose);
-    CanClose := aCanClose;
-  end;
+  FGridItem.LoadUpDownData(True);
 end;
 
 end.

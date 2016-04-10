@@ -38,14 +38,17 @@ begin
 end;
 
 procedure TfrmReportStockGoods.IniGridField;
+var
+  aCol: TColInfo;
 begin
   inherited;
   FGridItem.BasicType := btPtype;
   FGridItem.ClearField();
-  FGridItem.AddFiled(btPtype);
-  FGridItem.AddFiled('Qty', '数量', 50, cfQty);
-  FGridItem.AddFiled('Price', '单价', 50, cfPrice);
-  FGridItem.AddFiled('Total', '金额', 50, cfTotal);
+  FGridItem.AddField(btPtype);
+  FGridItem.AddField('Qty', '数量', 50, cfQty);
+  FGridItem.AddField('Price', '单价', 50, cfPrice);
+  aCol := FGridItem.AddField('Total', '金额', 50, cfTotal);
+  FGridItem.AddFooterSummary(aCol, skSum);
   FGridItem.InitGridData;
 end;
 

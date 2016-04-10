@@ -43,6 +43,7 @@ contains
   uBusinessLayer in 'uBusinessLayer.pas',
   uModelSys in 'uModelSys.pas',
   uModelReport in 'uModelReport.pas',
-  uModelBill in 'uModelBill.pas';
+  uModelBill in 'uModelBill.pas',
+  uModelStockGoods in 'uModelStockGoods.pas';
 
 end.

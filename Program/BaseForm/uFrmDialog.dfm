@@ -8,18 +8,21 @@ inherited frmDialog: TfrmDialog
   TextHeight = 13
   object pnlBottom: TPanel [0]
     Left = 0
-    Top = 268
+    Top = 269
     Width = 505
     Height = 49
     Align = alBottom
     TabOrder = 0
+    DesignSize = (
+      505
+      49)
     object btnOK: TcxButton
       Left = 294
       Top = 12
       Width = 75
       Height = 25
       Action = actOK
-      ModalResult = 1
+      Anchors = [akTop, akRight]
       TabOrder = 0
     end
     object btnCannel: TcxButton
@@ -28,6 +31,7 @@ inherited frmDialog: TfrmDialog
       Width = 75
       Height = 25
       Action = actCancel
+      Anchors = [akTop, akRight]
       ModalResult = 2
       TabOrder = 1
     end
@@ -56,7 +60,7 @@ inherited frmDialog: TfrmDialog
     Left = 0
     Top = 41
     Width = 505
-    Height = 227
+    Height = 228
     Align = alClient
     TabOrder = 2
   end
@@ -66,6 +70,7 @@ inherited frmDialog: TfrmDialog
     end
     object actCancel: TAction
       Caption = #21462#28040'(&C)'
+      OnExecute = actCancelExecute
     end
   end
 end

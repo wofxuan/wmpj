@@ -82,9 +82,9 @@ var
 begin
   FButtons := Value;
   BtnCount := 0;
-  BtnWidth := 80;                                           //默认BtnWidth
-  BtnHeight := 23;                                          //默认BtnHeight
-  BtnSpace := 8;                                            //默认BtnSpace
+  BtnWidth := 80; //默认BtnWidth
+  BtnHeight := 23; //默认BtnHeight
+  BtnSpace := 8; //默认BtnSpace
   BtnGroupWidth := 0;
   for B := Low(TMessageBoxButton) to High(TMessageBoxButton) do
   begin
@@ -199,6 +199,4 @@ begin
 end;
 
 end.
-
-
 

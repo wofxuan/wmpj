@@ -42,7 +42,6 @@ type
     function DeleteRec(ATypeId: string; ABasicType: TBasicType): Boolean; virtual; //删除一条记录
     function CheckBaseTypeid(AType, ATypeid: string; AData: TClientDataSet): Boolean; virtual; //获取一条记录信息
     function GetSaveProcName: string; virtual;              //得到保存数据时的存储过程
-    procedure ClientDataSetToParamObject(AData: TClientDataSet; AList: TParamObject); virtual; //数据转换
     
     function ModelInfName: string; overload; //业务领域名称
 
@@ -89,8 +88,12 @@ type
     function ClearSaveCreate(APRODUCT_TRADE, AModi, AVchType, AVchcode, AOldVchcode: Integer): Integer; //错误后清除单据相关记录
   protected
     function GetBillCreateProcName: string; virtual; abstract; //过账调用的存储过程名称
+    function GetBillDraftProcName: string; virtual; //草稿调用的存储过程名称
     function SaveBill(const ABillData: TBillData; AOutPutData: TParamObject): Integer;
-    function BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode: Integer; AOutPutData: TParamObject): Integer; //单据过账
+    function BillCreate(AModi, AVchType, AVchcode, AOldVchCode: Integer; ADraft: TBillSaveState; AOutPutData: TParamObject): Integer; //单据过账
+    procedure LoadBillDataMaster(AInParam, AOutParam: TParamObject); //得到单据主表信息
+    procedure LoadBillDataDetail(AInParam: TParamObject; ACdsD: TClientDataSet); //得到单据从表信息
+    function GetVchNumber(AParam: TParamObject): Integer;//获取单据编号
   public
 
   end;
@@ -99,7 +102,7 @@ type
   private
 
   protected
-    procedure LoadGridData(AParam: TParamObject; ACdsBaseList: TClientDataSet); virtual;//查询数据
+    procedure LoadGridData(AParam: TParamObject; ACdsReport: TClientDataSet); virtual;//查询数据
   public
 
   end;
@@ -383,26 +386,6 @@ begin
   Result := '';
 end;
 
-procedure TModelBaseType.ClientDataSetToParamObject(AData: TClientDataSet;
-  AList: TParamObject);
-var
-  aCol: Integer;
-  aName, aValues: string;
-begin
-  if not Assigned(AList) then Exit;
-  if not Assigned(AData) then Exit;
-  if AData.IsEmpty then Exit;
-
-  AList.Clear;
-  AData.First;
-  for aCol := 0 to AData.FieldCount - 1 do
-  begin
-    aName := AData.FieldDefs[aCol].Name;
-    aValues := AData.FieldList[acol].AsString;
-    AList.Add(aName, aValues);
-  end;
-end;
-
 procedure TModelBaseType.OnSetDataEvent(AOnSetDataEvent: TParamDataEvent);
 begin
   FOnSetDataEvent := AOnSetDataEvent;
@@ -511,19 +494,35 @@ end;
 
 { TModelBill }
 
-function TModelBill.BillCreate(AModi, ADraft, AVchType, AVchcode,
-  AOldVchCode: Integer; AOutPutData: TParamObject): Integer;
+function TModelBill.BillCreate(AModi, AVchType, AVchcode,
+  AOldVchCode: Integer; ADraft: TBillSaveState; AOutPutData: TParamObject): Integer;
 var
   aList: TParamObject;
   aRet: Integer;
   aShowMsg: string;
 begin
+  aRet := -1;
+  aShowMsg := '未定义操作类型！';
   aList := TParamObject.Create;
   try
+    aList.Add('@errorValue', '');
     aList.Add('@NewVchCode', AVchcode);
     aList.Add('@OldVchCode', AOldVchcode);
-    aList.Add('@errorValue', '');
-    aRet := gMFCom.ExecProcByName(GetBillCreateProcName, aList);
+    aList.Add('@ModiDly', AModi);
+    aList.Add('@ADraft', Ord(ADraft));
+    aRet := gMFCom.ExecProcByName(GetBillDraftProcName, aList);
+    if aRet = 0 then
+    begin
+      aShowMsg := '保存草稿成功！';
+      if ADraft =  soSettle then
+      begin
+        aList.Add('@NewVchCode', AVchcode);
+        aList.Add('@OldVchCode', AOldVchcode);
+        aRet := gMFCom.ExecProcByName(GetBillCreateProcName, aList);
+        aShowMsg := '过账成功！';
+      end;
+    end;
+
     if aRet <> 0 then
     begin
       aShowMsg := aList.AsString('@errorValue');
@@ -532,9 +531,7 @@ begin
     else
     begin
       if AVchType in OrderVchtypes then
-        aShowMsg := '保存成功'
-      else
-        aShowMsg := '过账成功';
+        aShowMsg := '保存订单成功！';
         
       gMFCom.ShowMsgBox(aShowMsg, '提示', mbtInformation);
     end;
@@ -561,6 +558,65 @@ begin
 
     Result := gMFCom.ExecProcByName('pbx_Bill_ClearSaveCreate', aList);
   finally
+    aList.Free;
+  end;
+end;
+
+function TModelBill.GetBillDraftProcName: string;
+begin
+  Result := 'pbx_Bill_CreateDraft';
+end;
+
+function TModelBill.GetVchNumber(AParam: TParamObject): Integer;
+var
+  aRet: Integer;
+  aErrorMsg: string;
+begin
+  try
+    aRet := gMFCom.ExecProcByName('pbx_Bill_VchNumber', AParam);
+    if aRet <> 0 then
+    begin
+      aErrorMsg := AParam.AsString('@ErrorValue'); 
+      gMFCom.ShowMsgBox(aErrorMsg, '提示', mbtInformation);
+    end;
+    Result := aRet;
+  finally
+  end;
+end;
+
+procedure TModelBill.LoadBillDataDetail(AInParam: TParamObject;
+  ACdsD: TClientDataSet);
+var
+  aList: TParamObject;
+  aCdsMaster: TClientDataSet;
+begin
+  aList := TParamObject.Create;
+  aCdsMaster := TClientDataSet.Create(nil);
+  try
+    aList.Add('@VchCode', AInParam.AsInteger('VchCode'));
+    aList.Add('@DBName', AInParam.AsString('DBName'));
+    aList.Add('@UsedType', AInParam.AsString('UsedType'));
+    gMFCom.ExecProcBackData('pbx_Bill_Load_D', aList, ACdsD);
+  finally
+    aCdsMaster.Free;
+    aList.Free;
+  end;
+end;
+
+procedure TModelBill.LoadBillDataMaster(AInParam, AOutParam: TParamObject);
+var
+  aList: TParamObject;
+  aCdsMaster: TClientDataSet;
+begin
+  aList := TParamObject.Create;
+  aCdsMaster := TClientDataSet.Create(nil);
+  try
+    aList.Add('@VchCode', AInParam.AsInteger('VchCode'));
+    aList.Add('@VchType', AInParam.AsInteger('VchType'));
+    gMFCom.ExecProcBackData('pbx_Bill_Load_M', aList, aCdsMaster);
+    ClientDataSetToParamObject(aCdsMaster, AOutParam);
+  finally
+    aCdsMaster.Free;
     aList.Free;
   end;
 end;
@@ -658,7 +714,7 @@ end;
 { TModelReport }
 
 procedure TModelReport.LoadGridData(AParam: TParamObject;
-  ACdsBaseList: TClientDataSet);
+  ACdsReport: TClientDataSet);
 begin
 
 end;

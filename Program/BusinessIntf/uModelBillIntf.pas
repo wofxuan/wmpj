@@ -17,6 +17,10 @@ type
     ['{8BE32B7F-DFA3-48B7-9687-51CE83C1BBBB}']
   end;
 
+  IModelBillAllot = interface(IModelBill) //单据-调拨单
+    ['{BC31588A-A43E-4A04-B20F-207D4AD3D24B}']
+  end;
+
 implementation
 
 end.

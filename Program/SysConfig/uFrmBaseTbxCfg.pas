@@ -62,13 +62,13 @@ var
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled('tbxId', 'tbxId', -1);
-  FGridItem.AddFiled('tbxName', '表格名称', 200);
-  FGridItem.AddFiled('tbxDefName', '表格别名', 200);             
-  aCol := FGridItem.AddFiled('tbxType', '表格类型', 200);
+  FGridItem.AddField('tbxId', 'tbxId', -1);
+  FGridItem.AddField('tbxName', '表格名称', 200);
+  FGridItem.AddField('tbxDefName', '表格别名', 200);             
+  aCol := FGridItem.AddField('tbxType', '表格类型', 200);
   aCol.SetDisplayText(TSys_TbxType);
 
-  FGridItem.AddFiled('tbxComment', '备注', 200);
+  FGridItem.AddField('tbxComment', '备注', 200);
   FGridItem.InitGridData;
 end;
 

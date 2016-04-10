@@ -32,8 +32,6 @@ type
     actStop: TAction;
     pnlTV: TPanel;
     tvClass: TcxTreeView;
-    btnReturn: TdxBarLargeButton;
-    actReturn: TAction;
     procedure actAddExecute(Sender: TObject);
     procedure actModifyExecute(Sender: TObject);
     procedure actDeleteExecute(Sender: TObject);
@@ -45,7 +43,6 @@ type
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
     procedure tvClassChange(Sender: TObject; Node: TTreeNode);
-    procedure actReturnExecute(Sender: TObject);
   private
     { Private declarations }
     procedure SetTVVisble(const Value: Boolean); //树表是否显示 调用此函数应该在IniGridData内
@@ -66,7 +63,6 @@ type
     procedure BeforeFormDestroy; override;
     function GetCurTypeId: string; virtual;                 //获取当前表格选中行的ID
     procedure LoadGridData(ATypeid: string = ''); override;
-    function LoadParGridData: Boolean; override;
     procedure InitParamList; override;
   public
     { Public declarations }
@@ -284,41 +280,13 @@ begin
   QueryRec();
 end;
 
-function TfrmMDIBaseType.LoadParGridData: Boolean;
-var
-  aParId: string;
-begin
-  Result := False;
-  aParId := FModelFun.GetLocalValue(FModelBaseList.GetBasicType, 'Parid', Self.ParamList.AsString('ParId_Cur'));
-  if Length(aParId) >= Length(ROOT_ID) then
-  begin
-    LoadGridData(aParId);
-  end;
-  if Length(aParId) <= Length(ROOT_ID) then
-  begin
-    actReturn.Enabled := False;
-  end;
-  Result := True;
-end;
-
 procedure TfrmMDIBaseType.gridTVMainShowCellDblClick(
   Sender: TcxCustomGridTableView;
   ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
   AShift: TShiftState; var AHandled: Boolean);
-var
-  aSonnum: string;
 begin
   inherited;
-  aSonnum := FModelFun.GetLocalValue(FModelBaseList.GetBasicType, GetBaseTypeSonnumStr(FModelBaseList.GetBasicType), CurTypeId);
-  if StringToInt(aSonnum) > 0 then
-  begin
-    LoadGridData(CurTypeId);
-    actReturn.Enabled := True;
-  end
-  else
-  begin
-    ModifyRec();
-  end;
+  ModifyRec();
 end;
 
 procedure TfrmMDIBaseType.BeforeFormDestroy;
@@ -348,13 +316,6 @@ end;
 procedure TfrmMDIBaseType.SetTVVisble(const Value: Boolean);
 begin
   pnlTV.Visible := Value;
-end;
-
-procedure TfrmMDIBaseType.actReturnExecute(Sender: TObject);
-begin
-  inherited;
-  if (not LoadParGridData()) then Close;
-  gridMainShow.SetFocus;
 end;
 
 end.

@@ -40,6 +40,7 @@ const
   fnMdlBillOrderSale = fnBill + 0002; //销售订单
   fnMdlBillBuy = fnBill + 0003; //进货单
   fnMdlBillSale = fnBill + 0004; //销售单
+  fnMdlBillAllot = fnBill + 0005; //调拨单
 
   //报表-----------------------------------3000---------------------
   fnMdlReportGoods = fnReport + 0001; //商品库存情况
@@ -54,8 +55,12 @@ const
   fnMdlBasicTypeCfg = fnSystem + 0003; //本地化信息列配置
   fnMdlHelp_Calc = fnSystem + 0004; //计算器
   fnMdlHelp_Online = fnSystem + 0005; //在线帮助
+  fnMdlStockGoodsIni = fnSystem + 0006; //期初库存商品
+  fnMdlInitOver = fnSystem + 0007; //开账，反开账
+  fnMdlReBuild = fnSystem + 0008; //系统重建
+  fnMdlCheckGoods = fnSystem + 0009; //仓库盘点
 
-  //系统设置-------------------------------7000---------------------
+  //测试-------------------------------7000---------------------
   fnMdlTTest = fnTest + 0001; //测试
 
 implementation

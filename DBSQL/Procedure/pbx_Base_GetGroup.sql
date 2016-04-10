@@ -84,6 +84,15 @@ AS
             PRINT ( @sql )
             EXEC(@sql)
         END
+    IF @cMode = 'V'  --单据信息
+        BEGIN
+		    --exec p_hh_GetRightStr 'B','b',@OperatorID,'N',@TableStr out,@TableWhereStr out		
+            SELECT  @sql = 'SELECT *
+					FROM  tbx_Base_Vtype b
+			         WHERE  b.PARID = ''' + @szTypeid + ''' and b.deleted = 0 ORDER BY RowIndex, b.Ktypeid'		
+            PRINT ( @sql )
+            EXEC(@sql)
+        END
 go
 
 

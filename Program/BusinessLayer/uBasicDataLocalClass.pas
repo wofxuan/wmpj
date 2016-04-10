@@ -24,6 +24,7 @@ type
     constructor Create;
     destructor Destroy; override;
     function GetLocalValue(ABasicType: TBasicType; ADbName, ATypeid: string): string; overload;
+    function GetParIdFromId(ABasicType: TBasicType; ATypeid: string): string;
 
   end;
 
@@ -105,7 +106,7 @@ end;
 function TBasicDataLocalClass.GetLocalValue(ABasicType: TBasicType;
   ADbName, ATypeid: string): string;
 begin
-  if FLocalDatas[ABasicType].FindKey([Atypeid]) then
+  if FLocalDatas[ABasicType].FindKey([ATypeid]) then
   begin
     Result := FLocalDatas[ABasicType].FieldByName(ADbName).AsString;
   end
@@ -113,8 +114,26 @@ begin
   begin
     //尝试更新基本信息
     GetBasicData(ABasicType);
-    if FLocalDatas[ABasicType].FindKey([Atypeid]) then
+    if FLocalDatas[ABasicType].FindKey([ATypeid]) then
       Result := FLocalDatas[ABasicType].FieldByName(ADbName).AsString
+    else
+      Result := '';
+  end;
+end;
+
+function TBasicDataLocalClass.GetParIdFromId(ABasicType: TBasicType;
+  ATypeid: string): string;
+begin
+  if FLocalDatas[ABasicType].FindKey([ATypeid]) then
+  begin
+    Result := FLocalDatas[ABasicType].FieldByName('Parid').AsString;
+  end
+  else
+  begin
+    //尝试更新基本信息
+    GetBasicData(ABasicType);
+    if FLocalDatas[ABasicType].FindKey([ATypeid]) then
+      Result := FLocalDatas[ABasicType].FieldByName('Parid').AsString
     else
       Result := '';
   end;

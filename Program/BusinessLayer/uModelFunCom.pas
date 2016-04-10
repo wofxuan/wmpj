@@ -41,6 +41,7 @@ type
     procedure QuerySQL(const ASQLStr: string; AQueryData: TClientDataSet);
 
     function GetLocalValue(ABasicType: TBasicType; ADbName, ATypeid: string): string;
+    function GetParIdFromId(ABasicType: TBasicType; ATypeid: string): string;
     //显示提示消息
     function ShowMsgBox(AMsg: string; ACaption: string = ''; AMsgType: TMessageBoxType = mbtInformation; AButtons: TMessageBoxButtons = [mbbOk]): Integer;
 
@@ -139,6 +140,12 @@ procedure TModelFunCom.QuerySQL(const ASQLStr: string;
   AQueryData: TClientDataSet);
 begin
   FDBAC.QuerySQL(ASQLStr, AQueryData);
+end;
+
+function TModelFunCom.GetParIdFromId(ABasicType: TBasicType;
+  ATypeid: string): string;
+begin
+  Result := gBasicDataLocal.GetParIdFromId(ABasicType, ATypeid);
 end;
 
 initialization

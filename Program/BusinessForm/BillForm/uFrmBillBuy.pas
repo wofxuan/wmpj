@@ -37,7 +37,6 @@ type
 
     function LoadBillDataGrid: Boolean; override;
 
-    function SaveToSettle: Boolean; override;
     function SaveMasterData(const ABillMasterData: TBillData): Integer; override;
     function SaveDetailData(const ABillDetailData: TPackData): Integer; override;
     function SaveDetailAccount(const ADetailAccountData: TPackData): integer; override;
@@ -58,7 +57,7 @@ var
 implementation
 
 uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
-     uDefCom, uGridConfig, uFrmApp, uModelBillIntf, uVchTypeDef;
+     uDefCom, uGridConfig, uFrmApp, uModelBillIntf, uVchTypeDef, uPubFun;
 
 {$R *.dfm}
 
@@ -93,21 +92,17 @@ begin
 end;
 
 procedure TfrmBillBuy.InitGrids(Sender: TObject);
-var
-  aColInfo: TColInfo;
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled(btPtype);
-  FGridItem.AddFiled('Unit', '单位');
+  FGridItem.AddField(btPtype);
 
-  aColInfo := FGridItem.AddFiled('Qty', '数量', 100, cfQty);
-  aColInfo := FGridItem.AddFiled('Price', '单价', 100, cfPrice);
+  FGridItem.AddField('Qty', '数量', 100, cfQty);
+  FGridItem.AddField('Price', '单价', 100, cfPrice);
+  FGridItem.AddField('Total', '金额', 100, cfTotal);
+  FGridItem.AddField('Comment', '备注');
 
-  aColInfo := FGridItem.AddFiled('Total', '金额', 100, cfTotal);
-  aColInfo.AddExpression('[Qty]*[Price]');
-
-  FGridItem.AddFiled('Comment', '备注');
+  SetQtyPriceTotal('Total', 'Qty', 'Price');
   FGridItem.InitGridData;
 end;
 
@@ -163,9 +158,7 @@ begin
     begin
       for j := FGridItem.RowIndex + 1 to FGridItem.GetLastRow - 1 do
       begin
-        if VarIsEmpty(FGridItem.GetCellValue(GetBaseTypeid(btPtype), j)) then Break;
-        if VarIsNull(FGridItem.GetCellValue(GetBaseTypeid(btPtype), j)) then Break;
-        //if Trim() = EmptyStr then Break;
+        if StringEmpty(FGridItem.GetCellValue(GetBaseTypeid(btPtype), j)) then Break;
       end;
       if j >= FGridItem.GetLastRow then exit;
       LoadOnePtype(j, ABasicDatas[i])
@@ -184,13 +177,17 @@ function TfrmBillBuy.SaveDetailData(
 var
   aPackData: TParamObject;
   aRow: Integer;
+  aPrice, aTotal, aQty: Extended;
 begin
   ABillDetailData.ProcName := 'pbx_Bill_Is_Buy_D';
   for aRow := FGridItem.GetFirstRow to FGridItem.GetLastRow do
   begin
-    if VarIsEmpty(FGridItem.GetCellValue(GetBaseTypeid(btPtype), aRow)) then Continue;
-    if VarIsNull(FGridItem.GetCellValue(GetBaseTypeid(btPtype), aRow)) then Continue;
+    if StringEmpty(FGridItem.GetCellValue(GetBaseTypeid(btPtype), aRow)) then Continue;
 
+    aQty := FGridItem.GetCellValue('Qty', aRow);
+    aPrice := FGridItem.GetCellValue('Price', aRow);
+    aTotal := FGridItem.GetCellValue('Total', aRow);
+    
     aPackData := ABillDetailData.AddChild();
     aPackData.Add('@ColRowNo', IntToStr(aRow + 1));
     aPackData.Add('@AtypeId', '0000100001');
@@ -200,37 +197,37 @@ begin
     aPackData.Add('@KtypeId', DBComItem.GetItemValue(edtKtype));
     aPackData.Add('@KtypeId2', '');
     aPackData.Add('@PtypeId', FGridItem.GetCellValue(GetBaseTypeid(btPtype), aRow));
-    aPackData.Add('@CostMode', 1);
+    aPackData.Add('@CostMode', 0);
     aPackData.Add('@UnitRate', 1);
-    aPackData.Add('@Unit', 1);
+    aPackData.Add('@Unit', 0);
     aPackData.Add('@Blockno', '');
     aPackData.Add('@Prodate', '');
     aPackData.Add('@UsefulEndDate', '');
     aPackData.Add('@Jhdate', '');
-    aPackData.Add('@GoodsNo', '1');
-    aPackData.Add('@Qty', FGridItem.GetCellValue('Qty', aRow));
-    aPackData.Add('@Price', FGridItem.GetCellValue('Price', aRow));
-    aPackData.Add('@Total', FGridItem.GetCellValue('Total', aRow));
+    aPackData.Add('@GoodsNo', 0);
+    aPackData.Add('@Qty', aQty);
+    aPackData.Add('@Price', aPrice);
+    aPackData.Add('@Total', aTotal);
     aPackData.Add('@Discount', 1);
-    aPackData.Add('@DiscountPrice', 2);
-    aPackData.Add('@DiscountTotal', 3);
-    aPackData.Add('@TaxRate', 4);
-    aPackData.Add('@TaxPrice', 5);
-    aPackData.Add('@TaxTotal', 6);
-    aPackData.Add('@AssQty', FGridItem.GetCellValue('Qty', aRow));
-    aPackData.Add('@AssPrice', FGridItem.GetCellValue('Price', aRow));
-    aPackData.Add('@AssDiscountPrice', 7);
-    aPackData.Add('@AssTaxPrice', 8);
-    aPackData.Add('@CostTotal', 9);
-    aPackData.Add('@CostPrice', 10);
+    aPackData.Add('@DiscountPrice', aPrice);
+    aPackData.Add('@DiscountTotal', aTotal);
+    aPackData.Add('@TaxRate', 1);
+    aPackData.Add('@TaxPrice', aPrice);
+    aPackData.Add('@TaxTotal', aTotal);
+    aPackData.Add('@AssQty', aQty);
+    aPackData.Add('@AssPrice', aPrice);
+    aPackData.Add('@AssDiscountPrice', aPrice);
+    aPackData.Add('@AssTaxPrice', aPrice);
+    aPackData.Add('@CostTotal', aTotal);
+    aPackData.Add('@CostPrice', aPrice);
     aPackData.Add('@OrderCode', 0);
     aPackData.Add('@OrderDlyCode', 0);
     aPackData.Add('@OrderVchType', 0);
-    aPackData.Add('@Comment', 'ssss');
+    aPackData.Add('@Comment', FGridItem.GetCellValue('Comment', aRow));   
     aPackData.Add('@InputDate', FormatDateTime('YYYY-MM-DD', deBillDate.Date));
     aPackData.Add('@Usedtype', '1');
-    aPackData.Add('@Period', 0);
-    aPackData.Add('@PStatus', 1);
+    aPackData.Add('@Period', 1);
+    aPackData.Add('@PStatus', 0);
     aPackData.Add('@YearPeriod', 1);
   end;
 end;
@@ -251,43 +248,10 @@ begin
   ABillMasterData.Add('@Ktypeid2', '');
   ABillMasterData.Add('@Period', 1);
   ABillMasterData.Add('@YearPeriod', 1);
-  ABillMasterData.Add('@Total', 11);
+  ABillMasterData.Add('@Total', 0);
   ABillMasterData.Add('@RedWord', 'F');
   ABillMasterData.Add('@Defdiscount', 1);
   ABillMasterData.Add('@GatheringDate', DBComItem.GetItemValue(deGatheringDate));
-end;
-
-function TfrmBillBuy.SaveToSettle: Boolean;
-var
-  aBillData: TBillData;
-  aOutPutData: TParamObject;
-  aNewVchcode: Integer;
-begin
-  Result := False;
-  aBillData := TBillData.Create;
-  aOutPutData := TParamObject.Create;
-  try
-    aBillData.PRODUCT_TRADE := 0;
-    aBillData.Draft := Ord(soSettle);
-    aBillData.IsModi := false;
-    aBillData.VchCode := FVchcode;
-    aBillData.VchType := FVchtype;
-
-    SaveMasterData(aBillData);
-    SaveDetailData(aBillData.DetailData);
-    SaveDetailAccount(aBillData.AccountData);
-    aNewVchcode := FModelBill.SaveBill(aBillData, aOutPutData);
-    if aNewVchcode >= 0 then
-    begin
-      if FModelBill.BillCreate(0, aBillData.Draft, FVchType, aNewVchcode, aBillData.VchCode, aOutPutData) = 0 then
-      begin
-        Result := True;
-      end;
-    end;
-  finally
-    aOutPutData.Free;
-    aBillData.Free;
-  end;
 end;
 
 initialization

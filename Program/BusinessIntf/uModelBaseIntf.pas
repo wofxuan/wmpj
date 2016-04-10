@@ -35,13 +35,16 @@ type
   IModelBill = interface(IModelBase)
     ['{192C9A3B-07F4-43E9-952D-8C486AF158C3}']
     function SaveBill(const ABillData: TBillData; AOutPutData: TParamObject): Integer; //保存单据
-    function BillCreate(AModi, ADraft, AVchType, AVchcode, AOldVchCode: Integer; AOutPutData: TParamObject): Integer; //单据过账
+    function BillCreate(AModi, AVchType, AVchcode, AOldVchCode: Integer; ADraft: TBillSaveState; AOutPutData: TParamObject): Integer; //单据过账
+    procedure LoadBillDataMaster(AInParam, AOutParam: TParamObject); //得到单据主表信息
+    procedure LoadBillDataDetail(AInParam: TParamObject; ACdsD: TClientDataSet); //得到单据从表信息
+    function GetVchNumber(AParam: TParamObject): Integer;//获取单据编号
   end;
 
   //报表操作
   IModelReport = interface(IModelBase)
     ['{8AB57955-F14E-4B27-8790-92339017C1B6}']
-    procedure LoadGridData(AParam: TParamObject; ACdsBaseList: TClientDataSet); //查询数据
+    procedure LoadGridData(AParam: TParamObject; ACdsReport: TClientDataSet); //查询数据
   end;
 
 implementation

@@ -20,7 +20,8 @@ type
 
   TModelBasePtype = class(TModelBaseType, IModelBaseTypePtype) //基本信息-商品处理领域
   private
-
+    function SaveOneUnitInfo(aUnitInfo :TParamObject): Integer;
+    function GetUnitInfo(aPtypeId :string; ACdsU: TClientDataSet): Integer;
   protected
     function GetSaveProcName: string; override;
     function CheckData(AParamList: TParamObject; var Msg: string): Boolean; override; //检查数据
@@ -66,6 +67,8 @@ type
   end;
 
 implementation
+
+uses uModelFunCom;
 
 { TBusinessBasicLtype }
 
@@ -129,6 +132,22 @@ begin
         Result := 'pbx_Base_UpdateP';                       //修改
       end;
   end;
+end;
+
+function TModelBasePtype.GetUnitInfo(aPtypeId: string;
+  ACdsU: TClientDataSet): Integer;
+var
+  aSQL: string;
+begin
+  aSQL := 'SELECT * FROM tbx_Base_PtypeUnit WHERE PTypeId = ' + QuotedStr(aPtypeId) + ' ORDER BY OrdId';
+  gMFCom.QuerySQL(aSQL, ACdsU);
+end;
+
+function TModelBasePtype.SaveOneUnitInfo(aUnitInfo: TParamObject): Integer;
+var
+  aRet: Integer;
+begin
+  aRet := gMFCom.ExecProcByName('pbx_Base_SavePTypeUnit', aUnitInfo);
 end;
 
 { TModelBaseBtype }

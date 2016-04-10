@@ -42,10 +42,10 @@ requires
   dxBarD7,
   dxPSCoreD7,
   Other,
-  BusinessIntf,
   dbrtl,
   dsnap,
-  dxBarExtItemsD7;
+  dxBarExtItemsD7,
+  BusinessIntf;
 
 contains
   uBaseFormExport in 'uBaseFormExport.pas',

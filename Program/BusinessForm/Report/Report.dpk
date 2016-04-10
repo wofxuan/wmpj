@@ -52,10 +52,8 @@ requires
 
 contains
   uReportExport in 'uReportExport.pas',
-  uFrmReportSale in 'uFrmReportSale.pas' {frmReportSale},
   uFrmReportStockGoods in 'uFrmReportStockGoods.pas' {frmReportStockGoods},
-  uFrmReportBuy in 'uFrmReportBuy.pas' {frmReportBuy},
-  uFrmReportOrderBuy in 'uFrmReportOrderBuy.pas' {frmReportOrderBuy},
-  uFrmReportOrdeSale in 'uFrmReportOrdeSale.pas' {frmReportOrderSale};
+  uFrmReportBill in 'uFrmReportBill.pas' {frmReportBill},
+  uFrmReportOrder in 'uFrmReportOrder.pas' {frmReportOrder};
 
 end.

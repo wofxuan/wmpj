@@ -29,7 +29,8 @@ CREATE PROCEDURE dbo.pbx_Bill_ModifyDbf
     )
 AS 
     DECLARE @nRet INT ,
-        @inputNo VARCHAR(50)
+        @inputNo VARCHAR(50) ,
+        @GoodsDate VARCHAR(50)
         
     DECLARE @Costmode INT 
 -------Costing  method------------
@@ -60,6 +61,8 @@ AS
     DECLARE @goodsorderId INTEGER ,
         @UpdategoodsorderId INTEGER
      
+    SELECT @GoodsDate = CONVERT(varchar(100), GETDATE(), 21)
+    
     DECLARE @nInputZero INT    
     SET @nInputZero = 0 --如果是出库单据,表示是否0成本强制出库 0 不是, 1 是;如果是入库，则此标志表示是否采用0单价入库 0 不是, 1 是(此时用于获赠单)
     
@@ -129,7 +132,7 @@ AS
                                                 
                                             --库存变动 dlyorder暂填0，等有了后再填
                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(@dTotal, @dQty), @dTotal, GETDATE() )
+                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(@dTotal, @dQty), @dTotal, @GoodsDate )
                                             IF @@RowCount = 0 
                                                 GOTO ErrorNoRec	
                                             SELECT  @dCostTotalOut = @dTotal
@@ -152,7 +155,7 @@ AS
                                                         
 															--库存变动 dlyorder暂填0，等有了后再填
                                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, -1 * Dbo.Fun_CovTotalDivQty(@dCosttotaltemp, @dQty), -1 * @dCosttotaltemp, GETDATE() )
+                                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, -1 * Dbo.Fun_CovTotalDivQty(@dCosttotaltemp, @dQty), -1 * @dCosttotaltemp, @GoodsDate )
                                                             IF @@RowCount = 0 
                                                                 GOTO ErrorNoRec	
                                                             SELECT  @dCostTotalOut = -@dCostTotaltemp
@@ -183,7 +186,7 @@ AS
                                                                 
 															--库存变动 dlyorder暂填0，等有了后再填
                                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(( @dTotaltemp - @dCosttotaltemp ), @dQty), ( @dTotaltemp - @dCosttotaltemp ), GETDATE() )
+                                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(( @dTotaltemp - @dCosttotaltemp ), @dQty), ( @dTotaltemp - @dCosttotaltemp ), @GoodsDate )
                                                             IF @@RowCount = 0 
                                                                 GOTO ErrorNoRec
                                                             SELECT  @dCostTotalOut = @dTotaltemp - @dCosttotaltemp
@@ -242,7 +245,7 @@ AS
                                                         
                                                     --库存变动 dlyorder暂填0，等有了后再填    
                                                     INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                                    VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, @dCostPricetemp, @dCostTotalOut, GETDATE() )
+                                                    VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, @dCostPricetemp, @dCostTotalOut, @GoodsDate )
                                                     IF @@RowCount = 0 
                                                         GOTO ErrorNoRec
                                                     GOTO Success
@@ -287,14 +290,14 @@ AS
                                     IF @dQty = 0 
                                         BEGIN
                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, 0, @dTotal, GETDATE() )
+                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, 0, @dTotal, @GoodsDate )
                                             IF @@RowCount = 0 
                                                 GOTO ErrorNoRec
                                         END	
                                     ELSE 
                                         BEGIN
                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(@dTotal, @dQty), @dTotal, GETDATE() )
+                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(@dTotal, @dQty), @dTotal, @GoodsDate )
                                             IF @@RowCount = 0 
                                                 GOTO ErrorNoRec
                                         END
@@ -332,7 +335,7 @@ AS
                             
                             --库存变动 dlyorder暂填0，等有了后再填   
                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, @dCostPricetemp, @dTotal, GETDATE() )
+                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, @dCostPricetemp, @dTotal, @GoodsDate )
                             IF @@RowCount = 0 
                                 GOTO ErrorNoRec
                             SELECT  @dCostTotalOut = @dTotal

@@ -62,10 +62,10 @@ var
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled('ITypeId', 'ITypeId', -1);
-  FGridItem.AddFiled('IFullname', '名称', 200);
-  FGridItem.AddFiled('IComment', '备注', 200);
-  FGridItem.AddFiled('RowIndex', '序号', 50, cfInt);
+  FGridItem.AddField('ITypeId', 'ITypeId', -1);
+  FGridItem.AddField('IFullname', '名称', 200);
+  FGridItem.AddField('IComment', '备注', 200);
+  FGridItem.AddField('RowIndex', '序号', 50, cfInt);
   FGridItem.AddCheckBoxCol('ISystem', '系统包', 1, 0);
   FGridItem.InitGridData;
 end;

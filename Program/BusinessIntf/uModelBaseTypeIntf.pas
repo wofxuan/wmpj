@@ -11,6 +11,8 @@ type
 
   IModelBaseTypePtype = interface(IModelBaseType) //基本信息编辑框-商品
     ['{759C8A8C-D902-4766-A655-450F880D582F}']
+    function SaveOneUnitInfo(aUnitInfo :TParamObject): Integer;//保存一条多单位信息
+    function GetUnitInfo(aPtypeId :string; ACdsU: TClientDataSet): Integer;//获取一个商品所有的多单位信息
   end;
 
   IModelBaseTypeBtype = interface(IModelBaseType) //基本信息编辑框-单位

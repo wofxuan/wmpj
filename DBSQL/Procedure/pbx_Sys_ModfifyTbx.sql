@@ -29,7 +29,7 @@ AS
             GOTO ErrorGeneral
         END
         
-    GOTO success    
+    GOTO Success    
 
     Success:		 --成功完成函数
     RETURN 0
@@ -40,4 +40,4 @@ AS
     ErrorRollback:   --数据操作是错误，需要回滚
     --ROLLBACK TRAN insertproc 
     RETURN -2 
-go
+GO

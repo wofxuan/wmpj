@@ -16,6 +16,7 @@ type
     FCreateTime: TDateTime;
   public
     constructor Create(AFrm: IFormIntf);
+    destructor Destroy; override;
   published
     property FrmMDI: IFormIntf read FFrmMDI;
 
@@ -43,7 +44,9 @@ type
     {菜单点击事件方法声明区}
     procedure DefaultMethod(Sender: TObject); //默认点击菜单发生的事件
     procedure TestIntfMethod(Sender: TObject); //测试接口，发布是可以删除
+    function GetCaption(AFromNo: Integer): string;
   public
+    procedure CallFormClass(AFromNo: Integer; AParam: TParamObject); //打开窗体
     function GetMainMenu: TMainMenu;
     constructor Create(AOwner: TForm; AMDIClent: TWinControl);
     destructor Destroy; override;
@@ -68,7 +71,7 @@ begin
   tempMenu := TMenuItem.Create(FmainMenu);
   with tempMenu do
   begin
-    Name := AmenuId; //不能重复
+    Name := AMenuId; //不能重复
     Caption := Acaption;
     if AParamter <> '' then
       Hint := AParamter; //用Hint来记录Paramter
@@ -89,12 +92,38 @@ begin
       ShortCut := TextToShortCut(AShortKey);
     end;
   end;
-  FMenus.AddObject(AmenuId, tempMenu);
+  FMenus.AddObject(AMenuId, tempMenu);
 end;
 
 procedure TSysMenu.AddSeparators(const AParMenuId: string);
 begin
 
+end;
+
+procedure TSysMenu.CallFormClass(AFromNo: Integer; AParam: TParamObject);
+var
+  aCaption: string;
+  aFrm: IFormIntf;
+begin
+  aFrm := (SysService as IFromFactory).GetFormAsFromNo(AFromNo, AParam, FMDIClent);
+  aCaption := GetCaption(AFromNo);
+  if aFrm.FrmShowStyle = fssShow then
+  begin
+    aFrm.FrmShow;
+    if Assigned(OnShowMDI) then OnShowMDI(Self, aCaption, aFrm);
+  end
+  else if aFrm.FrmShowStyle = fssShowModal then
+  begin
+    try
+      aFrm.FrmShowModal;
+    finally
+      aFrm.FrmFree();
+    end;
+  end
+  else
+  begin
+    raise(SysService as IExManagement).CreateSysEx('没有找到<' + aCaption + '>窗体显示的方式！');
+  end;
 end;
 
 constructor TSysMenu.Create(AOwner: TForm; AMDIClent: TWinControl);
@@ -124,24 +153,7 @@ begin
         aList := TParamObject.Create;
         try
           GetParamList(TMenuItem(Sender).Hint, aList);
-          aFrm := (SysService as IFromFactory).GetFormAsFromNo(TMenuItem(Sender).HelpContext, aList, FMDIClent);
-          if aFrm.FrmShowStyle = fssShow then
-          begin
-            aFrm.FrmShow;
-            if Assigned(OnShowMDI) then OnShowMDI(Self, TMenuItem(Sender).Caption, aFrm);
-          end
-          else if aFrm.FrmShowStyle = fssShowModal then
-          begin
-            try
-              aFrm.FrmShowModal;
-            finally
-              aFrm.FrmFree();
-            end;
-          end
-          else
-          begin
-            raise(SysService as IExManagement).CreateSysEx('没有找到<' + TMenuItem(Sender).Caption + '>窗体显示的方式！');
-          end;
+          CallFormClass(TMenuItem(Sender).HelpContext, aList);
         finally
           aList.Free;
         end;
@@ -177,6 +189,26 @@ begin
   begin
     FmainMenu.Items.Add(ASubMenu);
     Result := True;
+  end;
+end;
+
+function TSysMenu.GetCaption(AFromNo: Integer): string;
+var
+  i: Integer;
+  aObjects: TObject;
+begin
+  Result := '';
+  for i := 0 to FMenus.Count - 1 do
+  begin
+    aObjects := FMenus.Objects[i];
+    if Assigned(aObjects) then
+    begin
+      if TMenuItem(aObjects).HelpContext = AFromNo then
+      begin
+        Result := TMenuItem(aObjects).Caption;
+        Exit;
+      end;
+    end;
   end;
 end;
 
@@ -226,30 +258,38 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m10001000', '系统参数设置', 'm1000', '', 0, nil);
     AddMenu('m100010001000', '加载包设置', 'm10001000', '', fnMdlLoadItemSet, nil);
     AddMenu('m100010002000', '系统表格配置', 'm10001000', '', fnMdlBaseTbxCfg, nil);
+    AddMenu('m10002000', '系统重建', 'm1000', '', fnMdlReBuild, nil);
 
-    AddMenu('m100011111', '测试接口', 'm1000', '', 0, TestIntfMethod);
+    AddMenu('m10001111', '测试接口', 'm1000', '', 0, TestIntfMethod);
 
 
     AddMenu('m2000', '基本资料', '', '', 0, nil);
-    AddMenu('m20001000', '商品信息', 'm2000', '', fnMdlBasePtypeList, nil);
-    AddMenu('m20002000', '单位信息', 'm2000', '', fnMdlBaseBtypeList, nil);
-    AddMenu('m20003000', '职员信息', 'm2000', '', fnMdlBaseEtypeList, nil);
-    AddMenu('m20004000', '仓库信息', 'm2000', '', fnMdlBaseKtypeList, nil);
+    AddMenu('m20001000', '商品信息', 'm2000', 'Mode=P', fnMdlBasePtypeList, nil);
+    AddMenu('m20002000', '单位信息', 'm2000', 'Mode=B', fnMdlBaseBtypeList, nil);
+    AddMenu('m20003000', '职员信息', 'm2000', 'Mode=E', fnMdlBaseEtypeList, nil);
+    AddMenu('m20004000', '仓库信息', 'm2000', 'Mode=K', fnMdlBaseKtypeList, nil);
     AddMenu('m20005000', '-', 'm2000', '', 0, nil);
-    AddMenu('m20006000', '部门信息', 'm2000', '', fnMdlBaseDtypeList, nil);
+    AddMenu('m20006000', '部门信息', 'm2000', 'Mode=D', fnMdlBaseDtypeList, nil);
+    AddMenu('m20007000', '-', 'm2000', '', 0, nil);
+    AddMenu('m20008000', '期初建账', 'm2000', '', 0, nil);
+    AddMenu('m200080001000', '期初库存商品', 'm20008000', '', fnMdlStockGoodsIni, nil);
+    AddMenu('m200080002000', '期初应收应付', 'm20008000', '', 0, nil);
+    AddMenu('m20009000', '期初建账..开账', 'm2000', '', fnMdlInitOver, nil);
 
     AddMenu('m3000', '业务录入', '', '', 0, nil);
     AddMenu('m30001000', '进货订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Buy), fnMdlBillOrderBuy, nil);
     AddMenu('m30002000', '进货单', 'm3000', 'Vchtype=' + IntToStr(VchType_Buy), fnMdlBillBuy, nil);
     AddMenu('m30003000', '销售订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Sale), fnMdlBillOrderSale, nil);
     AddMenu('m30004000', '销售单', 'm3000', 'Vchtype=' + IntToStr(VchType_Sale), fnMdlBillSale, nil);
+    AddMenu('m30005000', '调拨单', 'm3000', 'Vchtype=' + IntToStr(VchType_Allot), fnMdlBillAllot, nil);
+    AddMenu('m30006000', '仓库盘点', 'm3000', '', fnMdlCheckGoods, nil);
 
     AddMenu('m4000', '数据查询', '', '', 0, nil);
     AddMenu('m40001000', '库存状况', 'm4000', '', fnMdlReportGoods, nil);
-    AddMenu('m40002000', '进货订单统计', 'm4000', '', fnMdlReportOrderBuy, nil);
-    AddMenu('m40003000', '进货单统计', 'm4000', '', fnMdlReportBuy, nil);
-    AddMenu('m40004000', '销售订单统计', 'm4000', '', fnMdlReportOrderSale, nil);
-    AddMenu('m40005000', '销售单统计', 'm4000', '', fnMdlReportSale, nil);
+    AddMenu('m40002000', '进货订单查询', 'm4000', 'Mode=B', fnMdlReportOrderBuy, nil);
+    AddMenu('m40003000', '进货单查询', 'm4000', 'Mode=B', fnMdlReportBuy, nil);
+    AddMenu('m40004000', '销售订单查询', 'm4000', 'Mode=S', fnMdlReportOrderSale, nil);
+    AddMenu('m40005000', '销售单查询', 'm4000', 'Mode=S', fnMdlReportSale, nil);
     
     AddMenu('m9000', '帮助', '', '', 0, nil);
     AddMenu('m90001000', '在线帮助', 'm9000', '', fnMdlHelp_Online, nil);
@@ -309,6 +349,12 @@ constructor TFrmObj.Create(AFrm: IFormIntf);
 begin
   FFrmMDI := AFrm;
   FCreateTime := Now;
+end;
+
+destructor TFrmObj.Destroy;
+begin
+
+  inherited;
 end;
 
 end.

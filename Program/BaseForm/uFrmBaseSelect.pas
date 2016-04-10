@@ -33,6 +33,8 @@ type
     procedure gridTVMainShowCellDblClick(Sender: TcxCustomGridTableView;
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
+    procedure actQueryExecute(Sender: TObject);
+    procedure actOKExecute(Sender: TObject);
   private
     { Private declarations }
     FGridItem: TGridItem;
@@ -52,7 +54,9 @@ type
     procedure BeforeFormDestroy; override;
     procedure InitParamList; override;
 
-    procedure IniView; override; 
+    procedure IniView; override;
+    procedure QryData;
+    procedure DoLoadUpDownData(Sender: TObject; ATypeid: string); virtual; ///双击表格时回调的函数
   public
     { Public declarations }
   end;
@@ -64,7 +68,7 @@ function SelectBasicData(ABasicType: TBasicType;
 implementation
 
 uses uSysSvc, uMoudleNoDef, uFrmApp, uDefCom, uMainFormIntf, uModelControlIntf,
-      uModelBaseListIntf, uOtherIntf;
+      uModelBaseListIntf, uOtherIntf, uPubFun;
 
 {$R *.dfm}
 
@@ -102,13 +106,18 @@ begin
   inherited;
   FGridItem := TGridItem.Create(MoudleNo, gridMainShow, gridTVMainShow);
   FGridItem.SetGoToNextCellOnEnter(False);
+  FGridItem.OnLoadUpDownData := DoLoadUpDownData;
   FDBAC := SysService as IDBAccess;
   FModelFun := SysService as IModelFun;
 
   IniGridField();
   LoadGridData(ROOT_ID);
   SetLength(FReturnArray, 0);
-  gridMainShow.SetFocus;
+  if not FGridItem.CdsSource.IsEmpty then
+  begin
+    gridMainShow.SetFocus;
+    FGridItem.RowIndex := 0;
+  end;
 end;
 
 procedure TfrmBaseSelect.IniGridField;
@@ -116,6 +125,7 @@ var
   aColInfo: TColInfo;
 begin
   FGridItem.ClearField();
+  FGridItem.BasicType := FBasicType;
   if opMultiSelect in FSelectOptions then
   begin
     FGridItem.MultiSelect(True);
@@ -123,24 +133,24 @@ begin
 
   if FBasicType = btPtype then
   begin
-    FGridItem.AddFiled(btPtype);
+    FGridItem.AddField(btPtype);
     FGridItem.AddCheckBoxCol('IsStop', '是否停用', 1, 0);
   end
   else if FBasicType = btDtype then
   begin
-    FGridItem.AddFiled(btDtype);
+    FGridItem.AddField(btDtype);
   end
   else if FBasicType = btEtype then
   begin
-    FGridItem.AddFiled(btEtype);
+    FGridItem.AddField(btEtype);
   end
   else if FBasicType = btBtype then
   begin
-    FGridItem.AddFiled(btBtype);
+    FGridItem.AddField(btBtype);
   end
   else if FBasicType = btKtype then
   begin
-    FGridItem.AddFiled(btKtype);
+    FGridItem.AddField(btKtype);
   end;
   FGridItem.InitGridData;
 end;
@@ -173,14 +183,15 @@ begin
   inherited;
 //   aRowIndex := FGridItem.RowIndex;
 //  if (aRowIndex < FGridItem.GetFirstRow) or (aRowIndex > FGridItem.GetLastRow) then Exit;
-  if gridTVMainShow.DataController.GetSelectedCount <= 0 then Exit;
+  if gridTVMainShow.Controller.SelectedRecordCount <= 0 then Exit;
   
   if FBasicType <> btNo then
   begin
-    SetLength(FReturnArray, gridTVMainShow.DataController.GetSelectedCount);
-    for i := 0 to gridTVMainShow.DataController.GetSelectedCount - 1 do
+//    aRowIndex := gridTVMainShow.DataController.GetSelectedRowIndex(i);  //排序后不能取到正确的行
+    SetLength(FReturnArray, gridTVMainShow.Controller.SelectedRecordCount);
+    for i := 0 to gridTVMainShow.Controller.SelectedRecordCount - 1 do
     begin
-      aRowIndex := gridTVMainShow.DataController.GetSelectedRowIndex(i);
+      aRowIndex := gridTVMainShow.Controller.SelectedRows[i].RecordIndex;
       FReturnArray[i].TypeId := FGridItem.GetCellValue(GetBaseTypeid(FBasicType), aRowIndex);
       FReturnArray[i].FullName := FGridItem.GetCellValue(GetBaseTypeFullName(FBasicType), aRowIndex);
       FReturnArray[i].Usercode := FGridItem.GetCellValue(GetBaseTypeUsercode(FBasicType), aRowIndex);
@@ -195,23 +206,30 @@ begin
   inherited;
   if Key = VK_RETURN then
   begin
-    if FGridItem.SelectedRowCount > 0 then
-      actSelectExecute(actSelect);
+    actSelectExecute(actSelect);
   end;
 end;
 
 procedure TfrmBaseSelect.IniView;
 begin
   inherited;
+  Title := GetBasicTypeCaption(FBasicType);
+  Title := Title + '选择';
+  cbbQueryType.Properties.Items.Clear;
+  cbbQueryType.Properties.Items.Add('模糊查询');
   if FBasicType = btPtype then
   begin
     FModelBaseList := IModelBaseListPtype((SysService as IModelControl).GetModelIntf(IModelBaseListPtype));
     FModelBaseList.SetBasicType(btPtype);
+    cbbQueryType.Properties.Items.Add('商品名称');
+    cbbQueryType.Properties.Items.Add('商品编码');
   end
   else if FBasicType = btDtype then
   begin
     FModelBaseList := IModelBaseListPtype((SysService as IModelControl).GetModelIntf(IModelBaseListDtype));
     FModelBaseList.SetBasicType(btDtype);
+    cbbQueryType.Properties.Items.Add('部门名称');
+    cbbQueryType.Properties.Items.Add('部门编码');
   end
   else if FBasicType = btBtype then
   begin
@@ -232,6 +250,7 @@ begin
   begin
     raise(SysService as IExManagement).CreateSysEx('没有设置基本信息的类型！');
   end;
+  cbbQueryType.ItemIndex := 0;
 end;
 
 procedure TfrmBaseSelect.gridTVMainShowCellDblClick(
@@ -240,8 +259,61 @@ procedure TfrmBaseSelect.gridTVMainShowCellDblClick(
   AShift: TShiftState; var AHandled: Boolean);
 begin
   inherited;
-  if FGridItem.SelectedRowCount > 0 then
-    actSelectExecute(actSelect);
+  actSelectExecute(actSelect);
+end;
+
+procedure TfrmBaseSelect.actQueryExecute(Sender: TObject);
+begin
+  inherited;
+  QryData();
+end;
+
+procedure TfrmBaseSelect.QryData;
+var
+  aFilterStr: string;
+  aFilterCol: TcxGridColumn;
+begin
+  aFilterStr := '%' + Trim(edtFilter.Text) + '%';
+  gridTVMainShow.DataController.Filter.Active :=  False;
+  gridTVMainShow.DataController.Filter.Root.Clear;
+  gridTVMainShow.DataController.Filter.Root.BoolOperatorKind:= fboOR; //或者所有的条件
+  if aFilterStr <> '%%' then
+  begin
+    case cbbQueryType.ItemIndex of
+      0:
+        begin
+          aFilterCol := FGridItem.FindColByFieldName(GetBaseTypeFullName(FBasicType)).GridColumn;
+          gridTVMainShow.DataController.Filter.Root.AddItem(aFilterCol, foLike, aFilterStr, aFilterStr);
+          aFilterCol := FGridItem.FindColByFieldName(GetBaseTypeUsercode(FBasicType)).GridColumn;
+          gridTVMainShow.DataController.Filter.Root.AddItem(aFilterCol, foLike, aFilterStr, aFilterStr);
+        end;
+      1:
+        begin
+          aFilterCol := FGridItem.FindColByFieldName(GetBaseTypeFullName(FBasicType)).GridColumn;
+          gridTVMainShow.DataController.Filter.Root.AddItem(aFilterCol, foLike, aFilterStr, aFilterStr);
+        end;
+      2:
+        begin
+          aFilterCol := FGridItem.FindColByFieldName(GetBaseTypeUsercode(FBasicType)).GridColumn;
+          gridTVMainShow.DataController.Filter.Root.AddItem(aFilterCol, foLike, aFilterStr, aFilterStr);
+        end;
+    else
+
+    end;
+  end;
+  gridTVMainShow.DataController.Filter.Active :=  True;
+end;
+
+procedure TfrmBaseSelect.actOKExecute(Sender: TObject);
+begin
+  inherited;
+  actSelectExecute(actSelect);
+end;
+
+procedure TfrmBaseSelect.DoLoadUpDownData(Sender: TObject;
+  ATypeid: string);
+begin
+  LoadGridData(ATypeid);
 end;
 
 end.

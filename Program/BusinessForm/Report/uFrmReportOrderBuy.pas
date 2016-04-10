@@ -41,10 +41,10 @@ procedure TfrmReportOrderBuy.IniGridField;
 begin
   inherited;
   FGridItem.ClearField();
-  FGridItem.AddFiled('VchType', '单据类型', 50, cfString);
-  FGridItem.AddFiled('InputDate', '日期', 50, cfDate);
-  FGridItem.AddFiled('Savedate', '存盘时间', 50, cfDatime);
-  FGridItem.AddFiled('Number', '订单编号', 50, cfString);
+  FGridItem.AddField('VchType', '单据类型', 50, cfString);
+  FGridItem.AddField('InputDate', '日期', 50, cfDate);
+  FGridItem.AddField('Savedate', '存盘时间', 50, cfDatime);
+  FGridItem.AddField('Number', '订单编号', 50, cfString);
   FGridItem.InitGridData;
 end;
 

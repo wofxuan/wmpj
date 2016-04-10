@@ -70,6 +70,13 @@ AS
             WHERE   ( @nUpdateTag <= 0 )
                     OR ( UpdateTag > @nUpdateTag )
         END
+    IF @cMode = 'V' 
+        BEGIN
+            SELECT  [VTypeId], [Parid], [Soncount], [VSonnum], [VUsercode], [VFullname]
+            FROM    tbx_Base_Vtype
+            WHERE   ( @nUpdateTag <= 0 )
+                    OR ( UpdateTag > @nUpdateTag )
+        END
     RETURN 0
 
 go

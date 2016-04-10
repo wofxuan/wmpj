@@ -51,6 +51,11 @@ contains
   uSysConfigExport in 'uSysConfigExport.pas',
   uFrmLoadItemSet in 'uFrmLoadItemSet.pas' {frmLoadItemSet},
   uFrmLoadItemSetInput in 'uFrmLoadItemSetInput.pas' {frmLoadItemSetInput},
+  uFrmStockGoodsIni in 'uFrmStockGoodsIni.pas' {frmStockGoodsIni},
+  uFrmReBuild in 'uFrmReBuild.pas' {frmReBuild},
+  uFrmInitOver in 'uFrmInitOver.pas' {frmInitOver},
+  uFrmStockGoodOneCheck in 'uFrmStockGoodOneCheck.pas' {frmStockGoodOneCheck},
+  uFrmStockGoodCheck in 'uFrmStockGoodCheck.pas' {frmStockGoodCheck},
   uFrmBaseTbxCfg in 'uFrmBaseTbxCfg.pas' {frmBaseTbxCfg};
 
 end.

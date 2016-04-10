@@ -36,39 +36,35 @@ inherited frmMDIBaseType: TfrmMDIBaseType
     end
   end
   inherited actlstEvent: TActionList
-    object actReturn: TAction
-      Caption = 'actReturn'
-      OnExecute = actReturnExecute
-    end
-    object actAdd: TAction
+    object actAdd: TAction [1]
       Caption = #26032#22686
       OnExecute = actAddExecute
     end
-    object actModify: TAction
+    object actModify: TAction [2]
       Caption = #20462#25913
       OnExecute = actModifyExecute
     end
-    object actDelete: TAction
+    object actDelete: TAction [3]
       Caption = #21024#38500
       OnExecute = actDeleteExecute
     end
-    object actClass: TAction
+    object actClass: TAction [4]
       Caption = #20998#31867
       OnExecute = actClassExecute
     end
-    object actCopyAdd: TAction
+    object actCopyAdd: TAction [5]
       Caption = #22797#21046#26032#22686
       OnExecute = actCopyAddExecute
     end
-    object actList: TAction
+    object actList: TAction [6]
       Caption = #21015#34920
       OnExecute = actListExecute
     end
-    object actQuery: TAction
+    object actQuery: TAction [7]
       Caption = #26597#35810
       OnExecute = actQueryExecute
     end
-    object actStop: TAction
+    object actStop: TAction [8]
       Caption = #20572#29992
     end
   end
@@ -493,10 +489,6 @@ inherited frmMDIBaseType: TfrmMDIBaseType
         end
         item
           Visible = True
-          ItemName = 'btnReturn'
-        end
-        item
-          Visible = True
           ItemName = 'btnClose'
         end>
     end
@@ -546,14 +538,6 @@ inherited frmMDIBaseType: TfrmMDIBaseType
       Action = actStop
       Category = 0
       LargeImageIndex = 9
-      AutoGrayScale = False
-    end
-    object btnReturn: TdxBarLargeButton
-      Caption = #36820#22238
-      Category = 0
-      Visible = ivAlways
-      LargeImageIndex = 0
-      OnClick = actReturnExecute
       AutoGrayScale = False
     end
   end

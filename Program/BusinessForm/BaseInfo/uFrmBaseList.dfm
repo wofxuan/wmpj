@@ -1,5 +1,5 @@
-inherited frmBaseBtypeList: TfrmBaseBtypeList
-  Caption = 'frmBaseBtypeList'
+inherited frmBaseList: TfrmBaseList
+  Caption = 'frmBaseList'
   PixelsPerInch = 96
   TextHeight = 13
   inherited imglstBtn: TcxImageList

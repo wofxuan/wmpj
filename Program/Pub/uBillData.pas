@@ -3,7 +3,7 @@ unit uBillData;
 interface
 
 uses
-  Classes, uPackData, Variants;
+  Classes, uPackData, Variants, uDefCom;
 
 type
   //单据数据类
@@ -11,7 +11,7 @@ type
   private
     FIsModi: Boolean;
     FVchCode: Integer;
-    FDraft: Integer;
+    FDraft: TBillSaveState;
     FPRODUCT_TRADE: Integer;
     FVchType: Integer;
     FDetailData: TPackData;
@@ -20,7 +20,7 @@ type
 
     procedure SetAccountData(const Value: TPackData);
     procedure SetDetailData(const Value: TPackData);
-    procedure SetDraft(const Value: Integer);
+    procedure SetDraft(const Value: TBillSaveState);
     procedure SetIsModi(const Value: Boolean);
     procedure SetPRODUCT_TRADE(const Value: Integer);
     procedure SetVchCode(const Value: Integer);
@@ -32,7 +32,7 @@ type
     procedure Clear; override;
   published
     property PRODUCT_TRADE: Integer read FPRODUCT_TRADE write SetPRODUCT_TRADE; //行业表示； 0 辉煌系列； 1 五金建材系列； 2 布匹皮革系列；3 电脑行业
-    property Draft: Integer read FDraft write SetDraft; //操作类型 1:草稿 3:过账
+    property Draft: TBillSaveState read FDraft write SetDraft; //操作类型 1:草稿 3:过账
     property IsModi: Boolean read FIsModi write SetIsModi; //是否修改单据
     property VchCode: Integer read FVchCode write SetVchCode; //单据编码
     property VchType: Integer read FVchType write SetVchType; //单据类型
@@ -63,7 +63,7 @@ procedure TBillData.Clear;
 begin
   inherited;
   PRODUCT_TRADE := 0;
-  Draft := 0;
+  Draft := sbNone;
   isModi := False;
   vchCode := 0;
   vchType := 0;
@@ -76,7 +76,7 @@ begin
   FAccountData := Value;
 end;
 
-procedure TBillData.SetDraft(const Value: Integer);
+procedure TBillData.SetDraft(const Value: TBillSaveState);
 begin
   FDraft := Value;
 end;

@@ -18,6 +18,7 @@ type
     btEtype, //职员
     btDtype, //部门
     btKtype, //仓库
+    btVtype, //单据
     btAll);
 
 function GetBaseTypesLevels(ABasic: TBasicType): Integer; //返回基本信息的层数，来判断是否分类等操作
@@ -28,7 +29,8 @@ function GetBaseTypeKeyStr(ABasic: TBasicType): string;//返回对应的关键字
 function GetBaseTypeSonnumStr(ABasic: TBasicType): string;//返回对应的儿子数字段名称
 function GetBaseTypeTable(ABasic: TBasicType): string;//返回对应的表格名称
 function IsSaveToLocal(ABasic: TBasicType): Boolean;//不需要本地化的东东，就加到这里
-function BasicTypeToString(ABasicType: TBasicType; AName: string = ''): string;//基本信息转化为字符串
+function BasicTypeToString(ABasic: TBasicType; AName: string = ''): string;//基本信息转化为字符串
+function GetBasicTypeCaption(ABasic: TBasicType): string;//对应的标题
 
 implementation
 
@@ -42,6 +44,7 @@ begin
     btEtype: Result := 'ETypeId';
     btDtype: Result := 'DTypeId';
     btKtype: Result := 'KTypeId';
+    btVtype: Result := 'VTypeId';
   else
     Result := '';
   end;
@@ -57,6 +60,7 @@ begin
     btEtype: Result := 'EFullname';
     btDtype: Result := 'DFullname';
     btKtype: Result := 'KFullname';
+    btVtype: Result := 'VFullname';
   else
     Result := '';
   end;
@@ -72,6 +76,7 @@ begin
     btEtype: Result := 'EUsercode';
     btDtype: Result := 'DUsercode';
     btKtype: Result := 'KUsercode';
+    btVtype: Result := 'VUsercode';
   else
     Result := '';
   end;
@@ -87,6 +92,7 @@ begin
     btEtype: Result := 'E';
     btDtype: Result := 'D';
     btKtype: Result := 'K';
+    btVtype: Result := 'V';
   else
     Result := '';
   end;
@@ -101,6 +107,7 @@ begin
     btEtype: Result := 'tbx_Base_Etype';
     btDtype: Result := 'tbx_Base_Dtype';
     btKtype: Result := 'tbx_Base_Ktype';
+    btVtype: Result := 'tbx_Base_Vtype';
   else
     Result := '';
   end
@@ -115,6 +122,7 @@ begin
     btEtype: Result := 5;
     btDtype: Result := 5;
     btKtype: Result := 5;
+    btVtype: Result := 5;
   else
     Result := 1;
   end;
@@ -129,6 +137,7 @@ begin
     btEtype: Result := 'ESonnum';
     btDtype: Result := 'DSonnum';
     btKtype: Result := 'KSonnum';
+    btVtype: Result := 'VSonnum';
   else
     Result := '';
   end;
@@ -139,21 +148,41 @@ begin
   Result := not (ABasic in [btNo, btAtype, btAll]); //不需要本地化的东东，就加到这里
 end;
 
-function BasicTypeToString(ABasicType: TBasicType; AName: string = ''): string;
+function BasicTypeToString(ABasic: TBasicType; AName: string = ''): string;
 var
   aBtString: string;
 begin
-  case ABasicType of
+  case ABasic of
     btAtype: aBtString := 'btAtype';
     btBtype: aBtString := 'btBtype';
     btEtype: aBtString := 'btEtype';
     btKtype: aBtString := 'btKtype';
     btPtype: aBtString := 'btPtype';
     btDtype: aBtString := 'btDtype';
+    btVtype: aBtString := 'btVtype';
   else
     aBtString := 'btUtype';
   end;
   Result := aBtString + AName;
 end;
+
+function GetBasicTypeCaption(ABasic: TBasicType): string;
+var
+  aBtString: string;
+begin
+  case ABasic of
+    btAtype: aBtString := '会计科目';
+    btBtype: aBtString := '单位';
+    btEtype: aBtString := '职员';
+    btKtype: aBtString := '仓库';
+    btPtype: aBtString := '商品';
+    btDtype: aBtString := '部门';
+    btVtype: aBtString := '单据';
+  else
+    aBtString := '未定义';
+  end;
+  Result := aBtString;
+end;
+
 end.
 

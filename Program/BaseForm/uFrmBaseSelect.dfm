@@ -31,6 +31,7 @@ inherited frmBaseSelect: TfrmBaseSelect
     object cbbQueryType: TcxComboBox
       Left = 16
       Top = 8
+      Properties.DropDownListStyle = lsFixedList
       TabOrder = 1
       Width = 145
     end
@@ -73,8 +74,12 @@ inherited frmBaseSelect: TfrmBaseSelect
     end
   end
   inherited actlstEvent: TActionList
+    inherited actOK: TAction
+      OnExecute = actOKExecute
+    end
     object actQuery: TAction
       Caption = #26597#35810
+      OnExecute = actQueryExecute
     end
     object actSelect: TAction
       Caption = #36873#20013

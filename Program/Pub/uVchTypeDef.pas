@@ -14,6 +14,7 @@ const
   VchType_Buy = 3; //进货单
   VchType_Sale = 4; //销售单
 
+  VchType_Allot = 5; //调拨单
 
   //订单集合
   OrderVchtypes = [

@@ -1,6 +1,6 @@
 object FrmWMPG: TFrmWMPG
-  Left = 68
-  Top = 108
+  Left = 69
+  Top = 109
   Width = 1076
   Height = 517
   Caption = #20027#31243#24207
@@ -29,7 +29,7 @@ object FrmWMPG: TFrmWMPG
   end
   object statList: TStatusBar
     Left = 0
-    Top = 459
+    Top = 460
     Width = 1060
     Height = 19
     Panels = <

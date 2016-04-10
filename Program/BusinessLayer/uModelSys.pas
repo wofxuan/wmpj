@@ -17,6 +17,13 @@ type
   public
   
   end;
+
+  TModelSys = class(TModelBase, IModelSys)
+    function ReBuild(AParam: TParamObject): Integer;
+    procedure SetParam(const AName, AValue: string);//设置系统参数
+    function GetParam(const AName: string): string;//获取系统参数
+  end;
+  
 implementation
 
 uses uModelFunCom, uOtherIntf;
@@ -120,7 +127,61 @@ begin
   end;
 end;
 
+{ TModelSys }
+
+function TModelSys.GetParam(const AName: string): string;
+var
+  aParam: TParamObject;
+  aRet: Integer;
+begin
+  Result := '';
+  aParam := TParamObject.Create;
+  try
+    aParam.Add('@PName', AName);
+    aRet := gMFCom.ExecProcByName('pbx_Sys_GetParam', aParam);
+    if aRet <> 0 then Exit;
+
+    Result := aParam.AsString('@ValueReturn');
+  finally
+    aParam.Free;
+  end;
+end;
+
+procedure TModelSys.SetParam(const AName, AValue: string);
+var
+  aParam: TParamObject;
+begin
+  aParam := TParamObject.Create;
+  try
+    aParam.Add('@PName', AName);
+    aParam.Add('@PValue', AValue);
+    gMFCom.ExecProcByName('pbx_Sys_SetParam', aParam);
+  finally
+    aParam.Free;
+  end;
+end;
+
+function TModelSys.ReBuild(AParam: TParamObject): Integer;
+var
+  aRet: Integer;
+  aErrorMsg: string;
+begin
+  try
+    aRet := gMFCom.ExecProcByName('pbx_Sys_ReBuild', AParam);
+    if aRet <> 0 then
+    begin
+      aErrorMsg := AParam.AsString('@ErrorValue');
+      gMFCom.ShowMsgBox(aErrorMsg, '错误', mbtError);
+      Exit;
+    end;
+    Result := aRet;
+  finally
+
+  end;
+end;
+
 initialization
   gClassIntfManage.addClass(TModelTbxCfg, IModelTbxCfg);
+  gClassIntfManage.addClass(TModelSys, IModelSys);
   
 end.

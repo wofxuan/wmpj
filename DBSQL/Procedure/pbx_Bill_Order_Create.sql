@@ -78,7 +78,7 @@ AS
             SET @YPratypeid = '0000100009' --预付账款
         END
 
-    IF @szBTypeID <> '' 
+    IF ISNULL(@szBTypeID, '') <> '' 
         IF NOT EXISTS ( SELECT  btypeid
                         FROM    dbo.tbx_Base_Btype
                         WHERE   btypeid = @szBTypeID
@@ -88,7 +88,7 @@ AS
                 SET @ErrorValue = '单位不存在或者已经删除'
                 GOTO ErrorGeneral
             END
-    IF @szETypeID <> '' 
+    IF ISNULL(@szETypeID, '') <> '' 
         IF NOT EXISTS ( SELECT  etypeid
                         FROM    dbo.tbx_Base_Etype
                         WHERE   etypeid = @szETypeID
@@ -98,7 +98,7 @@ AS
                 SET @ErrorValue = '经手人不存在或者已经删除'
                 GOTO ErrorGeneral
             END
-    IF @DeptID <> '' 
+    IF ISNULL(@DeptID, '') <> '' 
         IF NOT EXISTS ( SELECT  Dtypeid
                         FROM    dbo.tbx_Base_Dtype
                         WHERE   Dtypeid = @DeptID
@@ -108,7 +108,7 @@ AS
                 SET @ErrorValue = '部门不存在或者已经删除'
                 GOTO ErrorGeneral
             END
-    IF @inputNo <> ''
+    IF ISNULL(@inputNo, '') <> ''
         AND @inputNo <> '00000' 
         IF NOT EXISTS ( SELECT  etypeid
                         FROM    tbx_Base_Etype
@@ -296,7 +296,7 @@ AS
                                     AND btypeid = @szBTypeID
                                     AND InputDate = @sdate ) 
                 BEGIN
-                    SET @net = -823
+                    SET @ErrorValue = '本单据已经在其它地方修改，不能修改/删除'
                     GOTO ErrorGeneral	
                 END
         END 

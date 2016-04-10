@@ -18,21 +18,24 @@ type
   TModelBillSale = class(TModelBill, IModelBillSale) //单据-进货单
   function GetBillCreateProcName: string; override;
   end;
-
+  
+  TModelBillAllot = class(TModelBill, IModelBillAllot) //单据-调拨单
+  function GetBillCreateProcName: string; override;
+  end;
 implementation
-
-{ TModelBillSale }
-
-function TModelBillSale.GetBillCreateProcName: string;
-begin
-  Result := 'pbx_Bill_Create';
-end;
 
 { TModelBillOrder }
 
 function TModelBillOrder.GetBillCreateProcName: string;
 begin
   Result := 'pbx_Bill_Order_Create';
+end;
+
+{ TModelBillSale }
+
+function TModelBillSale.GetBillCreateProcName: string;
+begin
+  Result := 'pbx_Bill_Create';
 end;
 
 { TModelBillBuy }
@@ -42,9 +45,17 @@ begin
   Result := 'pbx_Bill_Create';
 end;
 
+{ TModelBillAllot }
+
+function TModelBillAllot.GetBillCreateProcName: string;
+begin
+  Result := 'pbx_Bill_Create';
+end;
+
 initialization
   gClassIntfManage.addClass(TModelBillOrder, IModelBillOrder);
   gClassIntfManage.addClass(TModelBillBuy, IModelBillBuy);
   gClassIntfManage.addClass(TModelBillSale, IModelBillSale);
+  gClassIntfManage.addClass(TModelBillAllot, IModelBillAllot);
 
 end.

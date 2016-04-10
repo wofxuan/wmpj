@@ -3,7 +3,7 @@ unit uParamObject;
 interface
 
 uses
-  Classes, SysUtils, Variants, superobject;
+  Classes, SysUtils, Variants, DBClient, superobject;
 
 type
   //参数定义
@@ -16,14 +16,14 @@ type
   //参数数组
   TGParams = array of TGParam;
 
-  TParamObject = class(TPersistent)
+  TParamObject = class(TObject)
   private
     FParams: TGParams;
     FCount: Integer;
     procedure SetParams(Value: TGParams);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(Source: TObject);
     procedure SetValue(AParamName: string; AParamValue: Variant; AddWhenNotExist: Boolean = True);
     procedure Add(AParamName: string; AParamValue: Variant; IsSystem: Boolean = False); //先查找，有就修改没有就增加。
     procedure Clear; //只清空非系统级的
@@ -41,6 +41,7 @@ type
 function ParamObjectToJson(APB: TParamObject): ISuperObject;
 function PackageToJson(AProcName: string; AJson: ISuperObject): ISuperObject;
 function ParamObjectToString(APB: TParamObject): string;
+procedure ClientDataSetToParamObject(AData: TClientDataSet; AList: TParamObject); //数据转换
 
 implementation
 
@@ -52,6 +53,8 @@ begin
   aToStr := '';
   for i := 0 to APB.Count - 1 do
   begin
+    if Trim(APB.Params[i].ParamName) = EmptyStr then Continue;
+    
     case VarType(APB.Params[i].ParamValue) of
       varString: aToStr := aToStr + '[' + APB.Params[i].ParamName + ':''' + APB.Params[i].ParamValue + ''']';
       varDouble: aToStr := aToStr + '[' + APB.Params[i].ParamName + ':' + FloatToStr(APB.Params[i].ParamValue) + ']';
@@ -72,6 +75,8 @@ begin
   aJson := SO();
   for i := 0 to APB.Count - 1 do
   begin
+    if Trim(APB.Params[i].ParamName) = EmptyStr then Continue;
+    
     case VarType(APB.Params[i].ParamValue) of
       varString: aJson.S[APB.Params[i].ParamName] := APB.Params[i].ParamValue;
       varDouble: aJson.D[APB.Params[i].ParamName] := APB.Params[i].ParamValue;
@@ -168,13 +173,11 @@ begin
     Result := V;
 end;
 
-procedure TParamObject.Assign(Source: TPersistent);
+procedure TParamObject.Assign(Source: TObject);
 var
   i: Integer;
   aTGParam: TGParam;
 begin
-  inherited;
-
   if not (Source is TParamObject) then Exit;
 
   Self.Clear;
@@ -275,5 +278,24 @@ begin
     Add(AParamName, AParamValue, False);
 end;
 
+procedure ClientDataSetToParamObject(AData: TClientDataSet;
+  AList: TParamObject);
+var
+  aCol: Integer;
+  aName, aValues: string;
+begin
+  if not Assigned(AList) then Exit;
+  if not Assigned(AData) then Exit;
+  if AData.IsEmpty then Exit;
+
+  AList.Clear;
+  AData.First;
+  for aCol := 0 to AData.FieldCount - 1 do
+  begin
+    aName := AData.FieldDefs[aCol].Name;
+    aValues := AData.FieldList[acol].AsString;
+    AList.Add(aName, aValues);
+  end;
+end;
 end.
 

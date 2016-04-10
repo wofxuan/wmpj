@@ -57,7 +57,7 @@ begin
     Application.Run;
 //    ³ÌÐò½áÊø
     @ProFinal := GetProcAddress(CorePackageHandle, 'Final');
-    if assigned(ProFinal) then
+    if Assigned(ProFinal) then
     begin
       try
         ProFinal;

@@ -8,11 +8,7 @@ unit uModuleList;
 interface
 
 uses
-  uFrmBaseBtypeList, //基本信息-单位列表
-  uFrmBaseEtypeList, //基本信息-职员列表
-  uFrmBaseDtypeList, //基本信息-部门列表
-  uFrmBaseKtypeList, //基本信息-仓库列表
-  uFrmBasePtypeList; //基本信息-商品列表
+  uFrmBaseList; //基本信息
 
 implementation
 

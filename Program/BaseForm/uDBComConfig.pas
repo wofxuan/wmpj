@@ -203,6 +203,7 @@ begin
       aValue := AParam.AsString(aItem.GetDBName);
       if IsSaveToLocal(aItem.BasicType) and (not StringEmpty(aValue)) then
       begin
+        aItem.TypeId := aValue;
         aValue := FModelFun.GetLocalValue(aItem.BasicType, aItem.ShowFields, aValue);
       end;
       TcxButtonEdit(aItem.Component).Text := aValue;

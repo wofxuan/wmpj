@@ -1,5 +1,5 @@
-inherited frmBasePtypeList: TfrmBasePtypeList
-  Caption = 'frmBasePtypeList'
+inherited frmReportBill: TfrmReportBill
+  Caption = 'frmReportBill'
   PixelsPerInch = 96
   TextHeight = 13
   inherited imglstBtn: TcxImageList
