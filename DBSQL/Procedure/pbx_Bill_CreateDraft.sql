@@ -5,7 +5,7 @@ go
 CREATE PROCEDURE dbo.pbx_Bill_CreateDraft
     (
       @ModiDly INT , --是否是修改单据 0 否，1 是
-      @ADraft INT , --1 存草稿，3 过账
+      @ADraft INT , --3 存草稿，2过账
       @OldVchCode INT ,
       @NewVchCode INT OUT ,
        --下面面是存储过程必须的参数
@@ -34,6 +34,11 @@ AS
         @szzctypeid VARCHAR(50)
 
     BEGIN TRAN updata
+    
+	UPDATE  dbo.tbx_Bill_M
+	SET     Draft = 1
+	WHERE   VchCode = @NewVchCode
+		
     COMMIT TRAN updata
 
     SET @net = 0

@@ -6,28 +6,45 @@ go
 
 CREATE PROCEDURE pbx_Bill_Load_D
     (
-      @DBName VARCHAR(50) ,
-      @VchCode NUMERIC(10, 0) ,
-      @UsedType VARCHAR(1)--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 2是系统生成的记录
+      @VchType INT ,
+      @VchCode INT ,
+      @BillState INT --单据是否过账等状态
     )
 AS 
     SET NOCOUNT ON
-
-    IF @DBName = 'tbx_Bill_Order_D' 
+	
+    DECLARE @DBTable VARCHAR(50) ,
+        @SQL VARCHAR(8000)
+      
+    IF @VchType IN ( 1, 2 ) --订单
         BEGIN
-            SELECT  *
-            FROM    dbo.tbx_Bill_Order_D d LEFT JOIN dbo.tbx_Base_Ptype p ON d.PtypeId = p.PTypeId
-            WHERE   d.VchCode = @VchCode
-            ORDER BY d.DlyOrder 
+            SET @DBTable = 'tbx_Bill_Order_D'	
         END
     ELSE 
-        IF @dbname = 'tbx_Bill_Buy_D' 
-            BEGIN
-                SELECT  *
-                FROM    dbo.tbx_Bill_Buy_D d LEFT JOIN dbo.tbx_Base_Ptype p ON d.PtypeId = p.PTypeId
-                WHERE   d.VchCode = @VchCode
-                ORDER BY d.DlyOrder 
-            END
+        BEGIN
+            IF @BillState <> 3 
+                BEGIN
+                    SET @DBTable = 'tbx_Bill_D_Bak'	
+                END
+            ELSE 
+                BEGIN
+                    IF @VchType = 3 
+                        BEGIN
+                            SET @DBTable = 'tbx_Bill_Buy_D'	
+                        END
+                    ELSE 
+                        IF @VchType = 4 
+                            BEGIN
+                                SET @DBTable = 'tbx_Bill_Sale_D'	
+                            END
+                END
+        END
+    SET @SQL = 'SELECT  *
+                FROM    ' + @DBTable + ' d
+                        LEFT JOIN dbo.tbx_Base_Ptype p ON d.PtypeId = p.PTypeId
+                WHERE   d.VchCode = ' + CAST(@VchCode AS VARCHAR(20)) + '
+                ORDER BY d.DlyOrder '
+    EXEC (@SQL)
     RETURN 0
 
 GO 

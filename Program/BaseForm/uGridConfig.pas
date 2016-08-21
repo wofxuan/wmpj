@@ -10,7 +10,7 @@ interface
 
 uses
   Windows, Classes, Db, DBClient, SysUtils, Controls, cxGrid, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGraphics, uBaseInfoDef, uModelBaseIntf, uModelFunIntf, uModelOtherSet, cxEdit, uDefCom, cxCustomData;
+  cxGridDBTableView, cxGraphics, uBaseInfoDef, uModelBaseIntf, uModelFunIntf, cxEdit, uDefCom, cxCustomData, uOtherDefine;
 
 const
   SpecialCharList: array[0..1] of string = ('[', ']');

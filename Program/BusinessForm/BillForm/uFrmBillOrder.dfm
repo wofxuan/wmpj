@@ -164,5 +164,8 @@ inherited frmBillOrder: TfrmBillOrder
     inherited btnSave: TdxBarLargeButton
       ImageIndex = 3
     end
+    inherited btnSelectBill: TdxBarLargeButton
+      ImageIndex = 4
+    end
   end
 end

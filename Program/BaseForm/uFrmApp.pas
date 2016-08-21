@@ -9,7 +9,7 @@ interface
 
 uses
   Windows, Classes, Db, DBClient, SysUtils, cxGrid, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGraphics, cxContainer, cxTreeView, cxDropDownEdit, uModelOtherSet;
+  cxGridDBTableView, cxGraphics, cxContainer, cxTreeView, cxDropDownEdit, uOtherDefine;
 
 type
   PNodeData = ^TNodeData;   //一个树节点数据

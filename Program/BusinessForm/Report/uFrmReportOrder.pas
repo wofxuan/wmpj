@@ -31,7 +31,7 @@ var
 
 implementation
 
-uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uModelReportIntf, uVchTypeDef,
+uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uModelReportIntf, uVchTypeDef, uFunApp,
      uModelControlIntf, uBaseInfoDef, uDefCom, uGridConfig, uFrmApp, uMainFormIntf;
 {$R *.dfm}
 
@@ -79,7 +79,7 @@ procedure TfrmReportOrder.gridTVMainShowCellDblClick(
   ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
   AShift: TShiftState; var AHandled: Boolean);
 var
-  aVchType, aVchCode: string;
+  aVchType, aVchCode: Integer;
   aRowIndex: Integer;
   aParam: TParamObject;
 begin
@@ -91,17 +91,7 @@ begin
   aVchType := FGridItem.GetCellValue('VchType', aRowIndex);
   aVchCode := FGridItem.GetCellValue('VchCode', aRowIndex);
 
-  aParam := TParamObject.Create;
-  try
-    aParam.Add('VchType', aVchType);
-    aParam.Add('VchCode', aVchCode);
-    if FVchType = VchType_Order_Buy then
-      (SysService as  IMainForm).CallFormClass(fnMdlBillOrderBuy, aParam)
-    else if FVchType = VchType_Order_Sale then
-      (SysService as  IMainForm).CallFormClass(fnMdlBillOrderSale, aParam)
-  finally
-    aParam.Free;
-  end;
+  OpenBillFrm(aVchType, aVchCode, bosEdit);
 end;
 
 function TfrmReportOrder.GetQryParam(AParam: TParamObject): Boolean;

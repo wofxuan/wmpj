@@ -7,7 +7,7 @@ unit uModelStockGoodsInf;
 
 interface
 
-uses DBClient, Classes, uParamObject, uBaseInfoDef, uModelBaseIntf, uModelOtherSet;
+uses DBClient, Classes, uParamObject, uBaseInfoDef, uModelBaseIntf, uOtherDefine;
 
 type
   IModelStockGoods = interface(IModelBase)

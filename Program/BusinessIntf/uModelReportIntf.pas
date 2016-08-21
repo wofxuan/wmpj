@@ -2,7 +2,7 @@ unit uModelReportIntf;
 
 interface
 
-uses DBClient, uParamObject, uBaseInfoDef, uModelBaseIntf;
+uses DBClient, uParamObject, uBaseInfoDef, uModelBaseIntf, uOtherDefine;
 
 type
   IModelReportStockGoods = interface(IModelReport) //报表-库存查询       
@@ -20,7 +20,20 @@ type
   IModelReportSale = interface(IModelReport) //报表-销售单统计     
     ['{2D626231-163D-4BBD-A202-AEA352D59407}']     
   end;
+
+var
+  TReport_Draft: TIDDisplayText;//是否过账
+  
 implementation
 
+initialization
+  TReport_Draft := TIDDisplayText.Create;
+  TReport_Draft.AddItem('0', '未定义');
+  TReport_Draft.AddItem('1', '草稿');
+  TReport_Draft.AddItem('2', '过账');
+
+finalization
+  TReport_Draft.Free;
+  
 end.
 

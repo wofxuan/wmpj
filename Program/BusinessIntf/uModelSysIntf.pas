@@ -7,7 +7,7 @@ unit uModelSysIntf;
 
 interface
 
-uses DBClient, Classes, uParamObject, uBaseInfoDef, uModelBaseIntf, uModelOtherSet;
+uses DBClient, Classes, uParamObject, uBaseInfoDef, uModelBaseIntf, uOtherDefine;
 
 type
   //操作表的方式

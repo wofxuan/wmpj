@@ -41,7 +41,7 @@ contains
   uModelFunIntf in 'uModelFunIntf.pas',
   uModelControlIntf in 'uModelControlIntf.pas',
   uModelSysIntf in 'uModelSysIntf.pas',
-  uModelOtherSet in 'uModelOtherSet.pas',
+  uOtherDefine in 'uOtherDefine.pas',
   uModelReportIntf in 'uModelReportIntf.pas',
   uVchTypeDef in '..\Pub\uVchTypeDef.pas',
   uModelBillIntf in 'uModelBillIntf.pas',

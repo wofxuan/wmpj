@@ -153,7 +153,16 @@ inherited frmBillSale: TfrmBillSale
     DockControlHeights = (
       0
       0
-      48
+      44
       0)
+    inherited btnNewBill: TdxBarLargeButton
+      ImageIndex = 2
+    end
+    inherited btnSave: TdxBarLargeButton
+      ImageIndex = 3
+    end
+    inherited btnSelectBill: TdxBarLargeButton
+      ImageIndex = 4
+    end
   end
 end

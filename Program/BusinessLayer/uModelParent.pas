@@ -594,8 +594,8 @@ begin
   aCdsMaster := TClientDataSet.Create(nil);
   try
     aList.Add('@VchCode', AInParam.AsInteger('VchCode'));
-    aList.Add('@DBName', AInParam.AsString('DBName'));
-    aList.Add('@UsedType', AInParam.AsString('UsedType'));
+    aList.Add('@VchType', AInParam.AsInteger('VchType'));
+    aList.Add('@BillState', AInParam.AsInteger('BillState'));
     gMFCom.ExecProcBackData('pbx_Bill_Load_D', aList, ACdsD);
   finally
     aCdsMaster.Free;

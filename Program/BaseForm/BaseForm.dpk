@@ -60,6 +60,7 @@ contains
   uFrmMDIBill in 'uFrmMDIBill.pas' {frmMDIBill},
   uFrmDialog in 'uFrmDialog.pas' {frmDialog},
   uFrmBaseSelect in 'uFrmBaseSelect.pas' {frmBaseSelect},
-  uFrmMDIReport in 'uFrmMDIReport.pas' {frmMDIReport};
+  uFrmMDIReport in 'uFrmMDIReport.pas' {frmMDIReport},
+  uFunApp in 'uFunApp.pas';
 
 end.

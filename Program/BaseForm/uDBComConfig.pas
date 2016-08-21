@@ -54,6 +54,7 @@ type
     procedure SetBasicItemValue(AControl: TControl; ASelectBasicData: TSelectBasicData);//给绑定了基本信息的控件赋值
 
     function GetItemValue(AControl: TControl): Variant;//回去控件的值
+    procedure SetReadOnly(AControl: TControl; AReadOnly: Boolean = True);//设置是否只读
   published
     property DBComList: TDBComArray read FDBComList;
     property OnSelectBasic: TSelectBasicinfoEvent read FOnSelectBasic write FOnSelectBasic;
@@ -339,6 +340,7 @@ begin
       begin
         if aItem.Component = Sender then
         begin
+          if TcxButtonEdit(aItem.Component).Properties.ReadOnly then Exit;
           OnSelectBasic(aItem.Component, aItem.BasicType, aSelectParam, aSelectOptions, aReturnArray, aReturnCount);
           if aReturnCount >= 1 then
           begin
@@ -347,6 +349,49 @@ begin
           Break;
         end;
       end;
+    end;
+  end;
+end;
+
+procedure TFormDBComItem.SetReadOnly(AControl: TControl;
+  AReadOnly: Boolean);
+var
+  i: Integer;
+  aItem: PDBComItem;
+  aValue: string;
+begin
+  inherited;
+  for i := 0 to Length(Self.DBComList) - 1 do
+  begin
+    aItem := DBComList[i];
+    if Assigned(AControl) then
+    begin
+      if AControl <> aItem.Component then Continue;
+    end;
+
+    if aItem.Component is TcxButtonEdit then
+    begin
+      TcxButtonEdit(aItem.Component).Properties.ReadOnly := AReadOnly;
+    end
+    else if aItem.Component is TcxComboBox then
+    begin
+      TcxComboBox(aItem.Component).Properties.ReadOnly := AReadOnly;
+    end
+    else if aItem.Component is TcxCheckBox then
+    begin
+      TcxCheckBox(aItem.Component).Properties.ReadOnly := AReadOnly;
+    end
+    else if aItem.Component is TcxMemo then
+    begin
+      TcxButtonEdit(aItem.Component).Properties.ReadOnly := AReadOnly;
+    end
+    else if aItem.Component is TcxDateEdit then
+    begin
+      TcxDateEdit(aItem.Component).Properties.ReadOnly := AReadOnly;
+    end
+    else
+    begin
+      raise(SysService as IExManagement).CreateSysEx('绑定未知类型的控件[' + aItem.Component.ClassName + ']!');
     end;
   end;
 end;

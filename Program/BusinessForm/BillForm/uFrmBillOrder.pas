@@ -36,7 +36,6 @@ type
     procedure InitGrids(Sender: TObject); override;
 
     function LoadBillDataMaster: Boolean; override;
-    function LoadBillDataGrid: Boolean; override;
     function LoadPtype(ABasicDatas: TSelectBasicDatas): Boolean;
     function LoadOnePtype(ARow: Integer; AData: TSelectBasicData; IsImport: Boolean = False): Boolean; override;
 
@@ -160,61 +159,13 @@ begin
   deGatheringDate.Text := FormatdateTime('YYYY-MM-DD', Now + 1);
 end;
 
-function TfrmBillOrder.LoadBillDataGrid: Boolean;
-var
-  aInList: TParamObject;
-  aCdsD: TClientDataSet;
-begin
-  if FVchcode = 0 then //新单据
-  begin
-    FGridItem.ClearData;
-  end
-  else
-  begin
-    //加载单据
-    aInList := TParamObject.Create;
-    aCdsD := TClientDataSet.Create(nil);
-    try
-      aInList.Add('VchCode', FVchCode);
-      aInList.Add('DBName', 'tbx_Bill_Order_D');
-      aInList.Add('UsedType', '1');
-      FModelBill.LoadBillDataDetail(aInList, aCdsD);
-      FGridItem.LoadData(aCdsD);
-    finally
-      aCdsD.Free;
-      aInList.Free;
-    end;
-  end;
-end;
-
 function TfrmBillOrder.LoadBillDataMaster: Boolean;
-var
-  aInList, aMasterList: TParamObject;
 begin
   inherited LoadBillDataMaster;
   if FVchCode = 0 then
   begin
     deGatheringDate.Text := FormatdateTime('YYYY-MM-DD', Now + 1);
   end
-  else
-  begin
-    aInList := TParamObject.Create;
-    aMasterList := TParamObject.Create;
-    try
-      aInList.Add('VchCode', FVchCode);
-      aInList.Add('VchType', FVchType);
-      FModelBill.LoadBillDataMaster(aInList, aMasterList);
-      if aMasterList.Count = 0 then
-      begin
-        (SysService as IMsgBox).MsgBox('该单据不存在，可能已经被删除！');
-        FrmClose();  
-      end;
-      DBComItem.GetDataFormParam(aMasterList);
-    finally
-      aMasterList.Free;
-      aInList.Free;
-    end;
-  end;
 end;
 
 function TfrmBillOrder.LoadOnePtype(ARow: Integer; AData: TSelectBasicData;
