@@ -58,7 +58,7 @@ var
 
 implementation
 
-uses uSysSvc, uPubFun, uOtherIntf, uFactoryFormIntf;
+uses uSysSvc, uPubFun, uOtherIntf, uFactoryFormIntf, uDefCom, uMainFormIntf;
 
 { TBaseFormPlugin }
 
@@ -196,9 +196,10 @@ begin
 //    afrmParent.BorderStyle := bsNone;
 //    afrmParent.Align := alClient;
 //  end;
-  if afrmParent.FormStyle = fsMDIChild then
+  if afrmParent.FrmShowStyle = fssShow then
   begin
-    afrmParent.WindowState := wsMaximized;
+    afrmParent.Parent := (SysService as IMainForm).GetMDIShowClient;
+    afrmParent.WindowState := wsMaximized; 
   end;
   afrmParent.GetInterface(IFormIntf, aInstance);
   Result := aInstance;

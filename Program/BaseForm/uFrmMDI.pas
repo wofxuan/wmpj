@@ -95,8 +95,12 @@ begin
 end;
 
 procedure TfrmMDI.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  aCanClose: Boolean;
 begin
   inherited;
+  aCanClose := False;
+  (SysService as IMainForm).CloseFom(Self, aCanClose);
   Action := caFree;
 end;
 

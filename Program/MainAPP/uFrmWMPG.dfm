@@ -29,7 +29,7 @@ object FrmWMPG: TFrmWMPG
   end
   object statList: TStatusBar
     Left = 0
-    Top = 460
+    Top = 459
     Width = 1060
     Height = 19
     Panels = <
@@ -65,5 +65,15 @@ object FrmWMPG: TFrmWMPG
     ClientRectBottom = 20
     ClientRectRight = 1060
     ClientRectTop = 19
+  end
+  object pnlMDIClient: TPanel
+    Left = 0
+    Top = 85
+    Width = 1060
+    Height = 374
+    Align = alClient
+    BevelOuter = bvNone
+    Caption = 'pnlMDIClient'
+    TabOrder = 2
   end
 end

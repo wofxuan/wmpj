@@ -34,7 +34,6 @@ type
     function FrmShowModal: Integer;
     procedure FrmFree;
     procedure FrmClose;
-    function FrmShowStyle: TShowStyle; virtual; abstract; //窗体显示的类型，是否modal
 
     procedure DoSelectBasic(Sender: TObject; ABasicType: TBasicType;
       ASelectBasicParam: TSelectBasicParam;
@@ -57,7 +56,7 @@ type
     class function GetMdlDisName: string; virtual; //得到模块显示名称
     property Title: string read FTitle write SetTitle; //代表了子类的lbltitle.caption
     property DBComItem: TFormDBComItem read FDBComItem write FDBComItem;
-
+    function FrmShowStyle: TShowStyle; virtual; abstract; //窗体显示的类型，是否modal
   end;
 
 var

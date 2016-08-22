@@ -52,10 +52,11 @@ contains
   uFrmLoadItemSet in 'uFrmLoadItemSet.pas' {frmLoadItemSet},
   uFrmLoadItemSetInput in 'uFrmLoadItemSetInput.pas' {frmLoadItemSetInput},
   uFrmStockGoodsIni in 'uFrmStockGoodsIni.pas' {frmStockGoodsIni},
-  uFrmReBuild in 'uFrmReBuild.pas' {frmReBuild},
+  uFrmLimitSet in 'uFrmLimitSet.pas' {frmLimitSet},
   uFrmInitOver in 'uFrmInitOver.pas' {frmInitOver},
   uFrmStockGoodOneCheck in 'uFrmStockGoodOneCheck.pas' {frmStockGoodOneCheck},
   uFrmStockGoodCheck in 'uFrmStockGoodCheck.pas' {frmStockGoodCheck},
-  uFrmBaseTbxCfg in 'uFrmBaseTbxCfg.pas' {frmBaseTbxCfg};
+  uFrmBaseTbxCfg in 'uFrmBaseTbxCfg.pas' {frmBaseTbxCfg},
+  uFrmReBuild in 'uFrmReBuild.pas' {frmReBuild};
 
 end.

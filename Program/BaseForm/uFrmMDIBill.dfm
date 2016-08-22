@@ -1,5 +1,6 @@
 inherited frmMDIBill: TfrmMDIBill
   Caption = 'frmMDIBill'
+  FormStyle = fsNormal
   PixelsPerInch = 96
   TextHeight = 13
   inherited splOP: TSplitter

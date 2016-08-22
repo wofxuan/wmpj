@@ -59,6 +59,7 @@ const
   fnMdlInitOver = fnSystem + 0007; //开账，反开账
   fnMdlReBuild = fnSystem + 0008; //系统重建
   fnMdlCheckGoods = fnSystem + 0009; //仓库盘点
+  fnDialogLimitSet = fnSystem + 0010; //权限设置
 
   //测试-------------------------------7000---------------------
   fnMdlTTest = fnTest + 0001; //测试
