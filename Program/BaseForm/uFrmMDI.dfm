@@ -4,12 +4,7 @@ inherited frmMDI: TfrmMDI
   OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
-  object splOP: TSplitter [0]
-    Left = 0
-    Top = 82
-    Height = 235
-  end
-  object pnlTop: TPanel [1]
+  object pnlTop: TPanel [0]
     Left = 0
     Top = 44
     Width = 736
@@ -17,10 +12,10 @@ inherited frmMDI: TfrmMDI
     Align = alTop
     TabOrder = 0
   end
-  object gridMainShow: TcxGrid [2]
-    Left = 3
+  object gridMainShow: TcxGrid [1]
+    Left = 0
     Top = 82
-    Width = 733
+    Width = 736
     Height = 235
     Align = alClient
     TabOrder = 1
@@ -34,12 +29,12 @@ inherited frmMDI: TfrmMDI
       GridView = gridTVMainShow
     end
   end
-  object dsMainShow: TDataSource [3]
+  object dsMainShow: TDataSource [2]
     DataSet = cdsMainShow
     Left = 660
     Top = 16
   end
-  object cdsMainShow: TClientDataSet [4]
+  object cdsMainShow: TClientDataSet [3]
     Aggregates = <>
     Params = <>
     Left = 596
@@ -175,6 +170,7 @@ inherited frmMDI: TfrmMDI
           Visible = True
           ItemName = 'btnClose'
         end>
+      NotDocking = [dsNone, dsLeft, dsTop, dsRight, dsBottom]
       OneOnRow = True
       Row = 0
       UseOwnFont = False

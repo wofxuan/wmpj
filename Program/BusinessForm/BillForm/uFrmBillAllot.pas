@@ -107,7 +107,7 @@ end;
 procedure TfrmBillAllot.InitMasterTitles(Sender: TObject);
 begin
   inherited;
-  MoudleNo := FVchType;
+  MoudleNo := fnMdlBillAllot;
 
   Title := 'µ÷²¦µ¥';
 

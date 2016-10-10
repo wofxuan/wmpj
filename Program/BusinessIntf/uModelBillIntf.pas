@@ -21,6 +21,12 @@ type
     ['{BC31588A-A43E-4A04-B20F-207D4AD3D24B}']
   end;
 
+  IModelBillPRMoney = interface(IModelBill) //单据-收付款单
+    ['{471C0095-2EB8-489C-8BBC-9ED0907BC4CA}']
+    function QryBalance(AInParam: TParamObject; ACds: TClientDataSet): Integer; //查询需要结算的单据
+    function SaveBalance(AParam: TParamObject): Integer; //保存，修改或删除结算的单据记录
+  end;
+
 implementation
 
 end.

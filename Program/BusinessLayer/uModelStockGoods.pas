@@ -3,7 +3,7 @@ unit uModelStockGoods;
 interface
 uses
   Classes, Windows, SysUtils, DBClient, uPubFun, uParamObject, uBusinessLayerPlugin,
-  uBaseInfoDef, uModelParent, uModelStockGoodsInf;
+  uBaseInfoDef, uModelParent, uModelStockGoodsIntf;
 
 type
   TModelStockGoods = class(TModelBase, IModelStockGoods)

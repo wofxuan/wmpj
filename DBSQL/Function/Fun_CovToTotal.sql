@@ -9,7 +9,7 @@ AS
     BEGIN
         DECLARE @ditTotal INT
         SELECT  @ditTotal = DitDefValue
-        FROM    DitDefFomat
+        FROM    tbx_Sys_DitDef
         WHERE   DitDefName = 'DitTotal'
         RETURN ROUND(@nTotal,@ditTotal)
         

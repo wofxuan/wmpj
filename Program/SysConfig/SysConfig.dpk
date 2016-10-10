@@ -49,7 +49,7 @@ requires
 
 contains
   uSysConfigExport in 'uSysConfigExport.pas',
-  uFrmLoadItemSet in 'uFrmLoadItemSet.pas' {frmLoadItemSet},
+  uFrmLimitRole in 'uFrmLimitRole.pas' {frmLimitRole},
   uFrmLoadItemSetInput in 'uFrmLoadItemSetInput.pas' {frmLoadItemSetInput},
   uFrmStockGoodsIni in 'uFrmStockGoodsIni.pas' {frmStockGoodsIni},
   uFrmLimitSet in 'uFrmLimitSet.pas' {frmLimitSet},
@@ -57,6 +57,7 @@ contains
   uFrmStockGoodOneCheck in 'uFrmStockGoodOneCheck.pas' {frmStockGoodOneCheck},
   uFrmStockGoodCheck in 'uFrmStockGoodCheck.pas' {frmStockGoodCheck},
   uFrmBaseTbxCfg in 'uFrmBaseTbxCfg.pas' {frmBaseTbxCfg},
-  uFrmReBuild in 'uFrmReBuild.pas' {frmReBuild};
+  uFrmReBuild in 'uFrmReBuild.pas' {frmReBuild},
+  uFrmLoadItemSet in 'uFrmLoadItemSet.pas' {frmLoadItemSet};
 
 end.

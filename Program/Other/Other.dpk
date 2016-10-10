@@ -35,6 +35,7 @@ contains
   uOtherExport in 'uOtherExport.pas',
   uExDef in 'uExDef.pas',
   uFrmMsgBox in 'uFrmMsgBox.pas' {frmMsgBox},
-  uDBIntf in '..\Interfaces\uDBIntf.pas';
+  uDBIntf in '..\Interfaces\uDBIntf.pas',
+  uFrmInputBox in 'uFrmInputBox.pas' {frmInputBox};
 
 end.

@@ -18,6 +18,11 @@ function IsNumberic(AStr: string): Boolean; //字符串是否是数字
 function StringToInt(const AStr: string; ADefault: Integer = 0): Integer; //字符串转换为整数
 function IntToString(const AStr: Integer): string; //整数换为字符串转
 
+function IfThen(condition: Boolean; const ATrue, AFalse: string): string;
+function IfThenExt(condition: Boolean; const ATrue, AFalse: Extended): Extended;
+function IfThenInt(condition: Boolean; const ATrue, AFalse: Integer): Integer;
+function IfThenBool(condition: Boolean; const ATrue, AFalse: Boolean): Boolean;
+
 implementation
 
 function StrToOleData(const AText: string): OleVariant;
@@ -100,6 +105,38 @@ end;
 function IntToString(const AStr: Integer): string;
 begin
   Result := IntToStr(AStr);
+end;
+
+function IfThen(condition: Boolean; const ATrue, AFalse: string): string;
+begin
+  if condition then
+    Result := ATrue
+  else
+    Result := AFalse;
+end;
+
+function IfThenExt(condition: Boolean; const ATrue, AFalse: Extended): Extended;
+begin
+  if condition then
+    Result := ATrue
+  else
+    Result := AFalse;
+end;
+
+function IfThenInt(condition: Boolean; const ATrue, AFalse: Integer): Integer;
+begin
+  if condition then
+    Result := ATrue
+  else
+    Result := AFalse;
+end;
+
+function IfThenBool(condition: Boolean; const ATrue, AFalse: Boolean): Boolean;
+begin
+  if condition then
+    Result := ATrue
+  else
+    Result := AFalse;
 end;
 
 end.

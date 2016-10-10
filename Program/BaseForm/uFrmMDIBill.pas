@@ -40,7 +40,7 @@ type
     FBillCurrState: TBillCurrState; //当前单据变成了什么状态
     
   protected
-    FVchCode, FVchType: Integer;//单据ID，单据类型
+    FVchCode, FVchType, FNewVchCode: Integer;//单据ID，单据类型
     FModelBill: IModelBill;
     FReadOnlyFlag: boolean;//是否能够修改单据
     
@@ -69,7 +69,7 @@ type
     function SaveRecBillData(ABillSaveType: TBillSaveState): Integer; //保存单据
     function SaveToDraft: Boolean; virtual; //存草稿
     function SaveToSettle: Boolean; virtual; //存过账
-    function SaveDraftData(ADraft: TBillSaveState): Integer;//保存草稿
+    function SaveDraftData(ADraft: TBillSaveState): Integer; virtual;//保存草稿或过账
     function SaveMasterData(const ABillMasterData: TBillData): Integer; virtual; //保存主表信息
     function SaveDetailData(const ABillDetailData: TPackData): Integer; virtual; //保存从表信息
     function SaveDetailAccount(const ADetailAccountData: TPackData): integer; virtual; //保存财务信息
@@ -92,7 +92,7 @@ var
 implementation
 
 uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
-     uBaseInfoDef, uGridConfig, uFrmApp, uVchTypeDef, uOtherIntf;
+     uBaseInfoDef, uGridConfig, uFrmApp, uVchTypeDef, uOtherIntf, uFunApp, uModelLimitIntf;
 
 {$R *.dfm}
 
@@ -316,6 +316,7 @@ end;
 procedure TfrmMDIBill.actSaveSettleExecute(Sender: TObject);
 begin
   inherited;
+  CheckLimit(MoudleNo, Limit_Bill_Settle);
   SaveBillData(soSettle);
 end;
 
@@ -355,6 +356,7 @@ begin
     if aNewVchcode >= 0 then
     begin
       Result := FModelBill.BillCreate(0, FVchType, aNewVchcode, aBillData.VchCode, aBillData.Draft, aOutPutData);
+      if Result = 0 then FNewVchCode := aNewVchcode;
     end;
   finally
     aOutPutData.Free;
@@ -401,6 +403,7 @@ begin
   LoadBillDataMaster();
   LoadBillDataGrid();
 
+//  CheckLimit := CheckLimit(MoudleNo, Limit_Bill_Input);
   SetReadOnly(FReadOnlyFlag);
 end;
 

@@ -20,13 +20,15 @@ const
   fnReport = 3000;
   //系统配置
   fnSystem = 4000;
-  //查询窗口
-  fnDlgcond = 5000;
-  //TC选择类
-  fnTc = 6000;
+//  查询窗口
+//  fnDlgcond = 5000;
+//  TC选择类
+//  fnTc = 6000;
   //测试时使用的， 发布时删除
   fnTest = 7000;
 
+  //当一个窗体多个表格的时候, 定义表格的ID
+  fnGrid = 100000;
 
   //基本信息-----------------------------1000------------------------
   fnMdlBasePtypeList = fnBase + 0001; //商品
@@ -41,6 +43,8 @@ const
   fnMdlBillBuy = fnBill + 0003; //进货单
   fnMdlBillSale = fnBill + 0004; //销售单
   fnMdlBillAllot = fnBill + 0005; //调拨单
+  fnMdlBillGathering = fnBill + 0006; //收款单
+  fnMdlBillPayment = fnBill + 0007; //付款单
 
   //报表-----------------------------------3000---------------------
   fnMdlReportGoods = fnReport + 0001; //商品库存情况
@@ -56,14 +60,24 @@ const
   fnMdlHelp_Calc = fnSystem + 0004; //计算器
   fnMdlHelp_Online = fnSystem + 0005; //在线帮助
   fnMdlStockGoodsIni = fnSystem + 0006; //期初库存商品
-  fnMdlInitOver = fnSystem + 0007; //开账，反开账
-  fnMdlReBuild = fnSystem + 0008; //系统重建
+  fnDialogInitOver = fnSystem + 0007; //开账，反开账
+  fnDialogReBuild = fnSystem + 0008; //系统重建
   fnMdlCheckGoods = fnSystem + 0009; //仓库盘点
-  fnDialogLimitSet = fnSystem + 0010; //权限设置
+  fnMdlLimitRole = fnSystem + 0010; //权限管理-角色管理
+  fnDialogLimitSet = fnSystem + 0011; //权限管理-用户管理
 
   //测试-------------------------------7000---------------------
   fnMdlTTest = fnTest + 0001; //测试
 
+
+  //表格
+  fnLimitSetBase = fnGrid + 0001;//权限设置-基本信息权限
+  fnLimitSetBill = fnGrid + 0002;//权限设置-单据权限
+  fnLimitSetReport = fnGrid + 0003;//权限设置-报表权限
+  fnLimitSetData = fnGrid + 0004;//权限设置-数据权限
+  fnLimitSetOther = fnGrid + 0005;//权限设置-其它权限
+
+  fnPRMoney = fnGrid + 0006;//收付款单下表格
 implementation
 
 end.

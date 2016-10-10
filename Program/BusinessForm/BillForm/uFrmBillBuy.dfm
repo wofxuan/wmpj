@@ -137,7 +137,7 @@ inherited frmBillBuy: TfrmBillBuy
     end
   end
   inherited gridMainShow: TcxGrid
-    Width = 821
+    Width = 824
     inherited gridTVMainShow: TcxGridTableView
       OptionsSelection.InvertSelect = False
     end
@@ -153,7 +153,16 @@ inherited frmBillBuy: TfrmBillBuy
     DockControlHeights = (
       0
       0
-      48
+      44
       0)
+    inherited btnNewBill: TdxBarLargeButton
+      ImageIndex = 2
+    end
+    inherited btnSave: TdxBarLargeButton
+      ImageIndex = 3
+    end
+    inherited btnSelectBill: TdxBarLargeButton
+      ImageIndex = 4
+    end
   end
 end

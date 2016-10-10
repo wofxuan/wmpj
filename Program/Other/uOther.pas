@@ -2,7 +2,7 @@ unit uOther;
 
 interface
 
-uses SysUtils, Dialogs, uSvcInfoIntf, uDefCom, uOtherIntf;
+uses SysUtils, Dialogs, Controls, uSvcInfoIntf, uDefCom, uOtherIntf;
 
 const
   LogDir = 'Log';//保存日志的目录
@@ -33,9 +33,11 @@ type
     function GetTitle: string;
     function GetVersion: string;
     function GetComments: string;
-  {IExManagement}
+  {IMsgBox}
     function MsgBox(AMsg: string; ACaption: string = ''; AMsgType: TMessageBoxType = mbtInformation;
       AButtons: TMessageBoxButtons = [mbbOk]): Integer;
+    function InputBox(const ACaption, APrompt: string; var ADefautValue: string; AMaxLen:
+      Integer = 0; ADataType: TColField = cfString): Integer;
   public
 
   end;
@@ -59,7 +61,7 @@ type
 
 implementation
 
-uses uSysSvc, uSysFactory, uExDef, uPubFun, uFrmMsgBox;
+uses uSysSvc, uSysFactory, uExDef, uPubFun, uFrmMsgBox, uFrmInputBox;
 
 { TExManagement }
 
@@ -121,6 +123,27 @@ end;
 function TMsgBox.GetVersion: string;
 begin
   Result := '20150829';
+end;
+
+function TMsgBox.InputBox(const ACaption, APrompt: string;
+  var ADefautValue: string; AMaxLen: Integer;
+  ADataType: TColField): Integer;
+begin
+  with TfrmInputBox.Create(nil) do
+  try
+    Captions := ACaption;
+    Prompt := APrompt;
+    InputValue := ADefautValue;
+    MaxLen := AMaxLen;
+    DataType := ADataType;
+    Result := ShowModal;
+    if Result = mrok then
+    begin
+      ADefautValue := Trim(edtInput.Text);
+    end;
+  finally
+    Free
+  end;
 end;
 
 function TMsgBox.MsgBox(AMsg, ACaption: string; AMsgType: TMessageBoxType;

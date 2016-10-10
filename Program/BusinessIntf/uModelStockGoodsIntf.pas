@@ -3,7 +3,7 @@
 mx 2016-03-27
 ****************************}
 
-unit uModelStockGoodsInf;
+unit uModelStockGoodsIntf;
 
 interface
 

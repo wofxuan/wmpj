@@ -8,7 +8,7 @@ uses
   cxData, cxDataStorage, cxEdit, dxBar, dxBarExtItems, cxClasses, ImgList,
   ActnList, DB, DBClient, cxGridLevel, cxControls, cxGridCustomView,
   cxGridCustomTableView, cxGridTableView, cxGrid, cxContainer, cxTreeView,
-  ExtCtrls, uModelStockGoodsInf, uParamObject, StdCtrls;
+  ExtCtrls, uModelStockGoodsIntf, uParamObject, StdCtrls;
 
 type
   TfrmStockGoodsIni = class(TfrmMDI)

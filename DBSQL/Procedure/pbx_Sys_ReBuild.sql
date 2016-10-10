@@ -27,11 +27,15 @@ AS
     TRUNCATE TABLE dbo.tbx_Bill_Other_D
     TRUNCATE TABLE dbo.tbx_Bill_NumberRecords
     
+    TRUNCATE TABLE dbo.tbx_Bill_A_D
+    TRUNCATE TABLE dbo.tbx_Bill_A_Gathering
+        
     IF @ClearStock = 1
     BEGIN
 		TRUNCATE TABLE dbo.tbx_Stock_Goods
 		TRUNCATE TABLE dbo.tbx_Stock_Goods_Ini
 		TRUNCATE TABLE dbo.tbx_Stock_Glide	
+		TRUNCATE TABLE dbo.tbx_Stock_Check
     END
     
     UPDATE dbo.tbx_Sys_Param SET PValue = '0' WHERE PName = 'InitOver'

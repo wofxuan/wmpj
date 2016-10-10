@@ -28,11 +28,13 @@ type
     function CreateFunEx(const AshowMsg: string; const AWriteMsg: string = ''): Exception; //创建函数级异常，业务函数的异常
   end;
 
-  //提示框窗口
+  //弹出框窗口
   IMsgBox = interface
     ['{95EA0C64-62DD-4ED9-84DC-5257592CE598}']
     function MsgBox(AMsg: string; ACaption: string = ''; AMsgType: TMessageBoxType = mbtInformation;
-      AButtons: TMessageBoxButtons = [mbbOk]): Integer;
+      AButtons: TMessageBoxButtons = [mbbOk]): Integer; //提示框
+    function InputBox(const ACaption, APrompt: string; var ADefautValue: string; AMaxLen:
+      Integer = 0; ADataType: TColField = cfString): Integer;//输入框
   end;
 
   //系统日志接口

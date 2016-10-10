@@ -139,7 +139,7 @@ inherited frmBillOrder: TfrmBillOrder
     end
   end
   inherited gridMainShow: TcxGrid
-    Width = 821
+    Width = 824
     TabOrder = 3
     inherited gridTVMainShow: TcxGridTableView
       OptionsSelection.InvertSelect = False

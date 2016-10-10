@@ -17,6 +17,7 @@ type
   protected
   {IDBOperation}
     procedure QuerySQL(const ASQLStr: string; AQueryData: TClientDataSet);
+    function OpenSQL(const ASQLStr: AnsiString): Integer;
     function GetMoudleNoSQL(const AMoudleNo: Integer): string;
     // 执行一个存储过程, 不返回数据集
     function ExecuteProcByName(AProcName: string; AParamName: array of string;
@@ -183,6 +184,18 @@ begin
     end;
   end;
 end;
+
+function TDBOperation.OpenSQL(const ASQLStr: AnsiString): Integer;
+begin
+  Result := -1;
+  if Trim(ASQLStr) = EmptyStr then Exit;
+  try
+    Result := FWMServer.OpenSQL(ASQLStr);
+  except
+    raise(SysService as IExManagement).CreateSysEx('执行SQL<' + Trim(ASQLStr) + '>错误');
+  end;
+end;
+
 
 initialization
   TSingletonFactory.Create(IDBAccess, @CreateDBOperation);

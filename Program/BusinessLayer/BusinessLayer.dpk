@@ -44,6 +44,7 @@ contains
   uModelSys in 'uModelSys.pas',
   uModelReport in 'uModelReport.pas',
   uModelBill in 'uModelBill.pas',
-  uModelStockGoods in 'uModelStockGoods.pas';
+  uModelStockGoods in 'uModelStockGoods.pas',
+  uModelLimit in 'uModelLimit.pas';
 
 end.

@@ -60,6 +60,7 @@ type
     FTypeClassList: TStringList; //记录ID对应的商品是否有子类格式 00001=0 or 00001=1,0没有儿子，1有儿子;为了减少每行的查询操作
     FCdsSource: TClientDataSet; //通过数据集加载是的数据集
     FCanEdit: Boolean; //是否能够修改单元格类容
+    FShowMaxRow: Boolean; //是否能显示最大的行数，不管是否修改或加载数据
 
     FOnSelectBasic: TSelectBasicinfoEvent; //弹出TC类选择框
     FOldCellDblClick: TCellDblClickEvent; //表格单元格原来的双击事件
@@ -105,6 +106,8 @@ type
     function FindColByCaption(AShowCaption: string): TColInfo; //根据表头查找列
     function FindColByFieldName(AFieldName: string): TColInfo; //根据数据库字段名称查找列
     procedure AddFooterSummary(AColInfo: TColInfo; ASummaryKind: TcxSummaryKind); //增加一个合计行字段
+
+    property ShowMaxRow: Boolean read FShowMaxRow write FShowMaxRow;
   published
     property BasicType: TBasicType read FBasicType write FBasicType;
     property RowIndex: Integer read GetRowIndex write SetRowIndex;
@@ -235,6 +238,7 @@ begin
 
   FBasicType := btNo;
   FCanEdit := False;
+  FShowMaxRow := True;
 end;
 
 destructor TGridItem.Destroy;
@@ -390,7 +394,7 @@ begin
       inc(aRow);
       ACdsData.Next;
     end;
-    if FCanEdit then
+    if FCanEdit and ShowMaxRow then
     begin
       if FGridTV.DataController.RecordCount < MaxRowCount then
       begin

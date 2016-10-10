@@ -123,7 +123,6 @@ end;
 procedure TfrmBillOrder.InitMasterTitles(Sender: TObject);
 begin
   inherited;
-  MoudleNo := FVchType;
   actSaveSettle.Caption := '保存';
   btnSave.Action := actSaveSettle;
   btnSave.ButtonStyle := bsDefault;
@@ -133,12 +132,14 @@ begin
   case FVchType of
     VchType_Order_Buy:
       begin
+        MoudleNo := fnMdlBillOrderBuy;
         Title := '进货订单';
         lblBtype.Caption := '供货单位';
         lblKtype.Caption := '收货仓库';
       end;
     VchType_Order_Sale:
       begin
+        MoudleNo := fnMdlBillOrderSale;
         Title := '销售订单';
         lblBtype.Caption := '购买单位';
         lblKtype.Caption := '发货仓库';

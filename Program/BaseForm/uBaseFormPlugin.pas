@@ -189,7 +189,7 @@ var
   aInstance: IInterface;
 begin
   afrmParent := TfrmParent(AFormClass.NewInstance);
-  afrmParent.CreateFrmParamList(AOwner, AParam);
+//  afrmParent.CreateFrmParamList(AOwner, AParam);
 //  if AOwner is TWinControl then
 //  begin
 //    afrmParent.Parent := TWinControl(AOwner);
@@ -198,8 +198,13 @@ begin
 //  end;
   if afrmParent.FrmShowStyle = fssShow then
   begin
+    afrmParent.CreateFrmParamList((SysService as IMainForm).GetMDIShowClient, AParam);
     afrmParent.Parent := (SysService as IMainForm).GetMDIShowClient;
     afrmParent.WindowState := wsMaximized; 
+  end
+  else
+  begin
+    afrmParent.CreateFrmParamList(AOwner, AParam);
   end;
   afrmParent.GetInterface(IFormIntf, aInstance);
   Result := aInstance;

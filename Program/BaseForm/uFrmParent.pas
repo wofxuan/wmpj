@@ -93,6 +93,7 @@ procedure TfrmParent.FormShow(Sender: TObject);
 begin
   FDBComItem := TFormDBComItem.Create(Self);
   FDBComItem.OnSelectBasic := DoSelectBasic;
+
   BeforeFormShow();
 end;
 
@@ -110,11 +111,12 @@ end;
 constructor TfrmParent.CreateFrmParamList(AOwner: TComponent;
   AParam: TParamObject);
 begin
+  //要设置窗口的Visable为false,不然在调用create和设置Parent以后就会执行show事件
   ParamList := TParamObject.Create;
   if Assigned(AParam) then ParamList.Params := AParam.Params;
   InitParamList();
-  inherited Create(AOwner);
-  //赋窗体标题
+  Create(AOwner);
+//  赋窗体标题
   if Self.GetMdlDisName <> EmptyStr then
     Self.Caption := Self.GetMdlDisName;
 end;

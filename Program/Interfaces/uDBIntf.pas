@@ -8,6 +8,7 @@ type
   IDBAccess = interface
     ['{E868E629-EA25-47F8-A3D9-445F4F77BC15}']
     procedure QuerySQL(const ASQLStr: string; AQueryData: TClientDataSet);
+    function OpenSQL(const ASQLStr: AnsiString): Integer;
     function GetMoudleNoSQL(const AMoudleNo: Integer): string;
 
     // 执行一个存储过程, 不返回数据集

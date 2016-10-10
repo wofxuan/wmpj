@@ -7,7 +7,7 @@ uses
   Dialogs, uFrmDialog, Menus, cxLookAndFeelPainters, ActnList, cxControls,
   cxContainer, cxEdit, cxLabel, StdCtrls, cxButtons, ExtCtrls, cxTextEdit,
   cxMaskEdit, cxDropDownEdit, cxCalendar, cxButtonEdit, uModelFunIntf, uBaseInfoDef,
-  uModelStockGoodsInf, uParamObject;
+  uModelStockGoodsIntf, uParamObject;
 
 type
   TfrmStockGoodOneCheck = class(TfrmDialog)

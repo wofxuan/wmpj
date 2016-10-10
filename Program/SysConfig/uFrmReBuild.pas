@@ -65,7 +65,7 @@ end;
 procedure TfrmReBuild.InitParamList;
 begin
   inherited;
-  MoudleNo := fnMdlReBuild;
+  MoudleNo := fnDialogReBuild;
 end;
 
 procedure TfrmReBuild.actOKExecute(Sender: TObject);
@@ -75,7 +75,7 @@ begin
 end;
 
 initialization
-  gFormManage.RegForm(TfrmReBuild, fnMdlReBuild);
+  gFormManage.RegForm(TfrmReBuild, fnDialogReBuild);
 
 end.
 

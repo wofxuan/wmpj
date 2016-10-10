@@ -45,7 +45,8 @@ requires
   dbrtl,
   dsnap,
   dxBarExtItemsD7,
-  BusinessIntf;
+  BusinessIntf,
+  cxTreeListVCLD7;
 
 contains
   uBaseFormExport in 'uBaseFormExport.pas',

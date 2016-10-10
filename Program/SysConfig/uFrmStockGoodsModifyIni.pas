@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, uFrmDialog, Menus, cxLookAndFeelPainters, ActnList, cxControls,
   cxContainer, cxEdit, cxLabel, StdCtrls, cxButtons, ExtCtrls, cxTextEdit,
-  cxMaskEdit, cxButtonEdit, uModelStockGoodsInf, uParamObject;
+  cxMaskEdit, cxButtonEdit, uModelStockGoodsIntf, uParamObject;
 
 type
   TfrmStockGoodsModifyIni = class(TfrmDialog)

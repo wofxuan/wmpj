@@ -7,7 +7,7 @@ uses
   Dialogs, uFrmMDI, cxStyles, cxCustomData, cxGraphics, cxFilter, cxData,
   cxDataStorage, cxEdit, dxBar, dxBarExtItems, cxClasses, ImgList,
   ActnList, DB, DBClient, cxGridLevel, cxControls, cxGridCustomView,
-  cxGridCustomTableView, cxGridTableView, cxGrid, ExtCtrls, uModelStockGoodsInf,
+  cxGridCustomTableView, cxGridTableView, cxGrid, ExtCtrls, uModelStockGoodsIntf,
   uModelFunIntf, uBaseInfoDef, StdCtrls;
 
 type

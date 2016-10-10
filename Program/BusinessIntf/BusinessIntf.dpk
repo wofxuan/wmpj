@@ -45,7 +45,8 @@ contains
   uModelReportIntf in 'uModelReportIntf.pas',
   uVchTypeDef in '..\Pub\uVchTypeDef.pas',
   uModelBillIntf in 'uModelBillIntf.pas',
-  uModelStockGoodsInf in 'uModelStockGoodsInf.pas',
-  uModelLimit in 'uModelLimit.pas';
+  uModelStockGoodsIntf in 'uModelStockGoodsIntf.pas',
+  uModelLimitIntf in 'uModelLimitIntf.pas',
+  uMoudleNoDef in '..\Pub\uMoudleNoDef.pas';
 
 end.

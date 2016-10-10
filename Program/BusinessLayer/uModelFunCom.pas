@@ -39,6 +39,7 @@ type
     function ExecProcByName(AProcName: string; AInParam: TParamObject): Integer;
     function ExecProcBackData(AProcName: string; AInParam: TParamObject = nil; ABackData: TClientDataSet = nil): Integer;
     procedure QuerySQL(const ASQLStr: string; AQueryData: TClientDataSet);
+    function OpenSQL(const ASQLStr: AnsiString): Integer;
 
     function GetLocalValue(ABasicType: TBasicType; ADbName, ATypeid: string): string;
     function GetParIdFromId(ABasicType: TBasicType; ATypeid: string): string;
@@ -146,6 +147,11 @@ function TModelFunCom.GetParIdFromId(ABasicType: TBasicType;
   ATypeid: string): string;
 begin
   Result := gBasicDataLocal.GetParIdFromId(ABasicType, ATypeid);
+end;
+
+function TModelFunCom.OpenSQL(const ASQLStr: AnsiString): Integer;
+begin
+  Result := FDBAC.OpenSQL(ASQLStr);
 end;
 
 initialization

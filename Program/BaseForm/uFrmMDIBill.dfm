@@ -1,12 +1,7 @@
 inherited frmMDIBill: TfrmMDIBill
   Caption = 'frmMDIBill'
-  FormStyle = fsNormal
   PixelsPerInch = 96
   TextHeight = 13
-  inherited splOP: TSplitter
-    Top = 157
-    Height = 160
-  end
   inherited pnlTop: TPanel
     Height = 113
     object pnlBillTitle: TPanel

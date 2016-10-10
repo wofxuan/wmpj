@@ -2,16 +2,11 @@ inherited frmMDIBaseType: TfrmMDIBaseType
   Left = 466
   Top = 276
   Caption = 'frmMDIBaseType'
-  ClientHeight = 314
   PixelsPerInch = 96
   TextHeight = 13
-  inherited splOP: TSplitter
-    Height = 232
-  end
   inherited gridMainShow: TcxGrid
     Left = 124
     Width = 612
-    Height = 232
     inherited gridTVMainShow: TcxGridTableView
       OnCellDblClick = gridTVMainShowCellDblClick
     end
@@ -20,7 +15,7 @@ inherited frmMDIBaseType: TfrmMDIBaseType
     Left = 3
     Top = 82
     Width = 121
-    Height = 232
+    Height = 235
     Align = alLeft
     Caption = 'pnlTV'
     TabOrder = 6
@@ -29,7 +24,7 @@ inherited frmMDIBaseType: TfrmMDIBaseType
       Left = 1
       Top = 1
       Width = 119
-      Height = 230
+      Height = 233
       Align = alClient
       TabOrder = 0
       ReadOnly = True
@@ -54,14 +49,17 @@ inherited frmMDIBaseType: TfrmMDIBaseType
     end
     object actCopyAdd: TAction [5]
       Caption = #22797#21046#26032#22686
+      Enabled = False
       OnExecute = actCopyAddExecute
     end
     object actList: TAction [6]
       Caption = #21015#34920
+      Enabled = False
       OnExecute = actListExecute
     end
     object actQuery: TAction [7]
       Caption = #26597#35810
+      Enabled = False
       OnExecute = actQueryExecute
     end
     object actStop: TAction [8]

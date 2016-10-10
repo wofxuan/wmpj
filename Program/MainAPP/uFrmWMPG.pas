@@ -39,7 +39,7 @@ var
 
 implementation
 
-uses uSysSvc, uFactoryIntf, uOtherIntf, uTestdllInf;
+uses uSysSvc, uFactoryIntf, uOtherIntf, uTestdllInf, uDefCom;
 
 {$R *.dfm}
 
@@ -64,6 +64,7 @@ begin
       TFrmObj(tclFrmList.Tabs.Objects[aIndex]).Free;
       tclFrmList.Tabs.Delete(aIndex);
       ACanClose := True;
+      tclFrmListChange(tclFrmList);
       Break;
     end;
   end;
@@ -83,6 +84,7 @@ var
 begin
   aRegInf := SysService as IRegInf;
   aRegInf.RegObjFactory(IMainForm, Self);
+  OperatorID := '00001';
 end;
 
 procedure TFrmWMPG.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -122,7 +124,7 @@ begin
   begin
     TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.FrmClose;
 //    TFrmObj(tclFrmList.Tabs.Objects[aIndex]).Free;
-    ACanClose := True;
+    ACanClose := False;
   end
   else
   begin

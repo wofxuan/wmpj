@@ -109,7 +109,7 @@ end;
 procedure TfrmBillBuy.InitMasterTitles(Sender: TObject);
 begin
   inherited;
-  MoudleNo := FVchType;
+  MoudleNo := fnMdlBillBuy;
 
   Title := '进货单';
   lblBtype.Caption := '供货单位';

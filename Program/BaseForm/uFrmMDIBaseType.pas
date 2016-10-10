@@ -76,7 +76,7 @@ var
 
 implementation
 
-uses TypInfo, uSysSvc, uPubFun, uFrmApp;
+uses TypInfo, uSysSvc, uPubFun, uFrmApp, uModelLimitIntf, uFunApp;
 
 {$R *.dfm}
 
@@ -117,6 +117,7 @@ var
   aParam: TParamObject;
   aParId_Cur: string;
 begin
+  CheckLimit(MoudleNo, Limit_Base_Add);
   aParam := TParamObject.Create;
   aParam.Add('cMode', dctAdd);
   aParId_Cur := Self.ParamList.AsString('ParId_Cur');
@@ -138,6 +139,7 @@ var
   aParId_Cur: string;
   aOldRowIndex: Integer;
 begin
+  CheckLimit(MoudleNo, Limit_Base_Modify);
   if StringEmpty(CurTypeId) then Exit;
   
   aOldRowIndex := FGridItem.RowIndex;
@@ -160,6 +162,8 @@ end;
 
 procedure TfrmMDIBaseType.DeleteRec;
 begin
+  CheckLimit(MoudleNo, Limit_Base_Del);
+
   if FModelBaseList.DeleteRec(CurTypeId) then
   begin
     LoadGridData(Self.ParamList.AsString('ParId_Cur'));
@@ -171,6 +175,8 @@ var
   aParam: TParamObject;
   aCur: string;
 begin
+  CheckLimit(MoudleNo, Limit_Base_Class);
+
   aParam := TParamObject.Create;
   aParam.Add('cMode', dctClass);
   aCur := CurTypeId;

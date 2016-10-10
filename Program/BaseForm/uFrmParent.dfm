@@ -12,7 +12,6 @@ object frmParent: TfrmParent
   Font.Style = []
   OldCreateOrder = False
   Position = poDefault
-  Visible = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

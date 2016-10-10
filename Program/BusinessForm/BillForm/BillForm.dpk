@@ -54,7 +54,8 @@ contains
   uFrmBillAllot in 'uFrmBillAllot.pas' {frmBillAllot},
   uBillFormExport in 'uBillFormExport.pas',
   uFrmBillOrder in 'uFrmBillOrder.pas' {frmBillOrder},
-  uFrmBillBuy in 'uFrmBillBuy.pas' {frmBillBuy},
-  uFrmBillSale in 'uFrmBillSale.pas' {frmBillSale};
+  uFrmBillPRMoney in 'uFrmBillPRMoney.pas' {frmBillPRMoney},
+  uFrmBillSale in 'uFrmBillSale.pas' {frmBillSale},
+  uFrmBillBuy in 'uFrmBillBuy.pas' {frmBillBuy};
 
 end.

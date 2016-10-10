@@ -19,7 +19,6 @@ type
     gridMainShow: TcxGrid;
     dsMainShow: TDataSource;
     cdsMainShow: TClientDataSet;
-    splOP: TSplitter;
     imglstBtn: TcxImageList;
     actClose: TAction;
     bmList: TdxBarManager;

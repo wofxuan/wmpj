@@ -16,8 +16,12 @@ CREATE PROCEDURE dbo.pbx_Bill_Create
     )
 AS 
     DECLARE @nRet INT 
-    DECLARE @GOODS_ID VARCHAR(25) 
-        
+    DECLARE @GOODS_ID VARCHAR(50) 
+    DECLARE @AP_ID VARCHAR(50) 
+    DECLARE @AR_ID VARCHAR(50) 
+    DECLARE @SALE_INCOME_ID VARCHAR(50) 
+    DECLARE @SALE_COST_ID VARCHAR(50) 
+    
     DECLARE @modiDly CHAR(1)
     DECLARE @YPratypeid VARCHAR(50)
     DECLARE @flag INT
@@ -72,6 +76,10 @@ AS
         @aMTotal NUMERIC(22, 10)
 
     SELECT  @GOODS_ID = '0000100001'
+    SELECT  @AP_ID = '0000200001'
+    SELECT  @AR_ID = '0000100005'
+    SELECT  @SALE_INCOME_ID = '0000300001'
+    SELECT  @SALE_COST_ID = '0000400001'
     
     --SELECT  @nPeriod = ISNULL(SubValue, 0)
     --FROM    SysData
@@ -79,9 +87,15 @@ AS
     SELECT  @aPeriod = 1
     SELECT @aYearPeriod = 1    
     
-    SELECT  @aVchType = VchType
+    SELECT  @aVchType = VchType, @aInputDate= InputDate 
     FROM    dbo.tbx_Bill_M
     WHERE   VchCode = @NewvchCode
+    
+    IF ISNULL(@aVchType, -1) = -1
+    BEGIN
+		SET @ErrorValue='单据不存在或者删除，不能过账！'
+		GOTO ErrorGeneral 	
+    END
     
     SELECT  @InitOver = PValue
     FROM    dbo.tbx_Sys_Param
@@ -101,7 +115,7 @@ AS
     IF @aVchType = 3 
         BEGIN
             SELECT  @execsql = 'declare CreateDly_cursor cursor for 
-								select ColRowNo, ATypeID, PTypeID, KTypeID, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate, Costmode, Comment
+								select ColRowNo, ATypeID, BtypeId, EtypeId, DtypeId, PTypeID, KTypeID, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate, Costmode, Comment
                                 from tbx_Bill_D_Bak where Vchcode= ' + CAST(@NewVchCode AS VARCHAR(10))
             EXEC (@execsql)
             
@@ -109,11 +123,11 @@ AS
 
             WHILE 0 = 0 
                 BEGIN
-                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @ablockno, @aprodate, @aUnit, @aUnitRate, @aCostmode, @aComment
+                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDtypeId, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @ablockno, @aprodate, @aUnit, @aUnitRate, @aCostmode, @aComment
                     IF @@FETCH_STATUS <> 0 
                         BREAK
                         
-                    EXEC @nRet = pbx_Bill_ModifyDbf @aVchType, @OldVchCode, @GOODS_ID, @aPTypeID, '', @aETypeID, @aKTypeID, @aPeriod, @aQty, @aTotal, @aBlockno, @aProdate, 0, @aUnit, @aUnitRate, @ErrorValue OUT
+                    EXEC @nRet = pbx_Bill_ModifyDbf @aVchType, @OldVchCode, @GOODS_ID, @aPTypeID, @aBTypeID, @aETypeID, @aKTypeID, @aPeriod, @aQty, @aTotal, @aBlockno, @aProdate, 0, @aUnit, @aUnitRate, @ErrorValue OUT
                     IF @nRet < 0 
                         GOTO ErrorRollback
                         
@@ -127,9 +141,27 @@ AS
                     
                     SET @aMTotal = @aMTotal + @aTotal     
                 END --cursor while end
-                
+               
+            --库存商品增加
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @GOODS_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+			--应收应付
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @AP_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
             UPDATE  dbo.tbx_Bill_M
-            SET     Total = @aMTotal
+            SET     Total = @aMTotal, InvoceTag = 0
             WHERE   VchCode = @NewVchCode
                 
             CLOSE CreateDly_cursor
@@ -141,8 +173,11 @@ AS
 ------------------------------销售单------------------------------
     IF @aVchType = 4 
         BEGIN
+			DECLARE @aSumCostTotal NUMERIC(22, 10)
+			SET @aSumCostTotal = 0
+			 
             SELECT  @execsql = 'declare CreateDly_cursor cursor for 
-								select ColRowNo, ATypeID, PTypeID, KTypeID, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate, Costmode, Comment
+								select ColRowNo, ATypeID, BtypeId, EtypeId, DtypeId, PTypeID, KTypeID, Qty, Price, Total, CostTotal, Blockno, Prodate, Unit, UnitRate, Costmode, Comment
                                 from tbx_Bill_D_Bak where Vchcode= ' + CAST(@NewVchCode AS VARCHAR(10))
             EXEC (@execsql)
             
@@ -150,16 +185,19 @@ AS
 
             WHILE 0 = 0 
                 BEGIN
-                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @ablockno, @aprodate, @aUnit, @aUnitRate, @aCostmode, @aComment
+                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDtypeId, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @aCostTotal, @ablockno, @aprodate, @aUnit, @aUnitRate, @aCostmode, @aComment
                     IF @@FETCH_STATUS <> 0 
                         BREAK
                     
-                    SET @aMTotal = @aMTotal + @aTotal    
-                    
+                    SET @aMTotal = @aMTotal + @aTotal   
+                     
+                    SET @aCostTotal = -@aCostTotal
                     SET @aQty = -@aQty
                     SET @aTotal = -@aTotal 
                     
-                    EXEC @nRet = pbx_Bill_ModifyDbf @aVchType, @OldVchCode, @GOODS_ID, @aPTypeID, '', @aETypeID, @aKTypeID, @aPeriod, @aQty, @aTotal, @aBlockno, @aProdate, 0, @aUnit, @aUnitRate, @ErrorValue OUT
+                    SET @aSumCostTotal = @aSumCostTotal + @aCostTotal 
+                    
+                    EXEC @nRet = pbx_Bill_ModifyDbf @aVchType, @OldVchCode, @GOODS_ID, @aPTypeID, @aBTypeID, @aETypeID, @aKTypeID, @aPeriod, @aQty, @aTotal, @aBlockno, @aProdate, 0, @aUnit, @aUnitRate, @ErrorValue OUT
                     IF @nRet < 0 
                         GOTO ErrorRollback
                         
@@ -173,8 +211,47 @@ AS
                         
                 END --cursor while end
                 
+			--库存商品减少
+			IF  @aSumCostTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @GOODS_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aSumCostTotal, @aInputDate )
+				IF @@rowcount <= 0
+				BEGIN
+					SET @ErrorValue = '插入库存商品科目明细失败！'
+					GOTO ErrorRollback	
+				END 
+			END 
+			
+			--销售收入
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @SALE_INCOME_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+			--销售成本
+			IF ABS(@aSumCostTotal) <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @SALE_COST_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, ABS(@aSumCostTotal), @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+			--应收应付
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @AR_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
             UPDATE  dbo.tbx_Bill_M
-            SET     Total = @aMTotal
+            SET     Total = ABS(@aMTotal)
             WHERE   VchCode = @NewVchCode
             
             CLOSE CreateDly_cursor
@@ -187,7 +264,7 @@ AS
     IF @aVchType = 5 
         BEGIN
             SELECT  @execsql = 'declare CreateDly_cursor cursor for 
-								select ColRowNo, ATypeID, PTypeID, KTypeID, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate, Costmode, Comment, KtypeId2
+								select ColRowNo, ATypeID, BtypeId, EtypeId, DtypeId, PTypeID, KTypeID, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate, Costmode, Comment, KtypeId2
                                 from tbx_Bill_D_Bak where Vchcode= ' + CAST(@NewVchCode AS VARCHAR(10))
             EXEC (@execsql)
             
@@ -195,7 +272,7 @@ AS
 
             WHILE 0 = 0 
                 BEGIN
-                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @ablockno, @aprodate, @aUnit, @aUnitRate, @aCostmode, @aComment, @aKtypeId2
+                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDtypeId, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @ablockno, @aprodate, @aUnit, @aUnitRate, @aCostmode, @aComment, @aKtypeId2
                     IF @@FETCH_STATUS <> 0 
                         BREAK
                     
@@ -231,7 +308,7 @@ AS
 					
 					SET @aMTotal = @aMTotal + @aTotal    
                 END --cursor while end
-                
+			
             UPDATE  dbo.tbx_Bill_M
             SET     Total = @aMTotal
             WHERE   VchCode = @NewVchCode
@@ -241,6 +318,56 @@ AS
             GOTO Finish
         END
 ------------------------------调拨单处理结束--------------------------
+------------------------------付款单---------------------------
+    IF @aVchType = 7 
+        BEGIN
+            SELECT  @execsql = 'declare CreateDly_cursor cursor for 
+								select ColRowNo, ATypeID, BTypeID, ETypeID, DTypeID, KtypeId, Total, Comment
+                                from tbx_Bill_D_Bak where Vchcode= ' + CAST(@NewVchCode AS VARCHAR(10))
+            EXEC (@execsql)
+            
+            OPEN CreateDly_cursor
+
+            WHILE 0 = 0 
+                BEGIN
+                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aTotal, @aComment
+                    IF @@FETCH_STATUS <> 0 
+                        BREAK
+                        
+                    INSERT dbo.tbx_Bill_A_D ( VchCode, VchType, ColRowNo, AtypeId, BtypeId, EtypeId, DtypeId, Total, Comment )
+                    VALUES  ( @NewVchCode, @aVchType, @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDTypeID, @aTotal, @aComment)
+                        
+                    IF @@rowcount <= 0 
+                    BEGIN
+						SET @ErrorValue = '插入明细失败！'
+						GOTO ErrorRollback		
+                    END
+                    
+                    SET @aMTotal = @aMTotal + @aTotal     
+                END --cursor while end
+                
+			--应付款减少
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @AP_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+            UPDATE  dbo.tbx_Bill_M
+            SET     Total = @aMTotal
+            WHERE   VchCode = @NewVchCode
+                
+            CLOSE CreateDly_cursor
+            DEALLOCATE CreateDly_cursor
+            GOTO Finish
+        END
+------------------------------付款单处理结束----------------------
+
+	SET @ErrorValue = '没有找到单据类型！'
+	GOTO ErrorRollback 
+		    
     Success:		 --成功完成函数
     RETURN 0
     

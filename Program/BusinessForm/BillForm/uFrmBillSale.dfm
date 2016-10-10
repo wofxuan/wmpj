@@ -137,7 +137,7 @@ inherited frmBillSale: TfrmBillSale
     end
   end
   inherited gridMainShow: TcxGrid
-    Width = 821
+    Width = 824
     inherited gridTVMainShow: TcxGridTableView
       OptionsSelection.InvertSelect = False
     end

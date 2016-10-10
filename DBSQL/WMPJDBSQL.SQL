@@ -64,7 +64,7 @@ BEGIN
 		[Deleted] BIT NOT NULL DEFAULT 0,
 		[Updatetag] INT NOT NULL DEFAULT 0,
 		
-		[Name] VARCHAR(66) NOT NULL DEFAULT (''),		--简称
+		[Name] VARCHAR(66) NOT NULL DEFAULT (''),--简称
 		[Standard] VARCHAR(120) NOT NULL DEFAULT (''),--型号
 		[Model] VARCHAR(60) NOT NULL DEFAULT (''),--规格
 		[Area] VARCHAR(30) NOT NULL DEFAULT (''),--产地
@@ -113,7 +113,7 @@ BEGIN
 		[Deleted] BIT NOT NULL DEFAULT 0,
 		[Updatetag] INT NOT NULL DEFAULT 0,
 		
-		[Name] VARCHAR(66) NOT NULL DEFAULT (''),		--简称
+		[Name] VARCHAR(66) NOT NULL DEFAULT (''),--简称
 		[Address] VARCHAR(1000) NOT NULL DEFAULT (''),	
 		[Tel] VARCHAR(66) NOT NULL DEFAULT (''),
 		[EMail] VARCHAR(100) NOT NULL DEFAULT (''),
@@ -259,7 +259,7 @@ BEGIN
 		CONSTRAINT PK_tbx_Base_Vtype PRIMARY KEY ([VTypeId])
 	)
 	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VSonnum, Soncount)
-	VALUES  ( '00000' ,'0' ,0 ,'000000000' ,'全部单据', 5, 4)
+	VALUES  ( '00000' ,'0' ,0 ,'000000000' ,'全部单据', 7, 7)
 	
 	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VchType, NumberPrefix, SNFormat)
 	VALUES  ( '00001' ,'00000' ,1 ,'00001' ,'进货订单', 1, 'JHD', '"JHD" - yyyy - mm - dd - [000]')
@@ -271,8 +271,120 @@ BEGIN
 	VALUES  ( '00004' ,'00000' ,1 ,'00004' ,'销售单', 4, 'XS', '"XS" - yyyy - mm - dd - [000]')
 	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VchType, NumberPrefix, SNFormat)
 	VALUES  ( '00005' ,'00000' ,1 ,'00005' ,'调拨单', 5, 'DB', '"DB" - yyyy - mm - dd - [000]')
+	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VchType, NumberPrefix, SNFormat)
+	VALUES  ( '00006' ,'00000' ,1 ,'00006' ,'收款单', 6, 'SKD', '"SKD" - yyyy - mm - dd - [000]')
+	INSERT dbo.tbx_Base_Vtype( VTypeId ,Parid ,Leveal ,VUsercode ,VFullname, VchType, NumberPrefix, SNFormat)
+	VALUES  ( '00007' ,'00000' ,1 ,'00007' ,'付款单', 7, 'FKD', '"FKD" - yyyy - mm - dd - [000]')
 END
 GO 
+
+--科目信息
+IF OBJECT_ID('dbo.tbx_Base_Atype') IS NULL 
+BEGIN
+    CREATE TABLE [dbo].[tbx_Base_Atype]
+        (
+          [ATypeId] VARCHAR(50) ,
+          [Parid] VARCHAR(50) NOT NULL DEFAULT '' ,
+          [ASonnum] INT NOT NULL DEFAULT 0 ,
+          [Soncount] INT NOT NULL DEFAULT 0 , 
+          [Leveal] INT NOT NULL DEFAULT 1 ,
+          [AUsercode] VARCHAR(66) NOT NULL DEFAULT '' ,
+          [AFullname] VARCHAR(66) NOT NULL DEFAULT '' ,
+          [AComment] VARCHAR(255) NOT NULL DEFAULT '' ,
+          [ANamepy] VARCHAR(66) NOT NULL DEFAULT '' ,
+          [ARec] INT NOT NULL IDENTITY(1, 1),
+          [Parrec] INT NOT NULL DEFAULT 0,
+          [RowIndex] INT NOT NULL DEFAULT 0 ,
+          [Deleted] BIT NOT NULL DEFAULT 0,
+          [Updatetag] INT NOT NULL DEFAULT 0,  
+          --以上是基本信息必须的字段，下面是自定义的字段
+          [AName] VARCHAR(66) NOT NULL DEFAULT (''),--简称
+          [SysRow] BIT NOT NULL DEFAULT 0,--系统默认科目
+		  [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),--当前金额
+		  [Total00] NUMERIC(22, 10) NOT NULL DEFAULT (0),--期初金额
+		  [TTL01] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL02] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL03] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL04] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL05] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL06] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL07] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL08] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL09] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL10] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL11] NUMERIC(22, 10) NOT NULL DEFAULT (0),
+		  [TTL12] NUMERIC(22, 10) NOT NULL DEFAULT (0)
+          CONSTRAINT PK_tbx_Base_Atype PRIMARY KEY ([ATypeId])
+        )
+	SET IDENTITY_INSERT [dbo].[tbx_Base_Atype] ON
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'00000', N'root', 8, 200, 0, N'00', N'全部科目', N' ', N'', 1, 0, 0, 0, 1, N'科目', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'00001', N'00000', 9, 200, 1, N'01', N'【资产类】', N'', N'zcl', 2, 1, 0, 0, 54, N'资产类', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100001', N'00001', 0, 200, 2, N'011', N'库存商品', N'', N'kcsp', 3, 54, 0, 0, 55, N'库存商品', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100002', N'00001', 3, 200, 2, N'012', N'固定资产合计', N'', N'gdzchj', 4, 54, 1, 0, 56, N'固定资产', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000010000200001', N'0000100002', 0, 200, 3, N'0121', N'固定资产_甲', N'', N'gdzcj', 5, 56, 0, 0, 57, N'固资_甲', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100003', N'00001', 1, 200, 2, N'101', N'现金合计', N'', N'xjhj', 6, 54, 2, 0, 60, N'现金合计', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000010000300001', N'0000100003', 0, 0, 3, N'101', N'现    金', N'', N'xj', 7, 60, 0, 0, 117, N'现    金', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100004', N'00001', 5, 200, 2, N'014', N'『全部银行存款合计』', N'', N'qbyhckhj', 8, 54, 3, 0, 61, N'银行存款', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000010000400001', N'0000100004', 0, 200, 3, N'0141', N'建设银行', N'', N'jsyh', 9, 61, 0, 0, 62, N'建设银行', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100005', N'00001', 0, 200, 2, N'016', N'『应收款合计』', N'', N'yskhj', 10, 54, 4, 0, 68, N'  应收款', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100006', N'00001', 0, 200, 2, N'017', N'『借出商品』', N'', N'jcsp', 11, 54, 5, 0, 69, N'借出商品', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100007', N'00001', 0, 200, 2, N'015', N'待摊费用', N'', N'dtfy', 12, 54, 6, 0, 67, N'待摊费用', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100008', N'00001', 0, 200, 2, N'018', N'委托商品款', N'', N'wtspk', 13, 54, 7, 0, 101, N'委托商品款', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100009', N'00001', 0, 200, 2, N'1151', N'预付账款', N'', N'yfzk', 14, 54, 8, 0, 105, N'预付账款', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100010', N'00001', 0, 0, 2, N'1408', N'委托加工物资', N'', N'wtjgwz', 15, 54, 9, 0, 0, N'委托加工物资', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100011', N'00001', 0, 0, 2, N'1241', N'自制半成品', N'', N'zzbcp', 16, 54, 10, 0, 125, N'自制半成品', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100012', N'00001', 0, 0, 2, N'1606', N'固定资产清理', N'', N'gdzcql', 17, 54, 11, 0, 0, N'固定资产清理', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000100013', N'00001', 0, 0, 2, N'1604', N'在建工程', N'', N'zjgc', 18, 54, 12, 0, 0, N'在建工程', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'00002', N'00000', 4, 200, 1, N'02', N'【负债类】', N'', N'fzl', 19, 1, 1, 0, 70, N'负债类', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000200001', N'00002', 0, 200, 2, N'021', N'『应付款合计』', N'', N'yfkhj', 20, 70, 0, 0, 71, N'  应付款', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000200002', N'00002', 0, 200, 2, N'022', N'『借入商品』', N'', N'jrsp', 21, 70, 1, 0, 72, N'借入商品', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000200003', N'00002', 0, 200, 2, N'', N'受托商品', N'', N'stsp', 22, 70, 2, 0, 104, N'受托商品', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000200004', N'00002', 0, 200, 2, N'', N'应交税金', N'', N'yjsj', 23, 70, 3, 0, 99, N'应交税金', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000200005', N'00002', 0, 200, 2, N'2131', N'预收账款', N'', N'yszk', 24, 70, 4, 0, 106, N'预收账款', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000200006', N'00002', 0, 200, 2, N'023', N'会员储值', N'', N'hycz', 25, 70, 5, 0, 107, N'会员储值', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'00003', N'00000', 3, 200, 1, N'03', N'【收入类】', N'', N'srl', 26, 1, 2, 0, 73, N'收入类', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000300001', N'00003', 0, 200, 2, N'031', N'『销售收入』', N'', N'xssr', 27, 73, 0, 0, 74, N'销售收入', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000300002', N'00003', 8, 200, 2, N'032', N'『商品类收入』', N'', N'splsr', 28, 73, 1, 0, 75, N'商品收入', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000200001', N'0000300002', 0, 200, 3, N'0321', N'商品报溢收入', N'', N'spbysr', 29, 75, 0, 0, 76, N'商品报溢', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000200002', N'0000300002', 0, 200, 3, N'', N'其它入库收入', N'', N'qtrksr', 30, 75, 1, 0, 77, N'其它入库收入', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000200003', N'0000300002', 0, 200, 3, N'0322', N'成本调价收入', N'', N'cbtjsr', 31, 75, 2, 0, 78, N'调价收入', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000200004', N'0000300002', 0, 200, 3, N'0323', N'进货退货差价', N'', N'jhthcj', 32, 75, 3, 0, 79, N'结算差价', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000200005', N'0000300002', 0, 200, 3, N'0324', N'变价调拨差价', N'', N'bjdbcj', 33, 75, 4, 0, 80, N'调拨差价', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000200006', N'0000300002', 0, 200, 3, N'0325', N'商品拆装差价', N'', N'spczcj', 34, 75, 5, 0, 81, N'拆装差价', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000200007', N'0000300002', 0, 200, 3, N'0326', N'借转进货结算与成本差', N'', N'jzjhjsycbc', 35, 75, 6, 0, 82, N'其它收入', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000200008', N'0000300002', 0, 200, 3, N'0327', N'配送差价', N'', N'pscj', 36, 0, 8, 0, 0, N'配送差价', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000300003', N'00003', 3, 200, 2, N'033', N'『其它收入』', N'', N'qtsr', 37, 73, 2, 0, 83, N'其它收入', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000300001', N'0000300003', 0, 200, 3, N'0331', N'调账收入', N'', N'tzsr', 38, 83, 0, 0, 84, N'调账收入', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000300002', N'0000300003', 0, 200, 3, N'0332', N'利息收入', N'', N'lxsr', 39, 83, 1, 0, 85, N'利息收入', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000030000300003', N'0000300003', 0, 200, 3, N'', N'其它', N'', N'qt', 40, 83, 2, 0, 86, N'其它....', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000300004', N'00003', 0, 200, 2, N'6051', N'其它业务收入', N'', N'qtywsr', 41, 73, 3, 0, 0, N'其它业务收入', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'00004', N'00000', 3, 200, 1, N'04', N'【支出类】', N'', N'zcl', 42, 1, 3, 0, 87, N'支出类', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000400001', N'00004', 0, 200, 2, N'041', N'『销售成本』', N'', N'xscb', 43, 87, 0, 0, 88, N'销售成本', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000400002', N'00004', 2, 200, 2, N'042', N'『商品类支出』', N'', N'splzc', 44, 87, 2, 0, 89, N'商品支出', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000040000200001', N'0000400002', 0, 200, 3, N'0421', N'商品报损', N'', N'spbs', 45, 89, 0, 0, 90, N'商品报损', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000040000200002', N'0000400002', 0, 200, 3, N'0422', N'其它出库费用', N'', N'qtckfy', 46, 89, 1, 0, 91, N'其它出库费用', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000400003', N'00004', 3, 200, 2, N'043', N'『费用合计』', N'', N'fyhj', 47, 87, 3, 0, 92, N'费用合计', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000040000300001', N'0000400003', 0, 200, 3, N'0431', N'调账亏损', N'', N'tzks', 48, 92, 0, 0, 93, N'调账亏损', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000040000300002', N'0000400003', 0, 200, 3, N'0432', N'固定资产折旧', N'', N'gdzczj', 49, 92, 1, 0, 94, N'资产折旧', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000040000300003', N'0000400003', 0, 0, 3, N'0438', N'积分转储值', N'', N'jfzcz', 50, 92, 3, 0, 120, N'积分转储值', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000040000300004', N'0000400003', 0, 0, 3, N'0440', N'积分换商品', N'', N'jfhsp', 51, 92, 4, 0, 121, N'积分换商品', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000040000300005', N'0000400003', 0, 0, 3, N'0441', N'运费', N'', N'yf', 52, 92, 5, 0, 0, N'运费', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000040000300006', N'0000400003', 0, 0, 3, N'0443', N'礼品赠送', N'', N'lpzs', 53, 0, 6, 0, 0, N'礼品赠送', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000040000390000', N'0000400003', 0, 200, 3, N'0439', N'优惠', N'', N'yh', 54, 92, 2, 0, 100, N'优惠', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000400004', N'00004', 0, 200, 2, N'5405', N'其它业务支出', N'', N'qtywzc', 55, 0, 1, 0, 0, N'其它业务支出', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'00005', N'00000', 2, 200, 1, N'05', N'【权益合计】', N'', N'qyhj', 56, 1, 4, 0, 96, N'权益类', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000500001', N'00005', 0, 200, 2, N'3101', N'实收资本', N'', N'sszb', 57, 96, 0, 0, 97, N'实收资本', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000500002', N'00005', 0, 200, 2, N'3131', N'本年利润', N'', N'bnlr', 58, 96, 1, 0, 98, N'本年利润', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000500003', N'00005', 1, 1, 2, N'3141', N'利润分配', N'', N'lrfp', 59, 96, 2, 0, 118, N'利润分配', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000050000300001', N'0000500003', 0, 0, 3, N'314101', N'未分配利润', N'', N'wfplr', 60, 121, 0, 0, 119, N'未分配利润', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'00006', N'00000', 2, 200, 1, N'06', N'【成本类】', N'', N'cbl', 61, 1, 5, 0, 122, N'成本类', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000600001', N'00006', 1, 1, 2, N'4101', N'生产成本', N'', N'sccb', 62, 195, 0, 0, 122, N'生产成本', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'000060000100001', N'0000600001', 0, 0, 3, N'410101', N'基本生产成本', N'', N'jbsccb', 63, 196, 0, 0, 122, N'基本生产成本', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000600002', N'00006', 0, 0, 2, N'4105', N'制造费用', N'', N'zcfy', 64, 195, 0, 0, 123, N'制造费用', 1)
+	INSERT [dbo].[tbx_Base_Atype] ([ATypeId], [Parid], [ASonnum], [Soncount], [Leveal], [AUsercode], [AFullname], [AComment], [ANamepy], [ARec], [Parrec], [RowIndex], [Deleted], [Updatetag], [AName], [SysRow]) VALUES (N'0000600003', N'00006', 0, 0, 2, N'4107', N'劳务成本', N'', N'lwcb', 65, 195, 0, 0, 124, N'劳务成本', 1)
+	SET IDENTITY_INSERT [dbo].[tbx_Base_Atype] OFF
+END   
+GO
 
 --单据-单据号的记录
 IF OBJECT_ID('dbo.tbx_Bill_NumberRecords') IS NULL 
@@ -710,6 +822,48 @@ IF OBJECT_ID('dbo.tbx_Bill_Sale_D') IS NULL
         
 GO
 
+--单据-财务数据的从表,在做相关单据的时候都会写入对应的科目数据
+IF OBJECT_ID('dbo.tbx_Bill_A_D') IS NULL 
+    CREATE TABLE [dbo].[tbx_Bill_A_D]
+        (  
+		  [VchCode] INT NOT NULL DEFAULT (0), --主表单据Id
+          [VchType] INT NOT NULL DEFAULT (0) ,--单据类型
+          [DlyOrder] INT NOT NULL IDENTITY(1, 1),--数据库中行序号,可以用来关联行的其它相关信息
+          [ColRowNo] INT NOT NULL DEFAULT (0),--界面显示的行顺序
+          [AtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--会计科目
+		  [BtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--供货或收货单位
+		  [EtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--经手人
+		  [DtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--部门
+		  [KtypeId] VARCHAR(50) NOT NULL DEFAULT (''),--发货或者收货仓库
+		  
+		  [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),--金额
+		  
+		  [Redword] CHAR(2) NOT NULL DEFAULT ('F'),--是否是红冲生成的单据 F不是,T是
+		  [InputDate] VARCHAR(10)NOT NULL DEFAULT (''),--主表的录单日期
+		  [Period] SMALLINT NOT NULL DEFAULT (1),--对应的月度期间1-12之间
+		  [YearPeriod] INT NOT NULL DEFAULT (1),--对应的年度期间一直递增
+		  [UsedType] CHAR(1) NOT NULL DEFAULT ('1'),--是否自动生成的记录,在调拨的时候会多生成一条对应另外仓库的记录, 1是原记录, 空是系统生成的记录
+		  [Comment] VARCHAR(256) NOT NULL DEFAULT (''),--备注
+
+          CONSTRAINT PK_tbx_Bill_A_D PRIMARY KEY ( [VchCode], [VchType], [AtypeId])
+        )
+        
+GO
+
+--单据-付款或收款单结算的对应的单据
+IF OBJECT_ID('dbo.tbx_Bill_A_Gathering') IS NULL 
+    CREATE TABLE [dbo].[tbx_Bill_A_Gathering]
+        (
+          [BtypeId] VARCHAR(50) NOT NULL DEFAULT ( '' ) ,--结算单位
+          [VchCode] INT NOT NULL DEFAULT ( 0 ) ,--对应的单据ID
+          [VchType] INT NOT NULL DEFAULT ( 0 ) ,--对应的单据类型
+          [GatheringVchCode] INT NOT NULL DEFAULT ( 0 ) ,--付款或收款单等的主表ID
+          [Total] NUMERIC(22, 10) NOT NULL DEFAULT (0),--结算的金额
+          [DlyOrder] INT NOT NULL IDENTITY(1, 1) ,
+          CONSTRAINT PK_tbx_Bill_A_Gathering PRIMARY KEY ( [BTypeID], [VchCode] )
+        )   
+GO
+
 --单据-调拨单等的从表
 IF OBJECT_ID('dbo.tbx_Bill_Other_D') IS NULL 
     CREATE TABLE [dbo].[tbx_Bill_Other_D]
@@ -839,7 +993,7 @@ IF OBJECT_ID('dbo.tbx_Stock_Glide') IS NULL
 GO
 
 --库存盘点表
-IF OBJECT_ID('dbo.tbx_Stock_Check]') IS NULL 
+IF OBJECT_ID('dbo.tbx_Stock_Check') IS NULL 
 BEGIN
 	CREATE TABLE [dbo].[tbx_Stock_Check]
 	(
@@ -891,8 +1045,56 @@ IF OBJECT_ID('dbo.tbx_Sys_DefSQL') IS NULL
           [DSLCreateTime] DATETIME NOT NULL DEFAULT 0 ,
           [DSLUpdateTime] DATETIME NOT NULL DEFAULT 0 
           CONSTRAINT PK_tbx_Sys_DefSQL PRIMARY KEY ( DSLID )
+        )   
+GO
+
+--权限-权限功能列表
+IF OBJECT_ID('dbo.tbx_Limit_Action') IS NULL 
+    CREATE TABLE [dbo].[tbx_Limit_Action]
+        (
+          [LAGUID] VARCHAR(50) NOT NULL DEFAULT '' ,
+          [LAName] VARCHAR(50) NOT NULL DEFAULT '',
+          [LAType] INT NOT NULL DEFAULT 0 ,--类型，0未配置，1基本信息，2单据，3报表，4数据，5其它
+          [LARowIndex] INT NOT NULL DEFAULT 0 ,
+          [LARemark] VARCHAR(200) NOT NULL DEFAULT ''
+          CONSTRAINT PK_tbx_Limit_Action PRIMARY KEY ( [LAGUID] )
         )
-        
+GO
+
+--权限-角色
+IF OBJECT_ID('dbo.tbx_Limit_Role') IS NULL 
+    CREATE TABLE [dbo].[tbx_Limit_Role]
+        (
+          [LRGUID] VARCHAR(50) NOT NULL DEFAULT '' ,
+          [LRName] VARCHAR(50) NOT NULL DEFAULT '' ,
+          [LRRowIndex] INT NOT NULL IDENTITY(1, 1) ,
+          [LRRemark] VARCHAR(200) NOT NULL DEFAULT ''
+          CONSTRAINT PK_tbx_Limit_Role PRIMARY KEY ( [LRGUID] )
+        )
+GO
+
+--权限-角色用户映射表
+IF OBJECT_ID('dbo.tbx_Limit_RU') IS NULL 
+    CREATE TABLE [dbo].[tbx_Limit_RU]
+        (
+          [LRGUID] VARCHAR(50) NOT NULL DEFAULT '' ,--角色表点LRID
+          [UserId] VARCHAR(50) NOT NULL DEFAULT '' --职员表点ETypeID
+          CONSTRAINT PK_tbx_Limit_RU PRIMARY KEY ( [LRGUID], [UserId])
+        )
+GO
+
+--权限-权限和角色映射表
+IF OBJECT_ID('dbo.tbx_Limit_Action_Role') IS NULL 
+    CREATE TABLE [dbo].[tbx_Limit_Action_Role]
+        (
+          [LAGUID] VARCHAR(50) NOT NULL DEFAULT '' ,--权限功能ID
+          [RUID] VARCHAR(50) NOT NULL DEFAULT '' ,--角色或用户ID
+          [RUType] INT NOT NULL DEFAULT 0 ,--0未定义，1角色ID，2用户ID
+          --基本信息类型权限，2^x之和确定。查看，新增，分类，修改，删除，打印
+          --单据权限
+          [LimitValue] INT NOT NULL DEFAULT 0
+          CONSTRAINT PK_tbx_Limit_Action_Role PRIMARY KEY ( [LAGUID], [RUID], [RUType] )
+        )
 GO
 
 TRUNCATE TABLE  dbo.tbx_Base_PackageInfo
@@ -954,3 +1156,59 @@ INSERT INTO dbo.tbx_Sys_DitDef( DitDefName ,DitDefValue ,DitDefComment)
 VALUES  ( 'DitUnitRate' , '6' ,'关系')
 INSERT INTO dbo.tbx_Sys_DitDef( DitDefName ,DitDefValue ,DitDefComment)
 VALUES  ( 'DitcentRate' , '2' ,'比率(%)')
+
+TRUNCATE TABLE dbo.tbx_Limit_Action
+--权限-基本类型的权限
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{48B70E42-705F-48C3-928F-FD94280F14D7}', '商品信息', 1, 1)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{D56591FC-49A2-4C6E-8A43-1A04D553CED2}', '单位信息', 1, 2)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{11831D9E-664A-4DD7-8B6A-8D286A15F31B}', '职员信息', 1, 3)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{64E32F93-0BED-40E6-8EE5-3AA25FA8D3B2}', '部门信息', 1, 4)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{3E91FE79-1072-4B99-AFD3-E4759B6C11ED}', '仓库信息', 1, 5)
+
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{C68FA10B-741B-462E-9646-6A37E8A79543}', '进货订单', 2, 1)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{CD40BCFC-099E-476D-8560-5F65A7F9441D}', '进货单', 2, 2)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{4D06B1CD-38AA-431D-84ED-534676C46645}', '付款单', 2, 3)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{6138233E-9524-423F-881C-DAF556611881}', '销售订单', 2, 4)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{5AF10361-EAF6-4C63-B0CD-71B15802C9FC}', '销售单', 2, 5)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{50202B7A-256F-4B40-A142-8F78F9AE82A4}', '收款单', 2, 6)
+
+
+TRUNCATE TABLE dbo.tbx_Limit_Role
+--权限-角色
+INSERT INTO dbo.tbx_Limit_Role ( LRGUID, LRName, LRRemark )
+VALUES  ( '{6E2F55C8-8B47-45E8-8EFB-AEB9A85BB423}', '超级用户组', '具有全部权限')
+INSERT INTO dbo.tbx_Limit_Role ( LRGUID, LRName, LRRemark )
+VALUES  ( '{ED676827-6BCC-4AC5-BF0D-6FB8DF850E22}', '经理组', '具有部分权限')
+INSERT INTO dbo.tbx_Limit_Role ( LRGUID, LRName, LRRemark )
+VALUES  ( '{59FF1812-B309-41E4-8F24-6CD3043B308D}', '组长组', '具有部分权限')
+INSERT INTO dbo.tbx_Limit_Role ( LRGUID, LRName, LRRemark )
+VALUES  ( '{B56B5A19-99C8-45BA-9A92-54E7F9B798BE}', '普通员工组', '具有部分权限')
+
+TRUNCATE TABLE dbo.tbx_Limit_RU
+--权限-角色用户映射表
+INSERT INTO dbo.tbx_Limit_RU ( LRGUID, UserId )
+VALUES  ( '{6E2F55C8-8B47-45E8-8EFB-AEB9A85BB423}', '00000')
+INSERT INTO dbo.tbx_Limit_RU ( LRGUID, UserId )
+VALUES  ( '{6E2F55C8-8B47-45E8-8EFB-AEB9A85BB423}', '00001')
+INSERT INTO dbo.tbx_Limit_RU ( LRGUID, UserId )
+VALUES  ( '{6E2F55C8-8B47-45E8-8EFB-AEB9A85BB423}', '00002')
+
+TRUNCATE TABLE dbo.tbx_Limit_Action_Role
+--权限-基本信息类型的权限
+INSERT INTO dbo.tbx_Limit_Action_Role ( LAGUID, RUID, RUType, LimitValue )
+VALUES  ( '{48B70E42-705F-48C3-928F-FD94280F14D7}', '{6E2F55C8-8B47-45E8-8EFB-AEB9A85BB423}', 1, 31 )
+INSERT INTO dbo.tbx_Limit_Action_Role ( LAGUID, RUID, RUType, LimitValue )
+VALUES  ( '{D56591FC-49A2-4C6E-8A43-1A04D553CED2}', '00000', 2, 63 )
+INSERT INTO dbo.tbx_Limit_Action_Role ( LAGUID, RUID, RUType, LimitValue )
+VALUES  ( '{11831D9E-664A-4DD7-8B6A-8D286A15F31B}', '{6E2F55C8-8B47-45E8-8EFB-AEB9A85BB423}', 1, 61 )

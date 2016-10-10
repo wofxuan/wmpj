@@ -1,23 +1,22 @@
 inherited frmDialog: TfrmDialog
   BorderStyle = bsDialog
   Caption = 'frmDialog'
-  ClientWidth = 505
+  ClientWidth = 521
   Position = poMainFormCenter
-  Visible = False
   PixelsPerInch = 96
   TextHeight = 13
   object pnlBottom: TPanel [0]
     Left = 0
-    Top = 269
-    Width = 505
+    Top = 268
+    Width = 521
     Height = 49
     Align = alBottom
     TabOrder = 0
     DesignSize = (
-      505
+      521
       49)
     object btnOK: TcxButton
-      Left = 294
+      Left = 310
       Top = 12
       Width = 75
       Height = 25
@@ -26,7 +25,7 @@ inherited frmDialog: TfrmDialog
       TabOrder = 0
     end
     object btnCannel: TcxButton
-      Left = 406
+      Left = 422
       Top = 12
       Width = 75
       Height = 25
@@ -39,7 +38,7 @@ inherited frmDialog: TfrmDialog
   object pnlTop: TPanel [1]
     Left = 0
     Top = 0
-    Width = 505
+    Width = 521
     Height = 41
     Align = alTop
     TabOrder = 1
@@ -59,8 +58,8 @@ inherited frmDialog: TfrmDialog
   object pnlClient: TPanel [2]
     Left = 0
     Top = 41
-    Width = 505
-    Height = 228
+    Width = 521
+    Height = 227
     Align = alClient
     TabOrder = 2
   end

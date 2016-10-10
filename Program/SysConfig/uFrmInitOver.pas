@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, uFrmDialog, Menus, cxLookAndFeelPainters, ActnList, cxControls,
-  cxContainer, cxEdit, cxLabel, StdCtrls, cxButtons, ExtCtrls, uModelStockGoodsInf, uModelSysIntf;
+  cxContainer, cxEdit, cxLabel, StdCtrls, cxButtons, ExtCtrls, uModelStockGoodsIntf, uModelSysIntf;
 
 type
   TfrmInitOver = class(TfrmDialog)
@@ -85,7 +85,7 @@ end;
 procedure TfrmInitOver.InitParamList;
 begin
   inherited;
-  MoudleNo := fnMdlInitOver;
+  MoudleNo := fnDialogInitOver;
 end;
 
 procedure TfrmInitOver.btnBeginClick(Sender: TObject);
@@ -101,7 +101,7 @@ begin
 end;
 
 initialization
-  gFormManage.RegForm(TfrmInitOver, fnMdlInitOver);
+  gFormManage.RegForm(TfrmInitOver, fnDialogInitOver);
 
 end.
 

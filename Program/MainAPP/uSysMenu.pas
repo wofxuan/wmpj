@@ -258,7 +258,10 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m10001000', '系统参数设置', 'm1000', '', 0, nil);
     AddMenu('m100010001000', '加载包设置', 'm10001000', '', fnMdlLoadItemSet, nil);
     AddMenu('m100010002000', '系统表格配置', 'm10001000', '', fnMdlBaseTbxCfg, nil);
-    AddMenu('m10002000', '系统重建', 'm1000', '', fnMdlReBuild, nil);
+    AddMenu('m10002000', '系统重建', 'm1000', '', fnDialogReBuild, nil);
+    AddMenu('m10003000', '权限管理', 'm1000', '', 0, nil);
+    AddMenu('m1000300010000', '角色管理', 'm10003000', '', fnMdlLimitRole, nil);
+    AddMenu('m1000300020000', '用户管理', 'm10003000', '', fnDialogLimitSet, nil);
 
     AddMenu('m10001111', '测试接口', 'm1000', '', 0, TestIntfMethod);
 
@@ -274,15 +277,19 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m20008000', '期初建账', 'm2000', '', 0, nil);
     AddMenu('m200080001000', '期初库存商品', 'm20008000', '', fnMdlStockGoodsIni, nil);
     AddMenu('m200080002000', '期初应收应付', 'm20008000', '', 0, nil);
-    AddMenu('m20009000', '期初建账..开账', 'm2000', '', fnMdlInitOver, nil);
+    AddMenu('m20009000', '期初建账..开账', 'm2000', '', fnDialogInitOver, nil);
 
     AddMenu('m3000', '业务录入', '', '', 0, nil);
     AddMenu('m30001000', '进货订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Buy), fnMdlBillOrderBuy, nil);
     AddMenu('m30002000', '进货单', 'm3000', 'Vchtype=' + IntToStr(VchType_Buy), fnMdlBillBuy, nil);
-    AddMenu('m30003000', '销售订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Sale), fnMdlBillOrderSale, nil);
-    AddMenu('m30004000', '销售单', 'm3000', 'Vchtype=' + IntToStr(VchType_Sale), fnMdlBillSale, nil);
-    AddMenu('m30005000', '调拨单', 'm3000', 'Vchtype=' + IntToStr(VchType_Allot), fnMdlBillAllot, nil);
-    AddMenu('m30006000', '仓库盘点', 'm3000', '', fnMdlCheckGoods, nil);
+    AddMenu('m30003000', '付款单', 'm3000', 'Vchtype=' + IntToStr(VchType_Payment), fnMdlBillPayment, nil);
+    AddMenu('m30004000', '-', 'm3000', '', 0, nil);
+    AddMenu('m30005000', '销售订单', 'm3000', 'Vchtype=' + IntToStr(VchType_Order_Sale), fnMdlBillOrderSale, nil);
+    AddMenu('m30006000', '销售单', 'm3000', 'Vchtype=' + IntToStr(VchType_Sale), fnMdlBillSale, nil);
+    AddMenu('m30007000', '收款单', 'm3000', 'Vchtype=' + IntToStr(VchType_Gathering), fnMdlBillGathering, nil);
+    AddMenu('m30008000', '-', 'm3000', '', 0, nil);
+    AddMenu('m30009000', '调拨单', 'm3000', 'Vchtype=' + IntToStr(VchType_Allot), fnMdlBillAllot, nil);
+    AddMenu('m30010000', '仓库盘点', 'm3000', '', fnMdlCheckGoods, nil);
 
     AddMenu('m4000', '数据查询', '', '', 0, nil);
     AddMenu('m40001000', '库存状况', 'm4000', '', fnMdlReportGoods, nil);
