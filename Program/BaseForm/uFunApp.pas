@@ -11,14 +11,14 @@ uses
 
 procedure OpenBillFrm(AVchType, AVchCode: Integer; AOpenState: TBillOpenState); //打开单据
 
-function CheckLimit(AMoudleNo, ALimitDo: Integer): Boolean; //权限检查
+function CheckLimit(AMoudleNo, ALimitDo: Integer; AIsShowMsg: Boolean = True): Boolean; //权限检查
 
 
 implementation
 
 uses uSysSvc, uVchTypeDef, uMoudleNoDef, uMainFormIntf, uOtherIntf, uModelControlIntf;
 
-function CheckLimit(AMoudleNo, ALimitDo: Integer): Boolean; //权限检查
+function CheckLimit(AMoudleNo, ALimitDo: Integer; AIsShowMsg: Boolean = True): Boolean; //权限检查
 var
   aModelLimit: IModelLimit;
   aLimitId: string;
@@ -26,7 +26,18 @@ begin
   Result := False;
   aModelLimit := IModelLimit((SysService as IModelControl).GetModelIntf(IModelLimit));
   aLimitId := aModelLimit.GetLimitId(AMoudleNo);
-  aModelLimit.CheckLimit(ALimitDo, aLimitId, OperatorID);
+  if AIsShowMsg then
+  begin
+    aModelLimit.CheckLimit(ALimitDo, aLimitId, OperatorID);
+  end
+  else
+  begin
+    try
+      aModelLimit.CheckLimit(ALimitDo, aLimitId, OperatorID);
+    except
+      Exit;
+    end;
+  end;
   Result := True;
 end;
 

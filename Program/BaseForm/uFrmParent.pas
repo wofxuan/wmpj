@@ -34,6 +34,7 @@ type
     function FrmShowModal: Integer;
     procedure FrmFree;
     procedure FrmClose;
+    procedure ResizeFrm(AParentForm: TWinControl);
 
     procedure DoSelectBasic(Sender: TObject; ABasicType: TBasicType;
       ASelectBasicParam: TSelectBasicParam;
@@ -213,6 +214,12 @@ var
 begin
   aCxGrid := TcxGridTableView(AComp);
   aCxGrid.OptionsView.DataRowHeight := 25;
+end;
+
+procedure TfrmParent.ResizeFrm(AParentForm: TWinControl);
+begin
+  Width := AParentForm.Width;
+  Height := AParentForm.Height;
 end;
 
 initialization

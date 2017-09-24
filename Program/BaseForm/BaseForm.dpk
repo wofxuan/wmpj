@@ -62,6 +62,7 @@ contains
   uFrmDialog in 'uFrmDialog.pas' {frmDialog},
   uFrmBaseSelect in 'uFrmBaseSelect.pas' {frmBaseSelect},
   uFrmMDIReport in 'uFrmMDIReport.pas' {frmMDIReport},
-  uFunApp in 'uFunApp.pas';
+  uFunApp in 'uFunApp.pas',
+  uDM in 'uDM.pas' {DMApp: TDataModule};
 
 end.

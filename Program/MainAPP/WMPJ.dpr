@@ -6,7 +6,9 @@ uses
   Windows,
   uPackageExport,
   uFrmWMPG in 'uFrmWMPG.pas' {FrmWMPG},
-  uSysMenu in 'uSysMenu.pas';
+  uSysMenu in 'uSysMenu.pas',
+  uFrmNav in 'uFrmNav.pas' {frmNav},
+  uFrmLogin in 'uFrmLogin.pas' {frmLogin};
 
 {$R *.res}
 
@@ -29,7 +31,9 @@ begin
     @ProLoad := GetProcAddress(CorePackageHandle, 'Load');
     @ProInit := GetProcAddress(CorePackageHandle, 'Init');
 
-    Application.CreateForm(TFrmWMPG, FrmWMPG);//要在初始化Core后创建，不然不能注册IMainForm
+    Application.CreateForm(TFrmWMPG, FrmWMPG);
+    Application.CreateForm(TfrmLogin, frmLogin);
+  //要在初始化Core后创建，不然不能注册IMainForm
     
     if assigned(ProLoad) then
     begin

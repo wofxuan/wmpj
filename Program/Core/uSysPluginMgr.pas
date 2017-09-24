@@ -8,7 +8,8 @@ unit uSysPluginMgr;
 
 interface
 
-uses SysUtils, Classes, Windows, Contnrs, uRegPluginIntf, uPluginBase, uSysSvc, uOtherIntf;
+uses SysUtils, Classes, Windows, Contnrs, Forms, uRegPluginIntf, uPluginBase,
+      uSysSvc, uOtherIntf, uMainFormIntf;
 
 const
   BPLTYPE = 1;
@@ -78,26 +79,41 @@ procedure TPluginMgr.Init;
 var
   i: Integer;
   PluginLoader: TPluginLoader;
+  aLogin: ILogin;
 begin
   PluginLoader := nil;
-  for i := 0 to FpluginList.Count - 1 do
+  aLogin := SysService as ILogin;
+  if Assigned(aLogin) then
   begin
-    try
-      PluginLoader := TPluginLoader(FpluginList.Items[i]);
-      if not PluginLoader.ContainPlugin then Continue;
+    if not aLogin.Login() then
+    begin
+      (SysService as IMainForm).SetWindowState(wsMinimized);
+      Application.Terminate;
+      Exit;
+    end;
+  end;
 
-//      if Assigned(SplashForm) then
-//        SplashForm.loading(Format('正在初始化包[%s]',
-//            [ExtractFileName(PluginLoader.PackageFile)]));
+  
+  try
+    for i := 0 to FpluginList.Count - 1 do
+    begin
+        PluginLoader := TPluginLoader(FpluginList.Items[i]);
+        if not PluginLoader.ContainPlugin then Continue;
 
-      PluginLoader.Plugin.Init;
-    except
-      on E: Exception do
-      begin
-        WriteErrFmt('处理插件Init方法出错([%s])，错误：%s', [ExtractFileName(PluginLoader.PackageFile), E.Message]);
+        if Assigned(aLogin) then
+          aLogin.loading(Format('正在初始化包[%s]', [ExtractFileName(PluginLoader.PackageFile)]));
+  //      if Assigned(SplashForm) then
+  //        SplashForm.loading(Format('正在初始化包[%s]',
+  //            [ExtractFileName(PluginLoader.PackageFile)]));
 
-        raise Exception.CreateFmt('处理插件Init方法出错([%s])，请查看Log目录下的错误日志！', [ExtractFileName(PluginLoader.PackageFile)]);
-      end;
+        PluginLoader.Plugin.Init;
+    end;
+  except
+    on E: Exception do
+    begin
+      WriteErrFmt('处理插件Init方法出错([%s])，错误：%s', [ExtractFileName(PluginLoader.PackageFile), E.Message]);
+
+      raise Exception.CreateFmt('处理插件Init方法出错([%s])，请查看Log目录下的错误日志！', [ExtractFileName(PluginLoader.PackageFile)]);
     end;
   end;
 end;

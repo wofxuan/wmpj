@@ -13,8 +13,7 @@ object FrmWMPG: TFrmWMPG
   FormStyle = fsMDIForm
   OldCreateOrder = False
   Position = poScreenCenter
-  Visible = True
-  OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -75,5 +74,6 @@ object FrmWMPG: TFrmWMPG
     BevelOuter = bvNone
     Caption = 'pnlMDIClient'
     TabOrder = 2
+    OnResize = pnlMDIClientResize
   end
 end

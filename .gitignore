@@ -27,6 +27,11 @@ $RECYCLE.BIN/
 *.exe
 *.dof
 *.cfg
+*.map
+*.bak
+*.svn-base
+/.svn
+/Bin/Log
 Testdll.dll
 
 # =========================

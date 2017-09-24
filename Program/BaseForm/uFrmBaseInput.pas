@@ -27,7 +27,7 @@ type
   private
     { Private declarations }
     FViewRoot: TObject; //保存调用此窗体的对象，如TfrmBaseList
-    
+
     procedure SelfClose;
   protected
     FModelBaseType: IModelBaseType;
@@ -133,6 +133,7 @@ begin
   if FModelBaseType.DataChangeType = dctDis then
   begin
     SetReadOnly(True);
+    actOK.Enabled := False;
   end;
   Title := Caption; //默认title和caption是一样的。如果要设置为不一样的，可以在子类重写SetTitle方法
 end;
@@ -149,7 +150,7 @@ end;
 
 procedure TfrmBaseInput.SetReadOnly(AReadOnly: Boolean);
 begin
-
+  DBComItem.SetReadOnly(nil, AReadOnly);
 end;
 
 procedure TfrmBaseInput.SetTitle(const Value: string);

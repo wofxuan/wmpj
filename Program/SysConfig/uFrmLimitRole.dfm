@@ -12,7 +12,7 @@ inherited frmLimitRole: TfrmLimitRole
     Left = 0
     Top = 82
     Width = 214
-    Height = 235
+    Height = 243
     Align = alLeft
     Caption = 'pnlRolelist'
     TabOrder = 6
@@ -20,7 +20,7 @@ inherited frmLimitRole: TfrmLimitRole
       Left = 1
       Top = 1
       Width = 212
-      Height = 233
+      Height = 241
       Align = alClient
       TabOrder = 0
       OnChange = tvRoleChange
@@ -29,22 +29,22 @@ inherited frmLimitRole: TfrmLimitRole
   object pnlAction: TPanel [3]
     Left = 214
     Top = 82
-    Width = 522
-    Height = 235
+    Width = 530
+    Height = 243
     Align = alClient
     Caption = 'pnlAction'
     TabOrder = 7
     object pcLimit: TcxPageControl
       Left = 186
       Top = 1
-      Width = 335
-      Height = 233
-      ActivePage = tsBill
+      Width = 343
+      Height = 241
+      ActivePage = tsReport
       Align = alClient
       Style = 10
       TabOrder = 0
-      ClientRectBottom = 233
-      ClientRectRight = 335
+      ClientRectBottom = 241
+      ClientRectRight = 343
       ClientRectTop = 19
       object tsBase: TcxTabSheet
         Caption = #22522#26412#20449#24687
@@ -52,8 +52,8 @@ inherited frmLimitRole: TfrmLimitRole
         object gridBase: TcxGrid
           Left = 0
           Top = 0
-          Width = 335
-          Height = 214
+          Width = 343
+          Height = 222
           Align = alClient
           TabOrder = 0
           object gridTVBase: TcxGridTableView
@@ -73,8 +73,8 @@ inherited frmLimitRole: TfrmLimitRole
         object gridBill: TcxGrid
           Left = 0
           Top = 0
-          Width = 335
-          Height = 214
+          Width = 343
+          Height = 222
           Align = alClient
           TabOrder = 0
           object gridTVBill: TcxGridTableView
@@ -91,6 +91,23 @@ inherited frmLimitRole: TfrmLimitRole
       object tsReport: TcxTabSheet
         Caption = #25253#34920
         ImageIndex = 2
+        object gridReport: TcxGrid
+          Left = 0
+          Top = 0
+          Width = 343
+          Height = 222
+          Align = alClient
+          TabOrder = 0
+          object gridTVReport: TcxGridTableView
+            NavigatorButtons.ConfirmDelete = False
+            DataController.Summary.DefaultGroupSummaryItems = <>
+            DataController.Summary.FooterSummaryItems = <>
+            DataController.Summary.SummaryGroups = <>
+          end
+          object gridLVReport: TcxGridLevel
+            GridView = gridTVReport
+          end
+        end
       end
       object tsData: TcxTabSheet
         Caption = #25968#25454
@@ -107,13 +124,13 @@ inherited frmLimitRole: TfrmLimitRole
       Align = alLeft
       Caption = #29992#25143#21015#34920
       TabOrder = 1
-      Height = 233
+      Height = 241
       Width = 185
       object tvUser: TcxTreeView
         Left = 2
         Top = 16
         Width = 181
-        Height = 215
+        Height = 223
         Align = alClient
         TabOrder = 0
         ReadOnly = True
@@ -590,6 +607,12 @@ inherited frmLimitRole: TfrmLimitRole
     Aggregates = <>
     Params = <>
     Left = 225
+    Top = 186
+  end
+  object cdsReport: TClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 321
     Top = 186
   end
 end

@@ -5,14 +5,14 @@ inherited frmMDIBaseType: TfrmMDIBaseType
   PixelsPerInch = 96
   TextHeight = 13
   inherited gridMainShow: TcxGrid
-    Left = 124
-    Width = 612
+    Left = 121
+    Width = 615
     inherited gridTVMainShow: TcxGridTableView
       OnCellDblClick = gridTVMainShowCellDblClick
     end
   end
-  object pnlTV: TPanel [3]
-    Left = 3
+  object pnlTV: TPanel [2]
+    Left = 0
     Top = 82
     Width = 121
     Height = 235

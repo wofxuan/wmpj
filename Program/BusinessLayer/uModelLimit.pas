@@ -37,13 +37,19 @@ begin
   gLimitIdKeyList.Add(IntToString(fnMdlBaseDtypeList) + '={64E32F93-0BED-40E6-8EE5-3AA25FA8D3B2}');
   gLimitIdKeyList.Add(IntToString(fnMdlBaseKtypeList) + '={3E91FE79-1072-4B99-AFD3-E4759B6C11ED}');
 
-
   gLimitIdKeyList.Add(IntToString(fnMdlBillOrderBuy) + '={C68FA10B-741B-462E-9646-6A37E8A79543}');
   gLimitIdKeyList.Add(IntToString(fnMdlBillBuy) + '={CD40BCFC-099E-476D-8560-5F65A7F9441D}');
   gLimitIdKeyList.Add(IntToString(fnMdlBillGathering) + '={4D06B1CD-38AA-431D-84ED-534676C46645}');
   gLimitIdKeyList.Add(IntToString(fnMdlBillOrderSale) + '={6138233E-9524-423F-881C-DAF556611881}');
   gLimitIdKeyList.Add(IntToString(fnMdlBillSale) + '={5AF10361-EAF6-4C63-B0CD-71B15802C9FC}');
   gLimitIdKeyList.Add(IntToString(fnMdlBillPayment) + '={50202B7A-256F-4B40-A142-8F78F9AE82A4}');
+  gLimitIdKeyList.Add(IntToString(fnMdlBillAllot) + '={30B95AAD-6ABA-4BBF-94B8-FF9C8B3E059A}');
+
+  gLimitIdKeyList.Add(IntToString(fnMdlReportGoods) + '={AE2801FC-192F-4965-9994-7E6E74366510}');
+  gLimitIdKeyList.Add(IntToString(fnMdlReportOrderBuy) + '={38C6C242-121E-4F3F-B0B7-2E51B8C4F9DE}');
+  gLimitIdKeyList.Add(IntToString(fnMdlReportBuy) + '={20C50FBF-5B4C-44AF-900B-4087BFB98880}');
+  gLimitIdKeyList.Add(IntToString(fnMdlReportOrderSale) + '={350BF069-4CD4-4CBF-8F62-AEF407148AD4}');
+  gLimitIdKeyList.Add(IntToString(fnMdlReportSale) + '={7CDCC33E-9355-46ED-8E4B-6AE919F8AC2E}');
 end;
 { TModelLimit }
 

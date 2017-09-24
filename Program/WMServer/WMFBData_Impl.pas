@@ -42,6 +42,7 @@ type
     function Sum(const A: Integer; const B: Integer): Integer;
     function GetServerTime: DateTime;
     function QuerySQL(const ASQL: AnsiString; var AQueryData: OleVariant): Integer;
+    function OpenSQL(const ASQL: AnsiString): Integer;
     //传入的json参数格式'{"ProcName":"getptype","Params":{"@comde":"0001","@type1":"00002"}}'
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
@@ -271,6 +272,18 @@ begin
     aIni.WriteString('DataBase', 'BaseName', FBaseName);
   finally
     aIni.Free;
+  end;
+end;
+
+function TWMFBData.OpenSQL(const ASQL: AnsiString): Integer;
+begin
+  try
+    Result := -1;
+    qryPubBackData.SQL.Clear;
+    qryPubBackData.SQL.Add(ASQL);
+    Result := qryPubBackData.ExecSQL;
+  except
+
   end;
 end;
 

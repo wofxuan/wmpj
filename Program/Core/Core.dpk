@@ -39,6 +39,7 @@ contains
   uSysSvc in 'uSysSvc.pas',
   uSvcInfoIntf in '..\Interfaces\uSvcInfoIntf.pas',
   uParamObject in '..\Pub\uParamObject.pas',
-  uDefCom in '..\Pub\uDefCom.pas';
+  uDefCom in '..\Pub\uDefCom.pas',
+  uMainFormIntf in '..\Interfaces\uMainFormIntf.pas';
 
 end.

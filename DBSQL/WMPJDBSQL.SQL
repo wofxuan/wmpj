@@ -1182,7 +1182,19 @@ INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
 VALUES  ( '{5AF10361-EAF6-4C63-B0CD-71B15802C9FC}', '销售单', 2, 5)
 INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
 VALUES  ( '{50202B7A-256F-4B40-A142-8F78F9AE82A4}', '收款单', 2, 6)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{30B95AAD-6ABA-4BBF-94B8-FF9C8B3E059A}', '调拨单', 2, 7)
 
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{AE2801FC-192F-4965-9994-7E6E74366510}', '库存状况', 3, 1)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{38C6C242-121E-4F3F-B0B7-2E51B8C4F9DE}', '进货订单查询', 3, 2)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{20C50FBF-5B4C-44AF-900B-4087BFB98880}', '进货单查询', 3, 3)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{350BF069-4CD4-4CBF-8F62-AEF407148AD4}', '销售订单查询', 3, 4)
+INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
+VALUES  ( '{7CDCC33E-9355-46ED-8E4B-6AE919F8AC2E}', '销售单查询', 3, 5)
 
 TRUNCATE TABLE dbo.tbx_Limit_Role
 --权限-角色

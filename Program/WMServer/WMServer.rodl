@@ -32,6 +32,14 @@
 </Parameter>
 </Parameters>
 </Operation>
+<Operation Name="OpenSQL" UID="{1D0B0A43-0149-4992-8A7B-0515205E800D}">
+<Parameters>
+<Parameter Name="Result" DataType="Integer" Flag="Result">
+</Parameter>
+<Parameter Name="ASQL" DataType="AnsiString" Flag="In" >
+</Parameter>
+</Parameters>
+</Operation>
 <Operation Name="ExecuteProc" UID="{372E80F2-B5ED-4A06-BF0D-E180C5F64E39}">
 <Parameters>
 <Parameter Name="Result" DataType="Integer" Flag="Result">

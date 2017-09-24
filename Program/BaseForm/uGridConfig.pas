@@ -132,7 +132,7 @@ var
 
 implementation
 
-uses uSysSvc, uOtherIntf, cxDataStorage, cxCheckBox, cxButtonEdit, cxTextEdit, uPubFun, Graphics, Variants, uCalcExpress;
+uses uSysSvc, uOtherIntf, cxDataStorage, cxCheckBox, cxButtonEdit, cxTextEdit, uPubFun, Graphics, Variants, uCalcExpress, uDM;
 
 { TGridItem }
 
@@ -463,10 +463,12 @@ begin
     aDelBtn :=(aColInfo.FGridColumn.Properties as TcxButtonEditProperties).Buttons.Add;
     aDelBtn.Kind := bkGlyph;
 //    aDelBtn.Glyph.LoadFromFile('E:\Code\Delphi\wmpj\Img\delete_16px.bmp');
+    DMApp.GetBitmap(imDelRow, aDelBtn.Glyph);
 
     (aColInfo.FGridColumn.Properties as TcxButtonEditProperties).OnButtonClick := ColumnPropertiesButtonClick; //关联点击事件
 
-    AddField('PUsercode', '商品编码');
+    aColInfo := AddField('PUsercode', '商品编码');
+    aColInfo.GridColumn.Options.Editing := False;
   end
   else if ABasicType = btBtype then
   begin

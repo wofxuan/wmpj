@@ -8,8 +8,8 @@ unit uFactoryFormIntf;
 
 interface
 
-uses Classes, uParamObject, uDefCom;
-  
+uses Classes, Controls, uParamObject, uDefCom;
+
 type
   //业务窗体接口
   IFormIntf = interface
@@ -20,6 +20,7 @@ type
     function FrmShowStyle: TShowStyle;//窗体显示的类型，是否modal 
     procedure FrmFree;
     procedure FrmClose;
+    procedure ResizeFrm(AParentForm: TWinControl);//窗体容器大小发生改变
   end;
 
   //业务窗体调度控制接口

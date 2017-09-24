@@ -129,6 +129,12 @@ begin
   InitOthers(self);
 
   LoadBillData();
+
+  if not FReadOnlyFlag then
+  begin
+    FReadOnlyFlag := not CheckLimit(MoudleNo, Limit_Bill_Input, False);
+    SetReadOnly(FReadOnlyFlag);
+  end;
 end;
 
 function TfrmMDIBill.BeforeSaveBill(ASaveState: TBillSaveState): Boolean;
@@ -403,7 +409,6 @@ begin
   LoadBillDataMaster();
   LoadBillDataGrid();
 
-//  CheckLimit := CheckLimit(MoudleNo, Limit_Bill_Input);
   SetReadOnly(FReadOnlyFlag);
 end;
 

@@ -27,6 +27,7 @@ type
     procedure Invoke_Sum(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
     procedure Invoke_GetServerTime(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
     procedure Invoke_QuerySQL(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
+    procedure Invoke_OpenSQL(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
     procedure Invoke_ExecuteProc(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
     procedure Invoke_ExecuteProcBackData(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
     procedure Invoke_SaveBill(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
@@ -100,6 +101,26 @@ begin
     __Message.InitializeResponseMessage(__Transport, 'WMServer', 'WMFBData', 'QuerySQLResponse');
     __Message.Write('Result', TypeInfo(Integer), lResult, []);
     __Message.Write('ABackData', TypeInfo(OleVariant), ABackData, []);
+    __Message.Finalize;
+    __Message.UnsetAttributes(__Transport);
+
+  finally
+  end;
+end;
+
+procedure TWMFBData_Invoker.Invoke_OpenSQL(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
+{ function OpenSQL(const ASQL: AnsiString): Integer; }
+var
+  ASQL: AnsiString;
+  lResult: Integer;
+begin
+  try
+    __Message.Read('ASQL', TypeInfo(AnsiString), ASQL, []);
+
+    lResult := (__Instance as IWMFBData).OpenSQL(ASQL);
+
+    __Message.InitializeResponseMessage(__Transport, 'WMServer', 'WMFBData', 'OpenSQLResponse');
+    __Message.Write('Result', TypeInfo(Integer), lResult, []);
     __Message.Finalize;
     __Message.UnsetAttributes(__Transport);
 

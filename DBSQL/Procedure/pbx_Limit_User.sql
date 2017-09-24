@@ -45,6 +45,18 @@ AS
 			WHERE   la.LAType = @LimitType
 			ORDER BY la.LARowIndex
 		 END      
+	  ELSE IF ( @LimitType = 3 )
+		 BEGIN
+			SELECT  la.LAGUID, la.LAName, ISNULL(LimitValue, 0) LimitValue, 
+				CASE ISNULL(LimitValue & 1, 0) WHEN 1 THEN 1 ELSE 0 END LView, 
+				CASE ISNULL(LimitValue & 2, 0) WHEN 2 THEN 1 ELSE 0 END LPrint
+			FROM    tbx_Limit_Action la
+					LEFT JOIN tbx_Limit_Action_Role lar ON la.LAGUID = lar.LAGUID
+														   AND lar.RUType = @RUType
+														   AND lar.RUID = @RUID
+			WHERE   la.LAType = @LimitType
+			ORDER BY la.LARowIndex
+		 END     
     --EXEC(@aSQL)        
     RETURN 0
 

@@ -46,6 +46,10 @@ type
     gridTVBill: TcxGridTableView;
     gridLVBill: TcxGridLevel;
     cdsBill: TClientDataSet;
+    gridReport: TcxGrid;
+    gridTVReport: TcxGridTableView;
+    gridLVReport: TcxGridLevel;
+    cdsReport: TClientDataSet;
     procedure actAddExecute(Sender: TObject);
     procedure actModifyExecute(Sender: TObject);
     procedure actDelExecute(Sender: TObject);
@@ -57,7 +61,7 @@ type
   private
     { Private declarations }
     FModelLimit: IModelLimit;
-    FGridBase, FGridBill: TGridItem;
+    FGridBase, FGridBill, FGridReport: TGridItem;
     FModelFun: IModelFun;
     
     procedure BeforeFormShow; override;
@@ -93,6 +97,7 @@ begin
   FreeBaseTVData(tvRole);
   FGridBase.Free;
   FGridBill.Free;
+  FGridReport.Free;
 end;
 
 procedure TfrmLimitRole.BeforeFormShow;
@@ -109,12 +114,19 @@ begin
   FGridBill.SetGridCellSelect(True);
   FGridBill.ShowMaxRow := False;
 
+
+  FGridReport := TGridItem.Create(fnLimitSetReport, gridReport, gridTVBill);
+  FGridReport.SetGridCellSelect(True);
+  FGridReport.ShowMaxRow := False;
+  
   LoadRoleTree();
   LoadUserTree();
   IniGridField();
   LoadGridData();
 
   SetOptState(True);
+
+  pcLimit.ActivePage := tsBase;
 end;
 
 procedure TfrmLimitRole.IniGridField;
@@ -145,6 +157,15 @@ begin
   FGridBill.AddCheckBoxCol('LSettle', '过账', 1, 0);
   FGridBill.AddCheckBoxCol('LPrint', '打印', 1, 0);
   FGridBill.InitGridData;
+
+  FGridReport.ClearField();
+  FGridReport.AddField('LAGUID', 'LAGUID', -1);
+  FGridReport.AddField('LimitValue', 'LimitValue', -1, cfInt);
+  aColInfo := FGridReport.AddField('LAName', '模块名称', 200);
+  aColInfo.GridColumn.Options.Editing := False;
+  FGridReport.AddCheckBoxCol('LView', '查看', 1, 0);
+  FGridReport.AddCheckBoxCol('LPrint', '打印', 1, 0);
+  FGridBill.InitGridData;
 end;
 
 procedure TfrmLimitRole.InitParamList;
@@ -166,6 +187,9 @@ begin
 
   FModelLimit.UserLimitData(Limit_Bill, aNodeData.Typeid, cdsBill);
   FGridBill.LoadData(cdsBill);
+
+  FModelLimit.UserLimitData(Limit_Report, aNodeData.Typeid, cdsReport);
+  FGridReport.LoadData(cdsReport);
 end;
 
 procedure TfrmLimitRole.LoadRoleTree;

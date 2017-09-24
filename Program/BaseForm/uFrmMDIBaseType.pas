@@ -138,18 +138,26 @@ var
   aParam: TParamObject;
   aParId_Cur: string;
   aOldRowIndex: Integer;
+  aCanModify: Boolean;
 begin
-  CheckLimit(MoudleNo, Limit_Base_Modify);
   if StringEmpty(CurTypeId) then Exit;
+
+  CheckLimit(MoudleNo, Limit_Base_View);
+  aCanModify := CheckLimit(MoudleNo, Limit_Base_Modify, False);
   
   aOldRowIndex := FGridItem.RowIndex;
   aParam := TParamObject.Create;
   try
-    aParam.Add('cMode', GetEnumValue(TypeInfo(TDataChangeType), 'dctModif'));
+    if aCanModify then
+      aParam.Add('cMode', GetEnumValue(TypeInfo(TDataChangeType), 'dctModif'))
+    else
+      aParam.Add('cMode', GetEnumValue(TypeInfo(TDataChangeType), 'dctDis'));
+
     aParId_Cur := Self.ParamList.AsString('ParId_Cur');
     if Trim(aParId_Cur) = EmptyStr then aParId_Cur := ROOT_ID;
     aParam.Add('ParId', aParId_Cur);
     aParam.Add('CurTypeid', CurTypeId);
+
     if OpenInPutBase(aParam) then
     begin
       LoadGridData(Self.ParamList.AsString('ParId_Cur'));

@@ -37,6 +37,7 @@ type
     function Sum(const A: Integer; const B: Integer): Integer;
     function GetServerTime: DateTime;
     function QuerySQL(const ASQL: AnsiString; var ABackData: OleVariant): Integer;
+    function OpenSQL(const ASQL: AnsiString): Integer;
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
     function SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer;
@@ -55,6 +56,7 @@ type
     function Sum(const A: Integer; const B: Integer): Integer;
     function GetServerTime: DateTime;
     function QuerySQL(const ASQL: AnsiString; var ABackData: OleVariant): Integer;
+    function OpenSQL(const ASQL: AnsiString): Integer;
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
     function SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer;
@@ -124,6 +126,22 @@ begin
 
     __Message.Read('Result', TypeInfo(Integer), result, []);
     __Message.Read('ABackData', TypeInfo(OleVariant), ABackData, []);
+  finally
+    __Message.UnsetAttributes(__TransportChannel);
+    __Message.FreeStream;
+  end
+end;
+
+function TWMFBData_Proxy.OpenSQL(const ASQL: AnsiString): Integer;
+begin
+  try
+    __Message.InitializeRequestMessage(__TransportChannel, 'WMServer', __InterfaceName, 'OpenSQL');
+    __Message.Write('ASQL', TypeInfo(AnsiString), ASQL, []);
+    __Message.Finalize;
+
+    __TransportChannel.Dispatch(__Message);
+
+    __Message.Read('Result', TypeInfo(Integer), result, []);
   finally
     __Message.UnsetAttributes(__TransportChannel);
     __Message.FreeStream;

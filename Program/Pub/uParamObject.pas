@@ -29,6 +29,7 @@ type
     procedure Clear; //只清空非系统级的
     function AsString(AParamName: string): string;
     function AsInteger(AParamName: string): Integer;
+    function AsBoolean(AParamName: string): Boolean;
     function AsFloat(AParamName: string): double;
     function AsVariant(AParamName: string): Variant;
     property Params: TGParams read FParams write SetParams;
@@ -149,6 +150,17 @@ begin
       FParams[I].IsSystem := IsSystem;
     end;
   end;
+end;
+
+function TParamObject.AsBoolean(AParamName: string): Boolean;
+var
+  V: Variant;
+begin
+  V := AsVariant(AParamName);
+  if VarIsNull(V) then
+    Result := False
+  else
+    Result := V;
 end;
 
 function TParamObject.AsFloat(AParamName: string): double;

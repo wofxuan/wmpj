@@ -4,7 +4,6 @@ inherited frmBaseInput: TfrmBaseInput
   ClientHeight = 323
   ClientWidth = 513
   Position = poMainFormCenter
-  Visible = False
   PixelsPerInch = 96
   TextHeight = 13
   object pnlBottom: TPanel [0]

@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, uMainFormIntf, uFactoryFormIntf, StdCtrls, uDBIntf, DB, DBClient, Menus, uSysMenu,
-  ComCtrls, ExtCtrls, cxControls, cxPC, uParamObject, SyncObjs;
+  ComCtrls, ExtCtrls, cxControls, cxPC, uParamObject, SyncObjs, uFrmNav;
 
 type
   TFrmWMPG = class(TForm, IMainForm)
@@ -16,19 +16,22 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure tclFrmListCanClose(Sender: TObject; var ACanClose: Boolean);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure tclFrmListChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure pnlMDIClientResize(Sender: TObject);
   private
     { Private declarations }
     FMenuObject: TSysMenu;
+    FFrmNav: TfrmNav;
 
     //IMainForm
     function CreateMenu(const Path: string; MenuClick: TNotifyEvent): TObject;
     procedure CloseFom(AFormIntf: IFormIntf; var ACanClose: Boolean);
     procedure CallFormClass(AFromNo: Integer; AParam: TParamObject); //打开窗体
     function GetMDIShowClient: TWinControl;
-
+    procedure SetWindowState(AWindowState: TWindowState);
+    
     procedure OnShowMDI(Sender: TObject; ACaption: string; AFormIntf: IFormIntf);
   public
     { Public declarations }
@@ -60,46 +63,45 @@ begin
   begin
     if TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI = AFormIntf then
     begin
-//      TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.FrmClose;
-      TFrmObj(tclFrmList.Tabs.Objects[aIndex]).Free;
-      tclFrmList.Tabs.Delete(aIndex);
-      ACanClose := True;
-      tclFrmListChange(tclFrmList);
+      tclFrmList.Tabs.BeginUpdate;
+      try
+        TFrmObj(tclFrmList.Tabs.Objects[aIndex]).Free;
+        tclFrmList.Tabs.Delete(aIndex);
+        ACanClose := True;
+      finally
+        tclFrmList.Tabs.EndUpdate;
+        tclFrmListChange(tclFrmList)
+      end;
       Break;
     end;
   end;
 end;
 
 procedure TFrmWMPG.FormCreate(Sender: TObject);
+var
+  aRegInf: IRegInf;
 begin
   {加载菜单}
   FMenuObject := TSysMenu.Create(Self, Self);
   FMenuObject.OnShowMDI := OnShowMDI;
   Self.Menu := FMenuObject.GetMainMenu;
+
+  aRegInf := SysService as IRegInf;
+  aRegInf.RegObjFactory(IMainForm, Self);
 end;
 
 procedure TFrmWMPG.FormShow(Sender: TObject);
-var
-  aRegInf: IRegInf;
 begin
-  aRegInf := SysService as IRegInf;
-  aRegInf.RegObjFactory(IMainForm, Self);
-  OperatorID := '00001';
-end;
-
-procedure TFrmWMPG.FormClose(Sender: TObject; var Action: TCloseAction);
-var
-  i: Integer;
-begin
-  for i := 1 to tclFrmList.Tabs.Count - 1 do
-  begin
-    TFrmObj(tclFrmList.Tabs.Objects[i]).FrmMDI.FrmFree;
-    TFrmObj(tclFrmList.Tabs.Objects[i]).Free;
-  end;
+  FFrmNav := TfrmNav.Create(nil);
+  FFrmNav.Parent := Self;
+  FFrmNav.Show;
+  pnlMDIClient.Visible := False;
+  OperatorID := '00000';
 end;
 
 procedure TFrmWMPG.FormDestroy(Sender: TObject);
 begin
+  FFrmNav.Free;
   FMenuObject.Free;
 end;
 
@@ -141,6 +143,8 @@ begin
   aIndex := tclFrmList.TabIndex;
   if aIndex > 0 then
   begin
+    pnlMDIClient.Visible := True;
+    FFrmNav.Visible := False;
 //    Perform(WM_SETREDRAW, 0, 0); //锁屏幕, 防止在切换MDI窗体的时候闪烁
 //    try
     TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.FrmShow;
@@ -148,6 +152,11 @@ begin
 //      Perform(WM_SETREDRAW, 1, 0); //解锁屏幕并重画
 //      RedrawWindow(Handle, nil, 0, RDW_FRAME + RDW_INVALIDATE + RDW_ALLCHILDREN + RDW_NOINTERNALPAINT);//重绘客户区
 //    end;
+  end
+  else
+  begin
+    pnlMDIClient.Visible := False;
+    FFrmNav.Visible := True;
   end;
 end;
 
@@ -159,6 +168,39 @@ end;
 function TFrmWMPG.GetMDIShowClient: TWinControl;
 begin
   Result := pnlMDIClient;
+end;
+
+procedure TFrmWMPG.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+var
+  i: Integer;
+begin
+  CanClose := False;
+  while tclFrmList.Tabs.Count > 1 do
+  begin
+    TFrmObj(tclFrmList.Tabs.Objects[1]).FrmMDI.FrmClose();
+  end;
+  CanClose := True;
+end;
+
+procedure TFrmWMPG.SetWindowState(AWindowState: TWindowState);
+begin
+  WindowState := AWindowState;
+end;
+
+procedure TFrmWMPG.pnlMDIClientResize(Sender: TObject);
+var
+  aIndex: Integer;
+  aMsgBox: IMsgBox;
+begin
+  aIndex := tclFrmList.TabIndex;
+  if aIndex > 0 then
+  begin
+    TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.ResizeFrm(pnlMDIClient);
+  end
+  else
+  begin
+    if Assigned(FFrmNav) then FFrmNav.Width := pnlMDIClient.Width;;
+  end;
 end;
 
 end.
