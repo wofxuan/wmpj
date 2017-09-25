@@ -17,6 +17,9 @@ type
 
     // 执行一个存储过程, 回数据集
     function ExecuteProcBackData(AProcName: string; AInParam: TParamObject = nil; AOutParams: TParamObject = nil; ABackData: TClientDataSet = nil): Integer; overload;
+    
+    //登陆用户
+    function Login(AUserName, AUserPSW: string; var AMsg: string): Integer;
   end;
 
 implementation
