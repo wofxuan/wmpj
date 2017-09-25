@@ -20,12 +20,13 @@ type
     function OpenSQL(const ASQLStr: AnsiString): Integer;
     function GetMoudleNoSQL(const AMoudleNo: Integer): string;
     // 执行一个存储过程, 不返回数据集
-    function ExecuteProcByName(AProcName: string; AParamName: array of string;
-      AParamValue: array of OleVariant; OutputParams: TParamObject = nil): Integer; overload;
+    function ExecuteProcByName(AProcName: string; AParamName: array of string; AParamValue: array of OleVariant; OutputParams: TParamObject = nil): Integer; overload;
     function ExecuteProcByName(AProcName: string; AInParam: TParamObject = nil; AOutParams: TParamObject = nil): Integer; overload;
 
-        // 执行一个存储过程, 回数据集
+    // 执行一个存储过程, 回数据集
     function ExecuteProcBackData(AProcName: string; AInParam: TParamObject = nil; AOutParams: TParamObject = nil; ABackData: TClientDataSet = nil): Integer; overload;
+    
+    function Login(AUserName, AUserPSW: string; var AMsg: string): Integer; //登陆用户
   {ISvcInfo}
     function GetModuleName: string;
     function GetTitle: string;
@@ -196,6 +197,16 @@ begin
   end;
 end;
 
+function TDBOperation.Login(AUserName, AUserPSW: string; var AMsg: string): Integer;
+begin
+  Result := -999;
+  if (Trim(AUserName) = EmptyStr) OR (Trim(AUserPSW) = EmptyStr) then Exit;
+  try
+    Result := FWMServer.Login(AUserName, AUserPSW, AMsg);
+  except
+    raise(SysService as IExManagement).CreateFunEx('登陆账号错误，用户名:' + AUserName);
+  end;
+end;
 
 initialization
   TSingletonFactory.Create(IDBAccess, @CreateDBOperation);

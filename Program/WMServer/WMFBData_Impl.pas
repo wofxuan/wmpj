@@ -47,7 +47,6 @@ type
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
     function SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer;
-    function Login(const AUserName: AnsiString; const AUserPSW: AnsiString; out AMsg: AnsiString): Integer;
   end;
 
 
@@ -286,12 +285,6 @@ begin
   except
 
   end;
-end;
-
-function TWMFBData.Login(const AUserName, AUserPSW: AnsiString;
-  out AMsg: AnsiString): Integer;
-begin
-
 end;
 
 initialization
