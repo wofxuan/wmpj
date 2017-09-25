@@ -115,7 +115,7 @@ begin
   FGridBill.ShowMaxRow := False;
 
 
-  FGridReport := TGridItem.Create(fnLimitSetReport, gridReport, gridTVBill);
+  FGridReport := TGridItem.Create(fnLimitSetReport, gridReport, gridTVReport);
   FGridReport.SetGridCellSelect(True);
   FGridReport.ShowMaxRow := False;
   
@@ -344,6 +344,7 @@ procedure TfrmLimitRole.SetOptState(AReadOnly: Boolean);
 begin
   gridTVBill.OptionsData.Editing := not AReadOnly;
   gridTVBase.OptionsData.Editing := not AReadOnly;
+  gridTVReport.OptionsData.Editing := not AReadOnly;
   
   btnSave.Enabled := not AReadOnly;
   btnSetRoleAction.Enabled := AReadOnly;
@@ -375,6 +376,7 @@ var
 begin
   inherited;
   FGridBase.GridPost();
+  FGridBill.GridPost();
   FGridBill.GridPost();
   
   aNodeData := SelNodeData(tvRole);
@@ -443,6 +445,37 @@ begin
       if aLInput then aNewLimitValue := aNewLimitValue + Limit_Bill_Input;
       if aLSettle then aNewLimitValue := aNewLimitValue + Limit_Bill_Settle;
       if aLPrint then aNewLimitValue := aNewLimitValue + Limit_Bill_Print;
+
+      if aNewLimitValue = aOldLimitValue then Continue;
+      
+      aSaveRole.Add('@LAGUID', aLAGUID);
+      aSaveRole.Add('@RUID', aNodeData.Typeid);
+      aSaveRole.Add('@RUType', 1);
+      aSaveRole.Add('@LimitValue', aNewLimitValue);
+
+      if FModelLimit.SaveLimit(Limit_Save_RoleAction, aSaveRole, aOutParam) < 0 then
+      begin
+        (SysService as IMsgBox).MsgBox('更新权限<' + aLAName + '>失败');
+        Exit;
+      end;
+    end;
+
+    for aRow := FGridReport.GetFirstRow to FGridReport.GetLastRow do
+    begin
+      aSaveRole.Clear;
+      aOutParam.Clear;
+
+      aLAGUID := FGridReport.GetCellValue('LAGUID', aRow);
+      aLAName := FGridReport.GetCellValue('LAName', aRow);
+
+      aLView := FGridReport.GetCellValue('LView', aRow) = 1;
+      aLPrint := FGridReport.GetCellValue('LPrint', aRow) = 1;
+    
+      aOldLimitValue := FGridReport.GetCellValue('LimitValue', aRow);
+
+      aNewLimitValue := 0;
+      if aLView then aNewLimitValue := aNewLimitValue + Limit_Report_View;
+      if aLPrint then aNewLimitValue := aNewLimitValue + Limit_Report_Print;
 
       if aNewLimitValue = aOldLimitValue then Continue;
       

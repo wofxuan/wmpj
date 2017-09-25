@@ -32,6 +32,9 @@ uses uSysSvc, uFactoryIntf, uSysFactory;
 {$R *.dfm}
 
 procedure TfrmLogin.btnLoginClick(Sender: TObject);
+var
+  aRet: Integer;
+  aLogin: ;
 begin
   ModalResult := mrOk;
 end;

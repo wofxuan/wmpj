@@ -30,6 +30,9 @@ const
   Limit_Bill_Settle = 4; //单据-过账
   Limit_Bill_Print = 8; //单据-打印
 
+  Limit_Report_View = 1; //报表-查看
+  Limit_Report_Print = 2; //报表-打印
+
   Limit_Save_Role = 1; //保存角色信息
   Limit_Modify_Role = 2; //修改角色信息
   Limit_Del_Role = 3; //删除角色信息

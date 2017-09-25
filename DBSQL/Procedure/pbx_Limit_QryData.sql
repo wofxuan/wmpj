@@ -25,11 +25,19 @@ AS
             BEGIN
                 SELECT  lr.*, be.EFullname
                 FROM    dbo.tbx_Limit_RU lr
-                        LEFT JOIN dbo.tbx_Base_Etype be ON lr.UserId = be.ETypeId 
-                WHERE lr.LRGUID = @Custom
+                        LEFT JOIN dbo.tbx_Base_Etype be ON lr.UserId = be.ETypeId
+                WHERE   lr.LRGUID = @Custom
                 ORDER BY lr.UserId  	
             END
-
+        ELSE 
+            IF ( @QryType = 3 ) 
+                BEGIN
+                    SELECT  lr.*, be.EFullname
+                    FROM    dbo.tbx_Limit_RU lr
+                            LEFT JOIN dbo.tbx_Base_Etype be ON lr.UserId = be.ETypeId
+                    WHERE   lr.LRGUID = @Custom
+                    ORDER BY lr.UserId  	
+                END
             
     --EXEC(@aSQL)        
     RETURN 0
