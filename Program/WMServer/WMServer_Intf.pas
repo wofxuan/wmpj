@@ -37,6 +37,7 @@ type
     function Sum(const A: Integer; const B: Integer): Integer;
     function GetServerTime: DateTime;
     function QuerySQL(const ASQL: AnsiString; var ABackData: OleVariant): Integer;
+    function Login(const AUserName: AnsiString; const AUserPSW: AnsiString; out AMsg: AnsiString): Integer;
     function OpenSQL(const ASQL: AnsiString): Integer;
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
@@ -56,6 +57,7 @@ type
     function Sum(const A: Integer; const B: Integer): Integer;
     function GetServerTime: DateTime;
     function QuerySQL(const ASQL: AnsiString; var ABackData: OleVariant): Integer;
+    function Login(const AUserName: AnsiString; const AUserPSW: AnsiString; out AMsg: AnsiString): Integer;
     function OpenSQL(const ASQL: AnsiString): Integer;
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
@@ -126,6 +128,24 @@ begin
 
     __Message.Read('Result', TypeInfo(Integer), result, []);
     __Message.Read('ABackData', TypeInfo(OleVariant), ABackData, []);
+  finally
+    __Message.UnsetAttributes(__TransportChannel);
+    __Message.FreeStream;
+  end
+end;
+
+function TWMFBData_Proxy.Login(const AUserName: AnsiString; const AUserPSW: AnsiString; out AMsg: AnsiString): Integer;
+begin
+  try
+    __Message.InitializeRequestMessage(__TransportChannel, 'WMServer', __InterfaceName, 'Login');
+    __Message.Write('AUserName', TypeInfo(AnsiString), AUserName, []);
+    __Message.Write('AUserPSW', TypeInfo(AnsiString), AUserPSW, []);
+    __Message.Finalize;
+
+    __TransportChannel.Dispatch(__Message);
+
+    __Message.Read('Result', TypeInfo(Integer), result, []);
+    __Message.Read('AMsg', TypeInfo(AnsiString), AMsg, []);
   finally
     __Message.UnsetAttributes(__TransportChannel);
     __Message.FreeStream;

@@ -32,6 +32,18 @@
 </Parameter>
 </Parameters>
 </Operation>
+<Operation Name="Login" UID="{9F3B2892-BFFB-41CC-83C0-5332DAF30EDB}">
+<Parameters>
+<Parameter Name="Result" DataType="Integer" Flag="Result">
+</Parameter>
+<Parameter Name="AUserName" DataType="AnsiString" Flag="In" >
+</Parameter>
+<Parameter Name="AUserPSW" DataType="AnsiString" Flag="In" >
+</Parameter>
+<Parameter Name="AMsg" DataType="AnsiString" Flag="Out" >
+</Parameter>
+</Parameters>
+</Operation>
 <Operation Name="OpenSQL" UID="{1D0B0A43-0149-4992-8A7B-0515205E800D}">
 <Parameters>
 <Parameter Name="Result" DataType="Integer" Flag="Result">
