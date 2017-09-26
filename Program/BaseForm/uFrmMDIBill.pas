@@ -33,6 +33,7 @@ type
     btnSelectBill: TdxBarLargeButton;
     procedure actSaveDraftExecute(Sender: TObject);
     procedure actSaveSettleExecute(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     FBillSaveState: TBillSaveState; //单据保存类型状态
@@ -107,20 +108,6 @@ end;
 procedure TfrmMDIBill.BeforeFormShow;
 begin
   inherited;
-  BillSaveState := sbNone;
-  if ParamList.Count = 0 then
-  begin
-    FVchtype := VchType_Order_Sale;
-    FVchcode := 0;
-    BillOpenState := bosNew;
-  end
-  else
-  begin
-    FVchtype := ParamList.AsInteger('Vchtype');
-    FVchcode := ParamList.AsInteger('Vchcode');
-    BillOpenState := TBillOpenState(ParamList.AsInteger('bosState'));
-  end;
-
   FGridItem.SetGridCellSelect(True);
   
   InitMasterTitles(Self);
@@ -187,8 +174,20 @@ end;
 
 procedure TfrmMDIBill.InitParamList;
 begin
+  BillSaveState := sbNone;
+  if ParamList.Count = 0 then
+  begin
+    FVchtype := VchType_Order_Sale;
+    FVchcode := 0;
+    BillOpenState := bosNew;
+  end
+  else
+  begin
+    FVchtype := ParamList.AsInteger('Vchtype');
+    FVchcode := ParamList.AsInteger('Vchcode');
+    BillOpenState := TBillOpenState(ParamList.AsInteger('bosState'));
+  end;
   inherited;
-
 end;
 
 function TfrmMDIBill.LoadBillDataGrid: Boolean;
@@ -460,6 +459,20 @@ procedure TfrmMDIBill.SetReadOnly(AReadOnly: Boolean);
 begin
   DBComItem.SetReadOnly(nil, AReadOnly);
   FGridItem.SetGridCellSelect(not AReadOnly);
+end;
+
+procedure TfrmMDIBill.FormCreate(Sender: TObject);
+begin
+  inherited;
+  try
+    CheckLimit(MoudleNo, Limit_Bill_View);
+  except
+    on e:Exception do
+    begin
+      (SysService as IMsgBox).MsgBox(e.Message);
+      ShowStyle := fssClose;
+    end;
+  end;
 end;
 
 end.

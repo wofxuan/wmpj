@@ -112,10 +112,12 @@ inherited frmLimitRole: TfrmLimitRole
       object tsData: TcxTabSheet
         Caption = #25968#25454
         ImageIndex = 4
+        TabVisible = False
       end
       object tsOther: TcxTabSheet
         Caption = #20854#23427
         ImageIndex = 4
+        TabVisible = False
       end
     end
     object gbUser: TcxGroupBox

@@ -31,6 +31,7 @@ type
   private
     { Private declarations }
     procedure BeforeFormShow; override;
+    procedure InitParamList; override;
 
     procedure InitMasterTitles(Sender: TObject); override;
     procedure InitGrids(Sender: TObject); override;
@@ -109,8 +110,6 @@ end;
 procedure TfrmBillSale.InitMasterTitles(Sender: TObject);
 begin
   inherited;
-  MoudleNo := fnMdlBillSale;
-
   Title := '销售单';
   lblBtype.Caption := '购买单位';
   lblKtype.Caption := '发货仓库';
@@ -126,6 +125,12 @@ begin
   DBComItem.AddItem(deGatheringDate, 'GatheringDate');
   DBComItem.AddItem(edtSummary, 'Summary');
   DBComItem.AddItem(edtComment, 'Comment');
+end;
+
+procedure TfrmBillSale.InitParamList;
+begin
+  inherited;
+  MoudleNo := fnMdlBillSale;
 end;
 
 function TfrmBillSale.LoadBillDataGrid: Boolean;

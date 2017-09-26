@@ -377,7 +377,7 @@ begin
   inherited;
   FGridBase.GridPost();
   FGridBill.GridPost();
-  FGridBill.GridPost();
+  FGridReport.GridPost();
   
   aNodeData := SelNodeData(tvRole);
   if not Assigned(aNodeData) then Exit;

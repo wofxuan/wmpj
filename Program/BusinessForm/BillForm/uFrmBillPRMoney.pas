@@ -37,6 +37,7 @@ type
 
     procedure BeforeFormShow; override;
     procedure BeforeFormDestroy; override;
+    procedure InitParamList; override;
 
     procedure InitMasterTitles(Sender: TObject); override;
     procedure InitGrids(Sender: TObject); override;
@@ -161,13 +162,11 @@ begin
       begin
         Title := '收款单';
         lblBtype.Caption := '收款单位';
-        MoudleNo := fnMdlBillGathering;
       end;
     VchType_Payment:
       begin
         Title := '付款单';
         lblBtype.Caption := '付款单位';
-        MoudleNo := fnMdlBillPayment;
       end;
   end;
 
@@ -180,6 +179,21 @@ begin
 
   DBComItem.AddItem(edtSummary, 'Summary');
   DBComItem.AddItem(edtComment, 'Comment');
+end;
+
+procedure TfrmBillPRMoney.InitParamList;
+begin
+  inherited;
+  case FVchType of
+    VchType_Gathering:
+      begin
+        MoudleNo := fnMdlBillGathering;
+      end;
+    VchType_Payment:
+      begin
+        MoudleNo := fnMdlBillPayment;
+      end;
+  end;
 end;
 
 function TfrmBillPRMoney.LoadBillDataGrid: Boolean;

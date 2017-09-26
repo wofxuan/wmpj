@@ -7,13 +7,13 @@ inherited frmMDIBill: TfrmMDIBill
     object pnlBillTitle: TPanel
       Left = 1
       Top = 1
-      Width = 734
+      Width = 742
       Height = 32
       Align = alTop
       BevelOuter = bvNone
       TabOrder = 0
       DesignSize = (
-        734
+        742
         32)
       object lblBillTitle: TcxLabel
         Left = 16
@@ -66,7 +66,7 @@ inherited frmMDIBill: TfrmMDIBill
     object pnlBillMaster: TPanel
       Left = 1
       Top = 33
-      Width = 734
+      Width = 742
       Height = 79
       Align = alClient
       BevelOuter = bvNone
@@ -75,7 +75,7 @@ inherited frmMDIBill: TfrmMDIBill
   end
   inherited gridMainShow: TcxGrid
     Top = 157
-    Height = 160
+    Height = 168
     inherited gridTVMainShow: TcxGridTableView
       OptionsView.GroupByBox = False
     end

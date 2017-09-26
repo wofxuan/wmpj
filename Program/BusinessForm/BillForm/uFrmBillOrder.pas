@@ -31,6 +31,7 @@ type
   private
     { Private declarations }
     procedure BeforeFormShow; override;
+    procedure InitParamList; override;
 
     procedure InitMasterTitles(Sender: TObject); override;
     procedure InitGrids(Sender: TObject); override;
@@ -51,6 +52,7 @@ type
       var AReturnCount: Integer); override;
   public
     { Public declarations }
+
   end;
 
 var
@@ -132,14 +134,12 @@ begin
   case FVchType of
     VchType_Order_Buy:
       begin
-        MoudleNo := fnMdlBillOrderBuy;
         Title := '进货订单';
         lblBtype.Caption := '供货单位';
         lblKtype.Caption := '收货仓库';
       end;
     VchType_Order_Sale:
       begin
-        MoudleNo := fnMdlBillOrderSale;
         Title := '销售订单';
         lblBtype.Caption := '购买单位';
         lblKtype.Caption := '发货仓库';
@@ -158,6 +158,21 @@ begin
   DBComItem.AddItem(edtComment, 'Comment');
 
   deGatheringDate.Text := FormatdateTime('YYYY-MM-DD', Now + 1);
+end;
+
+procedure TfrmBillOrder.InitParamList;
+begin
+  inherited;
+  case FVchType of
+    VchType_Order_Buy:
+      begin
+        MoudleNo := fnMdlBillOrderBuy;
+      end;
+    VchType_Order_Sale:
+      begin
+        MoudleNo := fnMdlBillOrderSale;
+      end;
+  end;
 end;
 
 function TfrmBillOrder.LoadBillDataMaster: Boolean;
