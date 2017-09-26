@@ -22,14 +22,14 @@ object FrmWMPG: TFrmWMPG
   object imgTop: TImage
     Left = 0
     Top = 0
-    Width = 1060
+    Width = 1068
     Height = 65
     Align = alTop
   end
   object statList: TStatusBar
     Left = 0
-    Top = 459
-    Width = 1060
+    Top = 467
+    Width = 1068
     Height = 19
     Panels = <
       item
@@ -48,7 +48,7 @@ object FrmWMPG: TFrmWMPG
   object tclFrmList: TcxTabControl
     Left = 0
     Top = 65
-    Width = 1060
+    Width = 1068
     Height = 20
     Align = alTop
     Options = [pcoAlwaysShowGoDialogButton, pcoCloseButton, pcoGradient, pcoGradientClientArea, pcoRedrawOnResize]
@@ -62,14 +62,14 @@ object FrmWMPG: TFrmWMPG
     OnCanClose = tclFrmListCanClose
     OnChange = tclFrmListChange
     ClientRectBottom = 20
-    ClientRectRight = 1060
+    ClientRectRight = 1068
     ClientRectTop = 19
   end
   object pnlMDIClient: TPanel
     Left = 0
     Top = 85
-    Width = 1060
-    Height = 374
+    Width = 1068
+    Height = 382
     Align = alClient
     BevelOuter = bvNone
     Caption = 'pnlMDIClient'

@@ -42,15 +42,11 @@ begin
   if ParamList.AsString('Mode') = 'B' then
   begin
     Title := '进货订单查询';
-    FVchType := VchType_Order_Buy;
-    MoudleNo := fnMdlReportOrderBuy;
     FModelReport := IModelReportOrderBuy((SysService as IModelControl).GetModelIntf(IModelReportOrderBuy));
   end
   else if ParamList.AsString('Mode') = 'S' then
   begin
     Title := '销售订单查询';
-    FVchType := VchType_Order_Sale;
-    MoudleNo := fnMdlReportOrderSale;
     FModelReport := IModelReportOrderSale((SysService as IModelControl).GetModelIntf(IModelReportOrderSale));
   end;
   inherited;
@@ -70,8 +66,17 @@ end;
 
 procedure TfrmReportOrder.InitParamList;
 begin
+  if ParamList.AsString('Mode') = 'B' then
+  begin
+    FVchType := VchType_Order_Buy;
+    MoudleNo := fnMdlReportOrderBuy;
+  end
+  else if ParamList.AsString('Mode') = 'S' then
+  begin
+    FVchType := VchType_Order_Sale;
+    MoudleNo := fnMdlReportOrderSale;
+  end;
   inherited;
-
 end;
 
 procedure TfrmReportOrder.gridTVMainShowCellDblClick(

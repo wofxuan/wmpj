@@ -18,6 +18,7 @@ type
 
     procedure LoadGridData(ATypeid: string = ''); override;
     procedure BeforeFormShow; override;
+    procedure InitParamList; override;
 
     function GetQryParam(AParam: TParamObject): Boolean; virtual;//获取报表查询的参数
   public
@@ -30,7 +31,7 @@ var
 
 implementation
 
-uses uDefCom;
+uses uSysSvc, uOtherIntf, uDefCom, uModelLimitIntf, uFunApp;
 
 {$R *.dfm}
 
@@ -46,6 +47,20 @@ end;
 function TfrmMDIReport.GetQryParam(AParam: TParamObject): Boolean;
 begin
   Result := True;
+end;
+
+procedure TfrmMDIReport.InitParamList;
+begin
+  inherited;
+  try
+    CheckLimit(MoudleNo, Limit_Report_View);
+  except
+    on e:Exception do
+    begin
+      (SysService as IMsgBox).MsgBox(e.Message);
+      ShowStyle := fssClose;
+    end;
+  end;
 end;
 
 procedure TfrmMDIReport.LoadGridData(ATypeid: string);

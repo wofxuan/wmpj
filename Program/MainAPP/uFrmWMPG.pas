@@ -66,6 +66,7 @@ begin
       tclFrmList.Tabs.BeginUpdate;
       try
         TFrmObj(tclFrmList.Tabs.Objects[aIndex]).Free;
+        tclFrmList.Tabs.Objects[aIndex] := nil;
         tclFrmList.Tabs.Delete(aIndex);
         ACanClose := True;
       finally
@@ -96,7 +97,7 @@ begin
   FFrmNav.Parent := Self;
   FFrmNav.Show;
   pnlMDIClient.Visible := False;
-  OperatorID := '00000';
+  OperatorID := '00001';
 end;
 
 procedure TFrmWMPG.FormDestroy(Sender: TObject);
@@ -139,15 +140,17 @@ end;
 procedure TFrmWMPG.tclFrmListChange(Sender: TObject);
 var
   aIndex: Integer;
+  aFrmObj: TFrmObj;
 begin
   aIndex := tclFrmList.TabIndex;
   if aIndex > 0 then
   begin
+    aFrmObj := TFrmObj(tclFrmList.Tabs.Objects[aIndex]);
     pnlMDIClient.Visible := True;
     FFrmNav.Visible := False;
 //    Perform(WM_SETREDRAW, 0, 0); //锁屏幕, 防止在切换MDI窗体的时候闪烁
 //    try
-    TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.FrmShow;
+    aFrmObj.FrmMDI.FrmShow;
 //    finally
 //      Perform(WM_SETREDRAW, 1, 0); //解锁屏幕并重画
 //      RedrawWindow(Handle, nil, 0, RDW_FRAME + RDW_INVALIDATE + RDW_ALLCHILDREN + RDW_NOINTERNALPAINT);//重绘客户区

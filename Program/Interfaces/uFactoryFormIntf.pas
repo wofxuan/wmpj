@@ -17,7 +17,7 @@ type
     procedure CreateParamList(AOwner: TComponent; AParam: TParamObject);
     procedure FrmShow;
     function FrmShowModal: Integer;
-    function FrmShowStyle: TShowStyle;//窗体显示的类型，是否modal 
+    function FrmShowStyle: TShowStyle;//窗体显示的类型，是否modal, 或者在销毁中
     procedure FrmFree;
     procedure FrmClose;
     procedure ResizeFrm(AParentForm: TWinControl);//窗体容器大小发生改变

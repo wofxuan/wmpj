@@ -14,7 +14,7 @@ type
   private
     FFrmMDI: IFormIntf;
     FCreateTime: TDateTime;
-  public
+  public    
     constructor Create(AFrm: IFormIntf);
     destructor Destroy; override;
   published
@@ -119,6 +119,10 @@ begin
     finally
       aFrm.FrmFree();
     end;
+  end
+  else if aFrm.FrmShowStyle = fssClose then
+  begin
+    aFrm.FrmFree();
   end
   else
   begin

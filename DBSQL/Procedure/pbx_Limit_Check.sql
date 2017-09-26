@@ -30,7 +30,10 @@ AS
     DECLARE @Limit_Bill_View INT = 1--单据权限-查看
     DECLARE @Limit_Bill_Input INT = 2--单据权限-输入
     DECLARE @Limit_Bill_Settle INT = 4--单据权限-过账
-    DECLARE @Limit_Bill_Print INT = 8--单据权限-改印
+    DECLARE @Limit_Bill_Print INT = 8--单据权限-打印
+    
+    DECLARE @Limit_Report_View INT = 1--报表权限-查看
+    DECLARE @Limit_Report_Print INT = 2--报表权限-打印
     
     SET @aRUType = 2 --通过用户查询
     SET @aLimitValue = 0
@@ -75,19 +78,32 @@ AS
 				
                     SET @ErrorValue = @ErrorValue + ')]权限'
                 END	
-              ELSE IF ( @aLAType = 2 )
-                BEGIN
-                    SET @ErrorValue = '没有功能[(' + @aLAName + ')->('	
-                    SET @ErrorValue = @ErrorValue + CASE @LimitDo
-                                                      WHEN @Limit_Bill_View THEN '查看'
-                                                      WHEN @Limit_Bill_Input THEN '输入'
-                                                      WHEN @Limit_Bill_Settle THEN '过账'
-                                                      WHEN @Limit_Bill_Print THEN '打印'
-                                                      ELSE '未定义'
-                                                    END    
+            ELSE 
+                IF ( @aLAType = 2 ) 
+                    BEGIN
+                        SET @ErrorValue = '没有功能[(' + @aLAName + ')->('	
+                        SET @ErrorValue = @ErrorValue + CASE @LimitDo
+                                                          WHEN @Limit_Bill_View THEN '查看'
+                                                          WHEN @Limit_Bill_Input THEN '输入'
+                                                          WHEN @Limit_Bill_Settle THEN '过账'
+                                                          WHEN @Limit_Bill_Print THEN '打印'
+                                                          ELSE '未定义'
+                                                        END    
 				
-                    SET @ErrorValue = @ErrorValue + ')]权限'
-                END	
+                        SET @ErrorValue = @ErrorValue + ')]权限'
+                    END	
+                ELSE 
+                    IF ( @aLAType = 3 ) 
+                        BEGIN
+                            SET @ErrorValue = '没有功能[(' + @aLAName + ')->('	
+                            SET @ErrorValue = @ErrorValue + CASE @LimitDo
+                                                              WHEN @Limit_Report_View THEN '查看'
+                                                              WHEN @Limit_Report_Print THEN '打印'
+                                                              ELSE '未定义'
+                                                            END    
+				
+                            SET @ErrorValue = @ErrorValue + ')]权限'
+                        END	
             RETURN -1 
         END    
     --EXEC(@aSQL)        

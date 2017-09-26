@@ -65,7 +65,7 @@ var
 
 implementation
 
-uses uSysSvc, uDBIntf, uMoudleNoDef, uFrmBaseSelect;
+uses uSysSvc, uDBIntf, uMainFormIntf, uMoudleNoDef, uFrmBaseSelect;
 
 {$R *.dfm}
 
@@ -124,6 +124,7 @@ end;
 
 procedure TfrmParent.FrmShow;
 begin
+  ResizeFrm((SysService as IMainForm).GetMDIShowClient);
   Self.Show;
 end;
 

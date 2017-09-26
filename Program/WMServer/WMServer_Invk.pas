@@ -31,6 +31,7 @@ type
     procedure Invoke_ExecuteProc(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
     procedure Invoke_ExecuteProcBackData(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
     procedure Invoke_SaveBill(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
+    procedure Invoke_Login(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
   end;
 
 implementation
@@ -191,6 +192,31 @@ begin
     __Message.InitializeResponseMessage(__Transport, 'WMServer', 'WMFBData', 'SaveBillResponse');
     __Message.Write('Result', TypeInfo(Integer), lResult, []);
     __Message.Write('AOutPutData', TypeInfo(OleVariant), AOutPutData, []);
+    __Message.Finalize;
+    __Message.UnsetAttributes(__Transport);
+
+  finally
+  end;
+end;
+
+procedure TWMFBData_Invoker.Invoke_Login(const __Instance:IInterface; const __Message:IROMessage; const __Transport:IROTransport; out __oResponseOptions:TROResponseOptions);
+{ function Login(const AUserName: AnsiString; const AUserPSW: AnsiString; var AMsg: AnsiString): Integer; }
+var
+  AUserName: AnsiString;
+  AUserPSW: AnsiString;
+  AMsg: AnsiString;
+  lResult: Integer;
+begin
+  try
+    __Message.Read('AUserName', TypeInfo(AnsiString), AUserName, []);
+    __Message.Read('AUserPSW', TypeInfo(AnsiString), AUserPSW, []);
+    __Message.Read('AMsg', TypeInfo(AnsiString), AMsg, []);
+
+    lResult := (__Instance as IWMFBData).Login(AUserName, AUserPSW, AMsg);
+
+    __Message.InitializeResponseMessage(__Transport, 'WMServer', 'WMFBData', 'LoginResponse');
+    __Message.Write('Result', TypeInfo(Integer), lResult, []);
+    __Message.Write('AMsg', TypeInfo(AnsiString), AMsg, []);
     __Message.Finalize;
     __Message.UnsetAttributes(__Transport);
 

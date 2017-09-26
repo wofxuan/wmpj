@@ -41,6 +41,7 @@ type
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
     function SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer;
+    function Login(const AUserName: AnsiString; const AUserPSW: AnsiString; var AMsg: AnsiString): Integer;
   end;
 
   { CoWMFBData }
@@ -60,6 +61,7 @@ type
     function ExecuteProc(const AInputParams: OleVariant; out AOutParams: OleVariant): Integer;
     function ExecuteProcBackData(const AInputParams: OleVariant; out AOutParams: OleVariant; var ABackData: OleVariant): Integer;
     function SaveBill(const ABillData: OleVariant; var AOutPutData: OleVariant): Integer;
+    function Login(const AUserName: AnsiString; const AUserPSW: AnsiString; var AMsg: AnsiString): Integer;
   end;
 
 implementation
@@ -196,6 +198,25 @@ begin
 
     __Message.Read('Result', TypeInfo(Integer), result, []);
     __Message.Read('AOutPutData', TypeInfo(OleVariant), AOutPutData, []);
+  finally
+    __Message.UnsetAttributes(__TransportChannel);
+    __Message.FreeStream;
+  end
+end;
+
+function TWMFBData_Proxy.Login(const AUserName: AnsiString; const AUserPSW: AnsiString; var AMsg: AnsiString): Integer;
+begin
+  try
+    __Message.InitializeRequestMessage(__TransportChannel, 'WMServer', __InterfaceName, 'Login');
+    __Message.Write('AUserName', TypeInfo(AnsiString), AUserName, []);
+    __Message.Write('AUserPSW', TypeInfo(AnsiString), AUserPSW, []);
+    __Message.Write('AMsg', TypeInfo(AnsiString), AMsg, []);
+    __Message.Finalize;
+
+    __TransportChannel.Dispatch(__Message);
+
+    __Message.Read('Result', TypeInfo(Integer), result, []);
+    __Message.Read('AMsg', TypeInfo(AnsiString), AMsg, []);
   finally
     __Message.UnsetAttributes(__TransportChannel);
     __Message.FreeStream;

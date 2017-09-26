@@ -54,8 +54,8 @@ end;
 
 procedure TfrmReportStockGoods.InitParamList;
 begin
-  inherited;
   MoudleNo := fnMdlReportGoods;
+  inherited;
 end;
 
 initialization

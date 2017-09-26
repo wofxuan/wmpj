@@ -57,7 +57,7 @@ type
 
 
   //窗体显示方式
-  TShowStyle = (fssShow, fssShowModal);
+  TShowStyle = (fssShow, fssShowModal, fssClose);
 
 
 var

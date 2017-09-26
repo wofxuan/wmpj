@@ -30,6 +30,8 @@ type
     procedure actCloseExecute(Sender: TObject);
     procedure actReturnExecute(Sender: TObject);
   private
+    FShowStyle: TShowStyle;
+
     function FrmShowStyle: TShowStyle; override;
   protected
     { Private declarations }
@@ -43,10 +45,10 @@ type
 
     procedure BeforeFormShow; override;
     procedure BeforeFormDestroy; override;
-    procedure InitParamList; override;
+    procedure InitParamList; override; //设置MoudleNo等于界面无关点操作
   public
     { Public declarations }
-    
+    property ShowStyle: TShowStyle read FShowStyle write FShowStyle default fssShow;
   end;
 
 var
@@ -85,7 +87,7 @@ end;
 procedure TfrmMDI.InitParamList;
 begin
   inherited;
-
+  FShowStyle := fssShow;
 end;
 
 procedure TfrmMDI.LoadGridData(ATypeid: string);
@@ -105,7 +107,7 @@ end;
 
 function TfrmMDI.FrmShowStyle: TShowStyle;
 begin
-  Result := fssShow;
+  Result := FShowStyle;
 end;
 
 procedure TfrmMDI.actCloseExecute(Sender: TObject);

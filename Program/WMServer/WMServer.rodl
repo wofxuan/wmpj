@@ -72,6 +72,18 @@
 </Parameter>
 </Parameters>
 </Operation>
+<Operation Name="Login" UID="{F2BD0A67-C132-430A-9E55-9B09D9F0EE42}">
+<Parameters>
+<Parameter Name="Result" DataType="Integer" Flag="Result">
+</Parameter>
+<Parameter Name="AUserName" DataType="AnsiString" Flag="In" >
+</Parameter>
+<Parameter Name="AUserPSW" DataType="AnsiString" Flag="In" >
+</Parameter>
+<Parameter Name="AMsg" DataType="AnsiString" Flag="InOut" >
+</Parameter>
+</Parameters>
+</Operation>
 </Operations>
 </Interface>
 </Interfaces>

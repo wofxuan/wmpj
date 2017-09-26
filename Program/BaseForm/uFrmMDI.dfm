@@ -7,7 +7,7 @@ inherited frmMDI: TfrmMDI
   object pnlTop: TPanel [0]
     Left = 0
     Top = 44
-    Width = 736
+    Width = 744
     Height = 38
     Align = alTop
     TabOrder = 0
@@ -15,8 +15,8 @@ inherited frmMDI: TfrmMDI
   object gridMainShow: TcxGrid [1]
     Left = 0
     Top = 82
-    Width = 736
-    Height = 235
+    Width = 744
+    Height = 243
     Align = alClient
     TabOrder = 1
     object gridTVMainShow: TcxGridTableView

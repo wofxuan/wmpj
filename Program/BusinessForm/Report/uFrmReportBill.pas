@@ -42,15 +42,11 @@ begin
   if ParamList.AsString('Mode') = 'B' then
   begin
     Title := '进货单查询';
-    FVchType := VchType_Buy;
-    MoudleNo := fnMdlBillBuy;
     FModelReport := IModelReportBuy((SysService as IModelControl).GetModelIntf(IModelReportBuy));
   end
   else if ParamList.AsString('Mode') = 'S' then
   begin
     Title := '销售单查询';
-    FVchType := VchType_Sale;
-    MoudleNo := fnMdlBillSale;
     FModelReport := IModelReportSale((SysService as IModelControl).GetModelIntf(IModelReportSale));
   end;
   inherited;
@@ -92,8 +88,17 @@ end;
 
 procedure TfrmReportBill.InitParamList;
 begin
+  if ParamList.AsString('Mode') = 'B' then
+  begin
+    FVchType := VchType_Buy;
+    MoudleNo := fnMdlReportBuy;
+  end
+  else if ParamList.AsString('Mode') = 'S' then
+  begin
+    FVchType := VchType_Sale;
+    MoudleNo := fnMdlReportSale;
+  end;
   inherited;
-
 end;
 
 procedure TfrmReportBill.gridTVMainShowCellDblClick(
