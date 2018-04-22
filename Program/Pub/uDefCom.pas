@@ -50,7 +50,7 @@ type
     dctDis, dctInsert, dctAddSub);
 
   //单据状态
-  TBillOpenState = (bosNew, bosEdit, bosView, bosSett, bosModi); //单据是以什么状态打开
+  TBillOpenState = (bosNew, bosEdit, bosView, bosSett, bosModi, bosAudit); //单据是以什么状态打开
   TBillCurrState = (bcsEdit, bcsAudit, bcsView, bcsEditAudit); //单据当前的状态
   TBillBlock = (stBody, stBankCash, stPref, stSubject, stFeeCash); //表体，收付款账户，优惠， 科目详情，运费收付款账户
   TBillSaveState = (sbNone, soSettle, soDraft, soCancel, soAnswer); //单据保存类型状态  Settle过账， Draft草稿，Answer询问
@@ -76,6 +76,8 @@ begin
     Result := dctAdd
   else if AMode = '2' then
     Result := dctAddCopy
+  else if AMode = '3' then
+    Result := dctDel
   else if AMode = '4' then
     Result := dctModif
   else if AMode = '6' then

@@ -8,8 +8,8 @@ object frmInputBox: TfrmInputBox
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  Font.Height = -13
+  Font.Name = #23435#20307
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
@@ -19,7 +19,7 @@ object frmInputBox: TfrmInputBox
   object lblPrompt: TLabel
     Left = 21
     Top = 12
-    Width = 43
+    Width = 63
     Height = 13
     Caption = 'lblPrompt'
   end
@@ -27,7 +27,13 @@ object frmInputBox: TfrmInputBox
     Left = 21
     Top = 36
     Width = 345
-    Height = 21
+    Height = 19
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = #23435#20307
+    Font.Style = []
+    ParentFont = False
     TabOrder = 0
     OnKeyPress = edtInputKeyPress
   end

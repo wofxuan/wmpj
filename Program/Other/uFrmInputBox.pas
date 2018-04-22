@@ -37,6 +37,8 @@ var
 
 implementation
 
+uses uOtherIntf;
+
 {$R *.dfm}
 
 procedure TfrmInputBox.FormShow(Sender: TObject);

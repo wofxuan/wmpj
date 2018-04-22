@@ -4,12 +4,16 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, Menus, cxLookAndFeelPainters, StdCtrls, cxButtons, uMainFormIntf, uDBIntf, uOtherIntf;
+  Dialogs, Menus, cxLookAndFeelPainters, StdCtrls, cxButtons, uMainFormIntf, uDBIntf, uOtherIntf,
+  cxControls, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, cxButtonEdit,
+  uWmLabelEditBtn;
 
 type
   TfrmLogin = class(TForm, ILogin)
     btnLogin: TcxButton;
     btnCancel: TcxButton;
+    edtName: TWmLabelEditBtn;
+    edtPW: TWmLabelEditBtn;
     procedure btnLoginClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -27,7 +31,7 @@ var
 
 implementation
 
-uses uSysSvc, uFactoryIntf, uSysFactory;
+uses uSysSvc, uFactoryIntf, uSysFactory, uDefCom;
 
 {$R *.dfm}
 
@@ -37,8 +41,8 @@ var
 	aUserName, aUserPSW, aMsg: string; 
 	aMsgBox: IMsgBox;
 begin
-	aUserName := Trim('00001');
-	aUserPSW := Trim('00001');
+	aUserName := Trim(edtName.Text);
+	aUserPSW := Trim(edtPW.Text);
 	aMsg := '';
 	
 	aMsgBox := SysService as IMsgBox;
@@ -59,7 +63,7 @@ begin
     aMsgBox.MsgBox(aMsg);
 		exit;
 	end;
-	
+	OperatorID := aUserName;
   ModalResult := mrOk;
 end;
 

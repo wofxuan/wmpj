@@ -395,7 +395,7 @@ IF OBJECT_ID('dbo.tbx_Bill_NumberRecords') IS NULL
           [LoopType] INT NOT NULL DEFAULT ( 1 ) ,--编号循环类型，是一天0，一月1，还是一年2，开始重新生成
           [Period] INT NOT NULL DEFAULT ( 0 ) ,--此记录所在的循环期间
           [MaxNo] INT NOT NULL DEFAULT ( 0 ) ,--此记录条件下产生的最大单据号
-          CONSTRAINT PK_tbx_Bill_NumberRecords PRIMARY KEY ( [ComputerID], [VchType], [MaxNo] ) ON [PRIMARY]
+          CONSTRAINT PK_tbx_Bill_NumberRecords PRIMARY KEY ( [ComputerID], [VchType], [Period], [MaxNo] ) ON [PRIMARY]
         )
         
 GO
@@ -1097,6 +1097,129 @@ IF OBJECT_ID('dbo.tbx_Limit_Action_Role') IS NULL
         )
 GO
 
+--流程设置，进货单审核，入职审核等
+IF OBJECT_ID('dbo.tbx_Flow_TaskType') IS NULL 
+    CREATE TABLE [dbo].[tbx_Flow_TaskType]
+        (
+          [TaskID] INT NOT NULL IDENTITY(1, 1) ,
+          [TaskName] VARCHAR(50) NOT NULL DEFAULT '' ,--流程作业名称
+          [TType] INT NOT NULL DEFAULT 0 ,--选择：单据业务0；人事1；
+		  [Statu] INT NOT NULL DEFAULT 0 ,--是否启用,0未启用,1启用.启用用后如果设置了默认的作业表会自动进入流程
+		  [WorkID] VARCHAR(50) NOT NULL DEFAULT '' ,--与具体业务功能模块关联的Id,如单据的MoudelNo等
+          [TComment] VARCHAR(255) NOT NULL DEFAULT '',--备注
+          CONSTRAINT PK_tbx_Flow_TaskType PRIMARY KEY (TaskID)
+        )
+GO
+
+--流程作业流程表，同一个流程作业可能有不同的设置。如入职时普通员工和经理审核的流程不一样
+IF OBJECT_ID('dbo.tbx_Flow_TaskProc') IS NULL 
+    CREATE TABLE [dbo].[tbx_Flow_TaskProc]
+        (
+          [TaskProcID] INT NOT NULL IDENTITY(1, 1) ,
+		  [TaskID] INT NOT NULL DEFAULT 0,
+		  [DefaultProc] INT NOT NULL DEFAULT 0,--是否流程使用默认流程，1是，0否
+          [TaskProcName] VARCHAR(50) NOT NULL DEFAULT '' ,--流程名称
+          CONSTRAINT PK_tbx_Flow_TaskProc PRIMARY KEY (TaskProcID)
+        )
+GO
+
+--流程作业具体项目表
+IF OBJECT_ID('dbo.tbx_Flow_Process') IS NULL 
+    CREATE TABLE [dbo].[tbx_Flow_Process]
+        (
+          [ProcessID] INT NOT NULL IDENTITY(1, 1) ,
+		  [TaskProcID] INT NOT NULL DEFAULT 0,
+          [ProcesseName] VARCHAR(50) NOT NULL DEFAULT '' ,--项目名称
+		  [OperType] INT NOT NULL DEFAULT 0,--操作类型，0审核，1知会，2执行。（知会不需要输入审批意见,可能审批完成后通知发起人）
+		  [ProceOrder] INT NOT NULL DEFAULT 0,--项目顺序,从小到大执行
+          CONSTRAINT PK_tbx_Flow_Process PRIMARY KEY (ProcessID)
+        )
+GO
+
+--流程作业具体项目表对应的审核人员
+IF OBJECT_ID('dbo.tbx_Flow_ProcePermi') IS NULL 
+    CREATE TABLE [dbo].[tbx_Flow_ProcePermi]
+        (
+          [PPID] INT NOT NULL IDENTITY(1, 1) ,
+		  [ProcessID] INT NOT NULL DEFAULT 0,
+		  [PermiType] INT NOT NULL DEFAULT 0,--0职员
+          [OperId] VARCHAR(50) NOT NULL DEFAULT '' ,--职员ID（以后可能扩展为部门或者岗位）
+          CONSTRAINT PK_tbx_Flow_ProcePermi PRIMARY KEY (PPID)
+        )
+GO
+
+--流程作业审核路径，具体业务的每个项目对应的审核记录
+IF OBJECT_ID('dbo.tbx_Flow_ProcePath') IS NULL 
+    CREATE TABLE [dbo].[tbx_Flow_ProcePath]
+        (
+          [ProcePathID] INT NOT NULL IDENTITY(1, 1) ,
+		  [ProcessID] INT NOT NULL DEFAULT 0,--tbx_Flow_Process的ID
+		  [BillID] INT NOT NULL DEFAULT 0,--要审核的记录的ID
+		  [BillType] INT NOT NULL DEFAULT 0,--要审核的记录的类型，可能同一个窗体，多个功能
+		  [WorkID] VARCHAR(50) NOT NULL DEFAULT '' ,--与具体业务功能模块关联的Id,如单据的MoudelNo等
+          [FlowETypeID] VARCHAR(50) NOT NULL DEFAULT '' ,--需要处理这条记录的职员ID
+		  [ProceResult] INT NOT NULL DEFAULT 0,--未处理0，通过1，终止2，退回-1
+		  [FlowInfo] VARCHAR(255) NOT NULL DEFAULT '' ,--审批意见
+		  [Info] VARCHAR(255) NOT NULL DEFAULT '' ,--摘要信息,自动生成,方便汇总处理时查看
+		  [CreaterETypeID] VARCHAR(50) NOT NULL DEFAULT '' ,--提交这条审核记录的人员
+		  [CreateTime] VARCHAR(20) NOT NULL DEFAULT '' ,--提交这条审核记录的时间
+          CONSTRAINT PK_tbx_Flow_ProcePath PRIMARY KEY (ProcePathID)
+        )
+GO
+
+--流程作业审核历史记录
+IF OBJECT_ID('dbo.tbx_Flow_His') IS NULL 
+    CREATE TABLE [dbo].[tbx_Flow_His]
+        (
+          [HisID] INT NOT NULL IDENTITY(1, 1) ,
+		  [ProcePathID] INT NOT NULL DEFAULT 0,--tbx_Flow_ProcePath的ID
+		  [ProceResult] INT NOT NULL DEFAULT 0,--未处理0，通过1，终止2，退回-1
+		  [FlowInfo] VARCHAR(255) NOT NULL DEFAULT '' ,--审批意见
+		  [CreaterETypeID] VARCHAR(50) NOT NULL DEFAULT '' ,--提交这条审核记录的人员
+		  [CreateTime] VARCHAR(20) NOT NULL DEFAULT '' ,--提交这条审核记录的时间
+          CONSTRAINT PK_tbx_Flow_His PRIMARY KEY (HisID)
+        )
+GO
+
+
+--测试数据
+--初始化职员
+DELETE dbo.tbx_Base_Etype WHERE ETypeId <> '00000'
+UPDATE dbo.tbx_Base_Etype SET ESonnum = 3, Soncount = 3 WHERE ETypeId = '00000' 
+INSERT dbo.tbx_Base_Etype ( ETypeId, Parid, ESonnum, Soncount, Leveal, EUsercode, EFullname, EComment, ENamepy, Parrec, RowIndex, Deleted, Updatetag, DTypeId,
+                             Tel, [Address], Birthday, EMail, Job, TopTotal, LowLimitDiscount, IsStop )
+VALUES  ( '00001', '00000', 0, 0, 1, 'zy1', '职员1', '', 'zy1', 2, 1, 0, 0, '', '10086', '重庆', '1980-01-01', '10086@qq.com', '', 1000, 0.1, 0 ),
+        ( '00002', '00000', 0, 0, 1, 'zy2', '职员2', '', 'zy2', 3, 1, 0, 1, '', '10000', '成都', '1981-12-12', '10000@qq.com', '', 2000, 0.2, 0 ),
+		( '00003', '00000', 0, 0, 1, 'zy3', '职员3', '', 'zy3', 4, 1, 0, 1, '', '10001', '北京', '1971-12-12', '10001@qq.com', '', 3000, 0.2, 0 )
+
+--初始化商品
+DELETE  dbo.tbx_Base_Ptype WHERE   PTypeId <> '00000'
+UPDATE  dbo.tbx_Base_Ptype SET PSonnum = 3, Soncount = 3 WHERE PTypeId = '00000' 
+INSERT  dbo.tbx_Base_Ptype ( PTypeId, Parid, PSonnum, Soncount, Leveal, PUsercode, PFullname, PComment, PNamepy, Parrec, RowIndex, Deleted, Updatetag,
+                             [Standard], Model, Area, UsefulLifeday, Costmode )
+VALUES  ( '00001', '00000', 0, 0, 1, 'sp1', '商品1', '', 'sp1', 2, 1, 0, 0, '型号1', '规格1', '产地1', 0, 0 ),
+        ( '00002', '00000', 0, 0, 1, 'sp2', '商品2', '', 'sp2', 3, 1, 0, 1, '型号1', '规格2', '产地2', 0, 0 ),
+        ( '00003', '00000', 0, 0, 1, 'sp3', '商品3', '', 'sp3', 4, 1, 0, 1, '型号1', '规格3', '产地1', 1, 0 )
+
+--初始化仓库
+DELETE  dbo.tbx_Base_Ktype WHERE   KTypeId <> '00000'
+UPDATE  dbo.tbx_Base_Ktype SET KSonnum = 3, Soncount = 3 WHERE KTypeId = '00000' 
+INSERT  dbo.tbx_Base_Ktype ( KTypeId, Parid, KSonnum, Soncount, Leveal, KUsercode, KFullname, KComment, KNamepy, Parrec, RowIndex, Deleted, Updatetag, Name,
+                                  [Address], Person, Tel, IsStop )
+VALUES  ( '00001', '00000', 0, 0, 1, 'ck1', '仓库1', '', 'ck1', 2, 1, 0, 0, '简称1', '地址1', '负责人1', '10086', 0 ),
+        ( '00002', '00000', 0, 0, 1, 'ck2', '仓库2', '', 'ck2', 3, 1, 0, 1, '简称2', '地址2', '负责人2', '10000', 0 ),
+        ( '00003', '00000', 0, 0, 1, 'ck3', '仓库3', '', 'ck3', 4, 1, 0, 1, '简称3', '地址3', '负责人3', '10001', 0 )
+
+--初始化单位
+DELETE  dbo.tbx_Base_Btype WHERE   BTypeId <> '00000'
+UPDATE  dbo.tbx_Base_Btype SET BSonnum = 3, Soncount = 3 WHERE BTypeId = '00000' 
+INSERT  dbo.tbx_Base_Btype ( BTypeId, Parid, BSonnum, Soncount, Leveal, BUsercode, BFullname, BComment, BNamepy, Parrec, RowIndex, Deleted, Updatetag, Name,
+                                  [Address], Tel)
+VALUES  ( '00001', '00000', 0, 0, 1, 'dw1', '单位1', '', 'dw1', 2, 1, 0, 0, '简称1', '地址1', '10086' ),
+        ( '00002', '00000', 0, 0, 1, 'dw2', '单位2', '', 'dw2', 3, 1, 0, 1, '简称2', '地址2', '10000' ),
+        ( '00003', '00000', 0, 0, 1, 'dw3', '单位3', '', 'dw3', 4, 1, 0, 1, '简称3', '地址3', '10001' )
+
+
 TRUNCATE TABLE  dbo.tbx_Base_PackageInfo
 GO 
 ---初始化加载项
@@ -1175,13 +1298,13 @@ VALUES  ( '{C68FA10B-741B-462E-9646-6A37E8A79543}', '进货订单', 2, 1)
 INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
 VALUES  ( '{CD40BCFC-099E-476D-8560-5F65A7F9441D}', '进货单', 2, 2)
 INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
-VALUES  ( '{4D06B1CD-38AA-431D-84ED-534676C46645}', '付款单', 2, 3)
+VALUES  ( '{50202B7A-256F-4B40-A142-8F78F9AE82A4}', '付款单', 2, 3)
 INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
 VALUES  ( '{6138233E-9524-423F-881C-DAF556611881}', '销售订单', 2, 4)
 INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
 VALUES  ( '{5AF10361-EAF6-4C63-B0CD-71B15802C9FC}', '销售单', 2, 5)
 INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
-VALUES  ( '{50202B7A-256F-4B40-A142-8F78F9AE82A4}', '收款单', 2, 6)
+VALUES  ( '{4D06B1CD-38AA-431D-84ED-534676C46645}', '收款单', 2, 6)
 INSERT INTO dbo.tbx_Limit_Action ( LAGUID, LAName, LAType, LARowIndex)
 VALUES  ( '{30B95AAD-6ABA-4BBF-94B8-FF9C8B3E059A}', '调拨单', 2, 7)
 
@@ -1224,3 +1347,51 @@ INSERT INTO dbo.tbx_Limit_Action_Role ( LAGUID, RUID, RUType, LimitValue )
 VALUES  ( '{D56591FC-49A2-4C6E-8A43-1A04D553CED2}', '00000', 2, 63 )
 INSERT INTO dbo.tbx_Limit_Action_Role ( LAGUID, RUID, RUType, LimitValue )
 VALUES  ( '{11831D9E-664A-4DD7-8B6A-8D286A15F31B}', '{6E2F55C8-8B47-45E8-8EFB-AEB9A85BB423}', 1, 61 )
+
+--业务流程
+TRUNCATE TABLE dbo.tbx_Flow_TaskType
+TRUNCATE TABLE dbo.tbx_Flow_TaskProc
+TRUNCATE TABLE dbo.tbx_Flow_Process
+TRUNCATE TABLE dbo.tbx_Flow_ProcePermi
+TRUNCATE TABLE dbo.tbx_Flow_His
+
+INSERT dbo.tbx_Flow_TaskType ( TaskName, TType, Statu, WorkID, TComment )
+VALUES  ( '进货订单', 0, 1, '2001', '进货订单审核')
+INSERT dbo.tbx_Flow_TaskType ( TaskName, TType, Statu, WorkID, TComment )
+VALUES  ( '销售订单', 0, 1, '2002', '销售订单审核')
+INSERT dbo.tbx_Flow_TaskType ( TaskName, TType, Statu, WorkID, TComment )
+VALUES  ( '进货单', 0, 1, '2003', '进货单审核')
+INSERT dbo.tbx_Flow_TaskType ( TaskName, TType, Statu, WorkID, TComment )
+VALUES  ( '销售单', 0, 1, '2004', '销售单审核')
+INSERT dbo.tbx_Flow_TaskType ( TaskName, TType, Statu, WorkID, TComment )
+VALUES  ( '调拨单', 0, 1, '2005', '调拨单审核')
+INSERT dbo.tbx_Flow_TaskType ( TaskName, TType, Statu, WorkID, TComment )
+VALUES  ( '收款单', 0, 1, '2006', '收款单审核')
+
+INSERT dbo.tbx_Flow_TaskProc ( TaskID, DefaultProc, TaskProcName )
+VALUES  ( 1, 1, '默认进货订单审核')
+
+INSERT dbo.tbx_Flow_TaskProc ( TaskID, DefaultProc, TaskProcName )
+VALUES  ( 1, 0, '大金额（大于100000）进货订单单审核')
+
+INSERT dbo.tbx_Flow_Process ( TaskProcID, ProcesseName, OperType, ProceOrder )
+VALUES  ( 1, '组长审核', 0, 1)
+INSERT dbo.tbx_Flow_Process ( TaskProcID, ProcesseName, OperType, ProceOrder )
+VALUES  ( 1, '经理审核', 0, 2)
+INSERT dbo.tbx_Flow_Process ( TaskProcID, ProcesseName, OperType, ProceOrder )
+VALUES  ( 1, '总监审核', 0, 3)
+INSERT dbo.tbx_Flow_Process ( TaskProcID, ProcesseName, OperType, ProceOrder )
+VALUES  ( 2, '总监审核', 0, 1)
+INSERT dbo.tbx_Flow_Process ( TaskProcID, ProcesseName, OperType, ProceOrder )
+VALUES  ( 2, '董事审核', 0, 1)
+
+INSERT dbo.tbx_Flow_ProcePermi ( ProcessID, PermiType, OperId )
+VALUES  ( 1, 0, '00001')
+INSERT dbo.tbx_Flow_ProcePermi ( ProcessID, PermiType, OperId )
+VALUES  ( 2, 0, '00002')
+INSERT dbo.tbx_Flow_ProcePermi ( ProcessID, PermiType, OperId )
+VALUES  ( 3, 0, '00003')
+INSERT dbo.tbx_Flow_ProcePermi ( ProcessID, PermiType, OperId )
+VALUES  ( 4, 0, '00001')
+INSERT dbo.tbx_Flow_ProcePermi ( ProcessID, PermiType, OperId )
+VALUES  ( 5, 0, '00002')

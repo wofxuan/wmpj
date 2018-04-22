@@ -39,7 +39,7 @@ inherited frmLimitRole: TfrmLimitRole
       Top = 1
       Width = 343
       Height = 241
-      ActivePage = tsBase
+      ActivePage = tsBill
       Align = alClient
       Style = 10
       TabOrder = 0
@@ -109,22 +109,12 @@ inherited frmLimitRole: TfrmLimitRole
           end
         end
       end
-      object tsData: TcxTabSheet
-        Caption = #25968#25454
-        ImageIndex = 4
-        TabVisible = False
-      end
-      object tsOther: TcxTabSheet
-        Caption = #20854#23427
-        ImageIndex = 4
-        TabVisible = False
-      end
     end
     object gbUser: TcxGroupBox
       Left = 1
       Top = 1
       Align = alLeft
-      Caption = #29992#25143#21015#34920'   '
+      Caption = #29992#25143#21015#34920
       Ctl3D = True
       ParentCtl3D = False
       TabOrder = 1

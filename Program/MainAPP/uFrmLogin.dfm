@@ -11,12 +11,13 @@ object frmLogin: TfrmLogin
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object btnLogin: TcxButton
     Left = 88
-    Top = 32
+    Top = 56
     Width = 75
     Height = 25
     Caption = 'btnLogin'
@@ -25,11 +26,57 @@ object frmLogin: TfrmLogin
   end
   object btnCancel: TcxButton
     Left = 272
-    Top = 32
+    Top = 56
     Width = 75
     Height = 25
     Caption = 'btnCancel'
     TabOrder = 1
     OnClick = btnCancelClick
+  end
+  object edtName: TWmLabelEditBtn
+    Left = 64
+    Top = 16
+    Height = 20
+    ParentFont = False
+    Properties.Buttons = <>
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -12
+    Style.Font.Name = #23435#20307
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    TabOrder = 2
+    Text = '00001'
+    LabelCaption = #29992#25143#21517
+    LabelFont.Charset = DEFAULT_CHARSET
+    LabelFont.Color = clWindowText
+    LabelFont.Height = -11
+    LabelFont.Name = #23435#20307
+    LabelFont.Style = []
+    Width = 121
+  end
+  object edtPW: TWmLabelEditBtn
+    Left = 248
+    Top = 16
+    Height = 20
+    ParentFont = False
+    Properties.Buttons = <>
+    Properties.EchoMode = eemPassword
+    Properties.PasswordChar = '*'
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -12
+    Style.Font.Name = #23435#20307
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    TabOrder = 3
+    Text = '0'
+    LabelCaption = #23494#30721
+    LabelFont.Charset = DEFAULT_CHARSET
+    LabelFont.Color = clWindowText
+    LabelFont.Height = -11
+    LabelFont.Name = #23435#20307
+    LabelFont.Style = []
+    Width = 121
   end
 end

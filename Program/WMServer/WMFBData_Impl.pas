@@ -98,6 +98,8 @@ begin
   if not conDB.Connected then
   begin
     LoadCfg();
+//    conDB.ConnectionTimeout := 30;
+//    conDB.CommandTimeout := 600;
     conDB.ConnectionString := 'Provider=SQLOLEDB.1;Password=' + FPassword + ';Persist Security Info=True;' +
                               'User ID=' + FUser + ';Initial Catalog=' + FBaseName + ';Data Source=' + FServerAddr;
     conDB.Connected := True;

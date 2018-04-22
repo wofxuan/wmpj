@@ -68,7 +68,7 @@ begin
 
   FModelLimit := IModelLimit((SysService as IModelControl).GetModelIntf(IModelLimit));
   
-  FGridBase := TGridItem.Create(fnLimitSetBase, gridBase, gridTVBase);
+  FGridBase := TGridItem.Create(ClassName + gridBase.Name, gridBase, gridTVBase);
   FGridBase.SetGridCellSelect(True);
   FGridBase.ShowMaxRow := False;
 

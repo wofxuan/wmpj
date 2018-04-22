@@ -92,10 +92,10 @@ begin
   DBComItem.AddItem(edtModel, 'Model', 'Model');
   DBComItem.AddItem(edtArea, 'Area', 'Area');
   DBComItem.AddItem(cbbCostMode, 'CostMode', 'CostMode');
-  DBComItem.AddItem(edtUsefulLifeday, 'UsefulLifeday', 'UsefulLifeday');
+  DBComItem.AddItem(edtUsefulLifeday, 'UsefulLifeday', 'UsefulLifeday', cfPlusInt);
   DBComItem.AddItem(chkStop, 'IsStop', 'IsStop');
 
-  FGridItem := TGridItem.Create(MoudleNo, gridPtypeUnit, gridTVPtypeUnit);
+  FGridItem := TGridItem.Create(ClassName + gridPtypeUnit.Name, gridPtypeUnit, gridTVPtypeUnit);
   FGridItem.SetGridCellSelect(True);
 
   IniUnitGridField();

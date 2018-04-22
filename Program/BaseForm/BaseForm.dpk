@@ -46,7 +46,8 @@ requires
   dsnap,
   dxBarExtItemsD7,
   BusinessIntf,
-  cxTreeListVCLD7;
+  cxTreeListVCLD7,
+  wmDefCom;
 
 contains
   uBaseFormExport in 'uBaseFormExport.pas',

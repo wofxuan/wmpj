@@ -69,7 +69,7 @@ AS
     BEGIN
         DECLARE @ditTotal INT
         SELECT  @ditTotal = DitDefValue
-        FROM    DitDefFomat
+        FROM    tbx_Sys_DitDef
         WHERE   DitDefName = 'DitTotal'
         RETURN ROUND(@nTotal,@ditTotal)
         
@@ -114,6 +114,24 @@ go
 
 
 
+IF OBJECT_ID('dbo.Fun_StrToNumeric') IS NOT NULL 
+    DROP FUNCTION dbo.Fun_StrToNumeric
+go
+
+CREATE   FUNCTION Fun_StrToNumeric
+    (
+      @StrValues VARCHAR(8000) ,
+      @DefValues NUMERIC(22, 10)
+    )
+RETURNS NUMERIC(22, 10)
+AS 
+    BEGIN
+        RETURN CAST(ISNULL(@StrValues, @DefValues) AS NUMERIC(22, 10))
+    END
+GO
+
+
+
 IF OBJECT_ID('dbo.Fun_TypeIDIntToStr') IS NOT NULL 
     DROP PROCEDURE dbo.Fun_TypeIDIntToStr
 go
@@ -138,6 +156,104 @@ AS
 
 
 go
+
+
+
+IF OBJECT_ID('dbo.pbx_A_Qry_Balance') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_A_Qry_Balance
+GO
+
+--查询付款或收款单的结算的单据
+
+CREATE PROCEDURE pbx_A_Qry_Balance
+    (
+      @BTypeID VARCHAR(50) ,
+      @ETypeID VARCHAR(50) ,
+      @StartDate VARCHAR(10) ,
+      @EndDate VARCHAR(10) ,
+      @VchType INT ,
+      @OperatorID VARCHAR(50)
+    )
+AS 
+    DECLARE @sql VARCHAR(8000)
+    
+    IF @VchType = 7 
+        BEGIN
+            SET @SQL = 'SELECT  m.VchType, m.VchCode, m.Number, m.Summary, m.InputDate, m.Total JETotal, (m.Total - g.gTotal) YETotal, 0 IsSelect
+					FROM    dbo.tbx_Bill_M m
+							LEFT JOIN ( SELECT  VchCode, VchType, SUM(Total) gTotal
+								FROM    dbo.tbx_Bill_A_Gathering
+								GROUP BY VchCode, VchType
+							  ) g ON m.VchCode = g.VchCode
+									 AND m.VchType = g.VchType
+					WHERE   m.Draft = 2 AND m.RedOld = ''F'' AND m.VchType = 3 AND m.BtypeId = ' + @BTypeID
+            PRINT ( @SQL )
+        END
+    ELSE IF @VchType = 6 
+        BEGIN
+            SET @SQL = 'SELECT  m.VchType, m.VchCode, m.Number, m.Summary, m.InputDate, m.Total JETotal, (m.Total - g.gTotal) YETotal, 0 IsSelect
+				FROM    dbo.tbx_Bill_M m
+						LEFT JOIN ( SELECT  VchCode, VchType, SUM(Total) gTotal
+							FROM    dbo.tbx_Bill_A_Gathering
+							GROUP BY VchCode, VchType
+						  ) g ON m.VchCode = g.VchCode
+								 AND m.VchType = g.VchType
+				WHERE   m.Draft = 2 AND m.RedOld = ''F'' AND m.VchType = 4 AND m.BtypeId = ' + @BTypeID
+            PRINT ( @SQL )
+        END
+    EXEC(@SQL)
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_A_Save_Gathering') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_A_Save_Gathering
+GO
+--  ********************************************************************************************
+--  ||                                                                                        
+--  ||   过程名称：pbx_A_Save_Gathering
+--  ||   过程功能：一条付款单或收款单的结算对应的单据
+--  ||=========================================================================================
+
+CREATE    PROCEDURE pbx_A_Save_Gathering
+    (
+      @BTypeID VARCHAR(50) ,
+      @VchCode INT ,
+      @VchType INT ,
+      @GatheringVchCode INT ,
+      @Total NUMERIC(22, 10) ,
+      @DoTypt INT , --操作类型，1插入，2修改，3根据@GatheringVchCode删除
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+    IF ( @DoTypt = 1 ) 
+        BEGIN
+            INSERT  INTO dbo.tbx_Bill_A_Gathering ( BtypeId, VchCode, VchType, GatheringVchCode, Total )
+            VALUES  ( @BTypeID, @VchCode, @VchType, @GatheringVchCode, @Total )
+        END
+        
+    IF ( @DoTypt = 2 ) 
+        BEGIN
+            UPDATE  dbo.tbx_Bill_A_Gathering
+            SET     Total = @Total
+            WHERE   VchCode = @VchCode
+                    AND GatheringVchCode = @GatheringVchCode
+        END
+        
+    IF ( @DoTypt = 3 ) 
+        BEGIN
+            DELETE  dbo.tbx_Bill_A_Gathering
+            WHERE   GatheringVchCode = @GatheringVchCode
+        END
+        
+    Success:
+    RETURN 0
+
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1  
+
+
+GO
 
 
 
@@ -563,6 +679,13 @@ AS
             WHERE   ( @nUpdateTag <= 0 )
                     OR ( UpdateTag > @nUpdateTag )
         END
+    IF @cMode = 'V' 
+        BEGIN
+            SELECT  [VTypeId], [Parid], [Soncount], [VSonnum], [VUsercode], [VFullname]
+            FROM    tbx_Base_Vtype
+            WHERE   ( @nUpdateTag <= 0 )
+                    OR ( UpdateTag > @nUpdateTag )
+        END
     RETURN 0
 
 go
@@ -653,6 +776,15 @@ AS
 		    --exec p_hh_GetRightStr 'B','b',@OperatorID,'N',@TableStr out,@TableWhereStr out		
             SELECT  @sql = 'SELECT *
 					FROM  tbx_Base_Ktype b
+			         WHERE  b.PARID = ''' + @szTypeid + ''' and b.deleted = 0 ORDER BY RowIndex, b.Ktypeid'		
+            PRINT ( @sql )
+            EXEC(@sql)
+        END
+    IF @cMode = 'V'  --单据信息
+        BEGIN
+		    --exec p_hh_GetRightStr 'B','b',@OperatorID,'N',@TableStr out,@TableWhereStr out		
+            SELECT  @sql = 'SELECT *
+					FROM  tbx_Base_Vtype b
 			         WHERE  b.PARID = ''' + @szTypeid + ''' and b.deleted = 0 ORDER BY RowIndex, b.Ktypeid'		
             PRINT ( @sql )
             EXEC(@sql)
@@ -1534,6 +1666,69 @@ go
 
 
 
+IF OBJECT_ID('dbo.pbx_Base_SavePTypeUnit') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Base_SavePTypeUnit
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Base_SavePTypeUnit                                                
+--  ||   过程功能：保存商品的多单位信息
+--  ********************************************************************************************
+
+CREATE      PROCEDURE pbx_Base_SavePTypeUnit
+    (
+      @PTypeId VARCHAR(50) ,
+      @UnitName VARCHAR(10) ,
+      @URate NUMERIC(22, 10) ,
+      @IsBase INT ,
+      @BarCode VARCHAR(60) ,
+      @Comment VARCHAR(200) ,
+      @OrdId VARCHAR(21) ,
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+    SET nocount ON
+        
+    --IF @IsStop = 1 
+    --    IF EXISTS ( SELECT  1
+    --                FROM    tbx_Base_Btype
+    --                WHERE   [btypeId] = @typeid_1
+    --                        AND bsonnum > 0 ) 
+    --        BEGIN
+    --            SET @errorValue = '商品已经存在并且停用!'
+    --            GOTO ErrorGeneral
+    --        END
+   
+    IF EXISTS ( SELECT  1
+                FROM    tbx_Base_PtypeUnit
+                WHERE   PTypeId = @PTypeId
+                        AND OrdId = @OrdId ) 
+        BEGIN
+            UPDATE  dbo.tbx_Base_PtypeUnit
+            SET     UnitName = @UnitName, URate = @URate, IsBase = @IsBase, BarCode = @BarCode, Comment = @Comment
+            WHERE   PTypeId = @PTypeId
+                    AND OrdId = @OrdId
+        END
+    ELSE 
+        BEGIN
+            INSERT  dbo.tbx_Base_PtypeUnit ( PTypeId, UnitName, URate, IsBase, BarCode, Comment, OrdId )
+            VALUES  ( @PTypeId, @UnitName, @URate, @IsBase, @BarCode, @Comment, @OrdId )	
+        END
+
+
+    GOTO Success
+
+    Success:		 --成功完成函数
+    RETURN 0
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    ErrorRollback:   --数据操作是错误，需要回滚
+    --ROLLBACK TRAN insertproc 
+    RETURN -2 
+go
+
+
+
 IF OBJECT_ID('dbo.pbx_Base_UpdateB') IS NOT NULL 
     DROP PROCEDURE dbo.pbx_Base_UpdateB
 go
@@ -1989,7 +2184,7 @@ AS
 
     BEGIN TRAN DelBak
 
-    IF @VchType IN ( 7, 8 ) --进货，销售订单
+    IF @VchType IN ( 1, 2 ) --进货订单，销售订单
         BEGIN
             DELETE  FROM tbx_Bill_Order_M
             WHERE   VchCode = @NewVchCode
@@ -1997,6 +2192,15 @@ AS
             DELETE  FROM dbo.tbx_Bill_Order_D
             WHERE   VchCode = @NewVchCode	
         END
+    ELSE 
+        IF @VchType IN ( 3, 4 ) --进货单，销售单
+            BEGIN
+                DELETE  FROM tbx_Bill_M
+                WHERE   VchCode = @NewVchCode
+	
+                DELETE  FROM dbo.tbx_Bill_D_Bak
+                WHERE   VchCode = @NewVchCode	
+            END
 
 
     COMMIT TRAN DelBak
@@ -2017,114 +2221,364 @@ go
 CREATE PROCEDURE dbo.pbx_Bill_Create
     (
       @OldVchCode INT ,
-      @NewvchCode INT ,
+      @NewVchCode INT ,
        --下面面是存储过程必须的参数
       @ErrorValue VARCHAR(500) OUTPUT  
     )
 AS 
-    DECLARE @nRet INT ,
-        @inputNo VARCHAR(50)
-    DECLARE @sdate VARCHAR(10) ,
-        @GOODS_ID VARCHAR(25) 
-    DECLARE @nVchtype INT ,
-        @nPeriod INT ,
-        @nYearPeriod INT ,
-        @unit INT
-        
-    DECLARE @szBlockno VARCHAR(20) ,
-        @szProdate VARCHAR(12) 
-        
+    DECLARE @nRet INT 
+    DECLARE @GOODS_ID VARCHAR(50) 
+    DECLARE @AP_ID VARCHAR(50) 
+    DECLARE @AR_ID VARCHAR(50) 
+    DECLARE @SALE_INCOME_ID VARCHAR(50) 
+    DECLARE @SALE_COST_ID VARCHAR(50) 
+    
     DECLARE @modiDly CHAR(1)
-    DECLARE @ntotal NUMERIC(22, 10)
     DECLARE @YPratypeid VARCHAR(50)
     DECLARE @flag INT
-    DECLARE @szBTypeID VARCHAR(50) 
-    DECLARE @szKTypeID VARCHAR(50) 
-    DECLARE @szETypeID VARCHAR(50) 
-    DECLARE @SzPtypeid VARCHAR(50) 
-    DECLARE @szATypeID VARCHAR(500)
     DECLARE @execsql VARCHAR(8000)
+    DECLARE @InitOver INT
     
-    DECLARE @dQty NUMERIC(22, 10) ,
-        @dPrice NUMERIC(22, 10) ,
-        @dTotal NUMERIC(22, 10) ,
-        @dUnitRate NUMERIC(22, 10)
-    
+    DECLARE @aVchType INT,
+		@aColRowNo INT ,
+        @aCostmode INT ,
+        @aUnit INT ,
+        @aGoodsNo INT ,
+        @aOrderVchType INT ,
+        @aOrderCode INT ,
+        @aOrderDlyCode INT ,
+        @aPStutas INT ,
+        @aYearPeriod INT
+          
+    DECLARE @aAtypeId VARCHAR(50) ,
+        @aBtypeId VARCHAR(50) ,
+        @aEtypeId VARCHAR(50) ,
+        @aDtypeId VARCHAR(50) ,
+        @aKtypeId VARCHAR(50) ,
+        @aKtypeId2 VARCHAR(50) ,
+        @aPtypeId VARCHAR(50) ,
+        @aBlockNo VARCHAR(20) ,
+        @aProDate VARCHAR(10) ,
+        @aUsefulEndDate VARCHAR(10) ,
+        @aJhDate VARCHAR(50)
+          
+    DECLARE @aUnitRate NUMERIC(22, 10) ,
+        @aQty NUMERIC(22, 10) ,
+        @aPrice NUMERIC(22, 10) ,
+        @aTotal NUMERIC(22, 10) ,
+        @aDisCount NUMERIC(22, 10) ,
+        @aDisCountPrice NUMERIC(22, 10) ,
+        @aDisCountTotal NUMERIC(22, 10) ,
+        @aTaxRate NUMERIC(22, 10) ,
+        @aTaxPrice NUMERIC(22, 10) ,
+        @aTaxTotal NUMERIC(22, 10) ,
+        @aAssQty NUMERIC(22, 10) ,
+        @aAssPrice NUMERIC(22, 10) ,
+        @aAssDiscountPrice NUMERIC(22, 10) ,
+        @aAssTaxPrice NUMERIC(22, 10) ,
+        @aCostPrice NUMERIC(22, 10) ,
+        @aCostTotal NUMERIC(22, 10) ,
+        @aToQty NUMERIC(22, 10) ,
+        @aRedword CHAR(2) ,
+        @aInputDate VARCHAR(10) ,
+        @aPeriod SMALLINT ,
+        @aUsedType CHAR(1) ,
+        @aComment VARCHAR(256),
+        @aMTotal NUMERIC(22, 10)
+
     SELECT  @GOODS_ID = '0000100001'
+    SELECT  @AP_ID = '0000200001'
+    SELECT  @AR_ID = '0000100005'
+    SELECT  @SALE_INCOME_ID = '0000300001'
+    SELECT  @SALE_COST_ID = '0000400001'
     
-    SET @nRet = 0
-    SELECT  @nVchType = VchType
+    --SELECT  @nPeriod = ISNULL(SubValue, 0)
+    --FROM    SysData
+    --WHERE   SubName = 'Period'
+    SELECT  @aPeriod = 1
+    SELECT @aYearPeriod = 1    
+    
+    SELECT  @aVchType = VchType, @aInputDate= InputDate 
     FROM    dbo.tbx_Bill_M
     WHERE   VchCode = @NewvchCode
     
+    IF ISNULL(@aVchType, -1) = -1
+    BEGIN
+		SET @ErrorValue='单据不存在或者删除，不能过账！'
+		GOTO ErrorGeneral 	
+    END
+    
+    SELECT  @InitOver = PValue
+    FROM    dbo.tbx_Sys_Param
+    WHERE   PName = 'InitOver'
+    
+    IF ISNULL(@InitOver, 0) <> 1
+    BEGIN
+		SET @ErrorValue='没有开账，不能过账！'
+		GOTO ErrorGeneral 	
+    END
+    
+    
+    SET @nRet = 0
+    SET @aMTotal = 0
     BEGIN TRAN Account
-------------------------------进货单------------------------------
-    IF @nVchType = 34 
+------------------------------进货单---------------------------
+    IF @aVchType = 3 
         BEGIN
             SELECT  @execsql = 'declare CreateDly_cursor cursor for 
-								select ATypeID, PTypeID, KTypeID, qty, Price, Total, blockno, prodate, Unit, UnitRate
-                                from tbx_Bill_D_Bak where Vchcode= ' + CAST(@nVchType AS VARCHAR(10))
+								select ColRowNo, ATypeID, BtypeId, EtypeId, DtypeId, PTypeID, KTypeID, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate, Costmode, Comment
+                                from tbx_Bill_D_Bak where Vchcode= ' + CAST(@NewVchCode AS VARCHAR(10))
             EXEC (@execsql)
-            
             
             OPEN CreateDly_cursor
 
             WHILE 0 = 0 
                 BEGIN
-                    FETCH NEXT FROM CreateDly_cursor INTO @szATypeID, @szPTypeID, @szKTypeID, @dQty, @dPrice, @dTotal, @szBlockno, @szProdate, @Unit, @dUnitRate
+                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDtypeId, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @ablockno, @aprodate, @aUnit, @aUnitRate, @aCostmode, @aComment
                     IF @@FETCH_STATUS <> 0 
                         BREAK
                         
-                    EXEC @nRet = pbx_Bill_ModifyDbf 34, @OldVchCode, @GOODS_ID, @szPTypeID, '', @szETypeID, @szKTypeID, @nPeriod, @dQty, @szBlockno, @szProdate, 0, @Unit, @dUnitRate, @ErrorValue
+                    EXEC @nRet = pbx_Bill_ModifyDbf @aVchType, @OldVchCode, @GOODS_ID, @aPTypeID, @aBTypeID, @aETypeID, @aKTypeID, @aPeriod, @aQty, @aTotal, @aBlockno, @aProdate, 0, @aUnit, @aUnitRate, @ErrorValue OUT
                     IF @nRet < 0 
                         GOTO ErrorRollback
                         
---						INSERT  INTO dlybuy ( vchcode, Date, VchType, ATypeID, PTypeID, BTypeID, ETypeID, KTypeID, KTypeID2, qty, SideQty, Price, Total, costPrice, CostTotal, discount, discountPrice, discountTotal, tax, taxPrice, taxTotal, tax_Total, Blockno, Prodate, comment, period, YearPeriod, UsedType, costmode, unit, OrderCode, OrderDlyCode, InvoceTotal, InvoceTag, DeptID, RetailPrice, Pstutas, AssQty, AssPrice, AssDiscountPrice, AssTaxPrice, UnitRate, FeeTotal, InPrice, InTotal, pgholqty, pgholInqty, copySdlyorder, UsefulEndDate )
---                       VALUES  ( @nVchcode, @tDate, @nVchType, @szATypeID, @szPTypeID, @szBTypeID, @szETypeID, @szKTypeID, @szKTypeID2, @dQty, @dSideQty, @dPrice, @dTotal, @dCostPrice, @dCostTotal, @dDiscount, @dDiscountPrice, @dDiscountTotal, @dTax, @dTaxPrice, @dTaxTotal, @dTax_Total, @szBlockno, @szProdate, @szMemo, @nPeriod, @nYearPeriod, @UsedType, @nCostMode, @unit, @nOrderCode, @nOrderDlyCode, @dInvoceTotal, @nInvoceTag, @DeptID, @RetailPrice, @nPstatus, @dAssQty, @dAssPrice, @dAssDiscountPrice, @dAssTaxPrice, @dUnitRate, @dFeeTotal, @dInPrice, @dInTotal, @dpgholqty, @npgholInqty, @ncopySdlyorder, @UsefulEndDate )
-				
---			--库存商品增加
---            IF @dTempTotal <> 0 
---                BEGIN
---                    INSERT  INTO dlya ( vchcode, Date, VchType, ATypeID, BTypeID, ETypeID, KTypeID, Total, period, YearPeriod, UsedType, DeptID )
---                    VALUES  ( @nVchcode, @tDate, @nVchType, @GOODS_ID, @szBTypeID, @szETypeID, @szKTypeID, @dTempTotal, @nPeriod, @nYearPeriod, '', @DeptID )
---                    IF @@rowcount <= 0 
---                        GOTO error1
---                END
-----应收应付
---            SELECT  @dTemp = @dTotalMoney - @dTotalInMoney - @dPreferential
---            IF @dTemp <> 0
---               -- if @dTotalInMoney <> @dTotalMoney
---                BEGIN
---                 --       select @dTemp = @dTotalMoney-@dTotalInMoney
---                    INSERT  INTO dlya ( vchcode, Date, VchType, ATypeID, BTypeID, ETypeID, KTypeID, Total, period, YearPeriod, UsedType, DeptID )
---                    VALUES  ( @nVchcode, @tDate, @nVchType, @AP_ID, @szBTypeID, @szETypeID, @szKTypeID, @dTemp, @nPeriod, @nYearPeriod, '', @DeptID )
---                    IF @@rowcount <= 0 
---                        GOTO error1
---                END
-
---            SELECT  @dTemp = @dFeeEditTotal - @dFeePayTotal
-            
---            IF @dTemp <> 0 
---                BEGIN
---                    INSERT  INTO dlya ( vchcode, Date, Vchtype, ATypeID, BTypeID, ETypeID, KTypeID, Total, Period, YearPeriod, UsedType, DeptID )
---                    VALUES  ( @nVchcode, @tDate, @nVchtype, @AP_ID, @szFeeBtypeID, @szETypeID, @szKTypeID, @dTemp, @nPeriod, @nYearPeriod, '', @DeptID )
---                    IF @@rowcount <= 0 
---                        GOTO error1
---                END
-
---            UPDATE  dlyndx
---            SET     Total = ABS(@dTotalMoney), InvoceTag = @nInvTag
---            WHERE   vchcode = @nVchcode
---            IF @@rowcount <= 0 
---                GOTO error1
-
-                    CLOSE CreateDly_cursor
-                    DEALLOCATE CreateDly_cursor
-                    GOTO Finish
-                END
+                    INSERT dbo.tbx_Bill_Buy_D ( VchCode, VchType, ColRowNo, ATypeID, PTypeID, KTypeID, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate ,Costmode, Comment)
+                    VALUES  ( @NewVchCode, @aVchType, @aColRowNo, @aATypeID, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @aBlockno, @aProdate, @aUnit, @aUnitRate, @aCostmode, @aComment)
+                    IF @@rowcount <= 0 
+                    BEGIN
+						SET @ErrorValue = '插入明细失败！'
+						GOTO ErrorRollback		
+                    END
+                    
+                    SET @aMTotal = @aMTotal + @aTotal     
+                END --cursor while end
+               
+            --库存商品增加
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @GOODS_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+			--应收应付
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @AP_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+            UPDATE  dbo.tbx_Bill_M
+            SET     Total = @aMTotal, InvoceTag = 0
+            WHERE   VchCode = @NewVchCode
+                
+            CLOSE CreateDly_cursor
+            DEALLOCATE CreateDly_cursor
+            GOTO Finish
         END
-------------------------------进货单处理结束--------------------------
+------------------------------进货单处理结束----------------------
 
+------------------------------销售单------------------------------
+    IF @aVchType = 4 
+        BEGIN
+			DECLARE @aSumCostTotal NUMERIC(22, 10)
+			SET @aSumCostTotal = 0
+			 
+            SELECT  @execsql = 'declare CreateDly_cursor cursor for 
+								select ColRowNo, ATypeID, BtypeId, EtypeId, DtypeId, PTypeID, KTypeID, Qty, Price, Total, CostTotal, Blockno, Prodate, Unit, UnitRate, Costmode, Comment
+                                from tbx_Bill_D_Bak where Vchcode= ' + CAST(@NewVchCode AS VARCHAR(10))
+            EXEC (@execsql)
+            
+            OPEN CreateDly_cursor
+
+            WHILE 0 = 0 
+                BEGIN
+                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDtypeId, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @aCostTotal, @ablockno, @aprodate, @aUnit, @aUnitRate, @aCostmode, @aComment
+                    IF @@FETCH_STATUS <> 0 
+                        BREAK
+                    
+                    SET @aMTotal = @aMTotal + @aTotal   
+                     
+                    SET @aCostTotal = -@aCostTotal
+                    SET @aQty = -@aQty
+                    SET @aTotal = -@aTotal 
+                    
+                    SET @aSumCostTotal = @aSumCostTotal + @aCostTotal 
+                    
+                    EXEC @nRet = pbx_Bill_ModifyDbf @aVchType, @OldVchCode, @GOODS_ID, @aPTypeID, @aBTypeID, @aETypeID, @aKTypeID, @aPeriod, @aQty, @aTotal, @aBlockno, @aProdate, 0, @aUnit, @aUnitRate, @ErrorValue OUT
+                    IF @nRet < 0 
+                        GOTO ErrorRollback
+                        
+                    INSERT dbo.tbx_Bill_Sale_D ( VchCode, VchType, ColRowNo, ATypeID, PTypeID, KTypeID, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate , Costmode, Comment, UsedType)
+                    VALUES  ( @NewvchCode, @aVchType, @aColRowNo, @aATypeID, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @aBlockno, @aProdate, @aUnit, @aUnitRate, @aCostmode, @aComment, '')
+                    IF @@rowcount <= 0 
+                    BEGIN
+						SET @ErrorValue = '插入明细失败！'
+						GOTO ErrorRollback		
+                    END
+                        
+                END --cursor while end
+                
+			--库存商品减少
+			IF  @aSumCostTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @GOODS_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aSumCostTotal, @aInputDate )
+				IF @@rowcount <= 0
+				BEGIN
+					SET @ErrorValue = '插入库存商品科目明细失败！'
+					GOTO ErrorRollback	
+				END 
+			END 
+			
+			--销售收入
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @SALE_INCOME_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+			--销售成本
+			IF ABS(@aSumCostTotal) <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @SALE_COST_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, ABS(@aSumCostTotal), @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+			--应收应付
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @AR_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+            UPDATE  dbo.tbx_Bill_M
+            SET     Total = ABS(@aMTotal)
+            WHERE   VchCode = @NewVchCode
+            
+            CLOSE CreateDly_cursor
+            DEALLOCATE CreateDly_cursor
+            GOTO Finish
+        END
+------------------------------销售单处理结束--------------------------
+
+------------------------------调拨单------------------------------
+    IF @aVchType = 5 
+        BEGIN
+            SELECT  @execsql = 'declare CreateDly_cursor cursor for 
+								select ColRowNo, ATypeID, BtypeId, EtypeId, DtypeId, PTypeID, KTypeID, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate, Costmode, Comment, KtypeId2
+                                from tbx_Bill_D_Bak where Vchcode= ' + CAST(@NewVchCode AS VARCHAR(10))
+            EXEC (@execsql)
+            
+            OPEN CreateDly_cursor
+
+            WHILE 0 = 0 
+                BEGIN
+                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDtypeId, @aPTypeID, @aKTypeID, @aQty, @aPrice, @aTotal, @ablockno, @aprodate, @aUnit, @aUnitRate, @aCostmode, @aComment, @aKtypeId2
+                    IF @@FETCH_STATUS <> 0 
+                        BREAK
+                    
+                    SET @aQty = -@aQty
+                    
+                    EXEC @nRet = pbx_Bill_ModifyDbf @aVchType, @OldVchCode, @GOODS_ID, @aPTypeID, '', @aETypeID, @aKTypeID, @aPeriod, @aQty, @aTotal, @aBlockno, @aProdate, 0, @aUnit, @aUnitRate, @ErrorValue OUT
+                    IF @nRet < 0 
+                        GOTO ErrorRollback
+                        
+                    INSERT dbo.tbx_Bill_Other_D ( VchCode, VchType, ColRowNo, ATypeID, PTypeID, KTypeID, KtypeId2, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate , Costmode, Comment)
+                    VALUES  ( @NewvchCode, @aVchType, @aColRowNo, @aATypeID, @aPTypeID, @aKTypeID, @aKtypeId2, @aQty, @aPrice, @aTotal, @aBlockno, @aProdate, @aUnit, @aUnitRate, @aCostmode, @aComment)
+                    IF @@rowcount <= 0 
+                    BEGIN
+						SET @ErrorValue = '插入明细失败！'
+						GOTO ErrorRollback		
+                    END
+                    
+                    IF @aCostmode IN ( 1, 2 ) --如果是先进先出或后进先出,用此方法
+                        BEGIN
+                            PRINT '先进先出或后进先出过账未实现'
+                        END
+                    ELSE 
+                        BEGIN
+                            SET @aQty = -@aQty
+                            
+							EXEC @nRet = pbx_Bill_ModifyDbf @aVchType, @OldVchCode, @GOODS_ID, @aPTypeID, '', @aETypeID, @aKtypeId2, @aPeriod, @aQty, @aTotal, @aBlockno, @aProdate, 0, @aUnit, @aUnitRate, @ErrorValue OUT
+							IF @nRet < 0 
+								GOTO ErrorRollback
+						END
+						
+                    INSERT dbo.tbx_Bill_Other_D ( VchCode, VchType, ColRowNo, ATypeID, PTypeID, KTypeID, KtypeId2, Qty, Price, Total, Blockno, Prodate, Unit, UnitRate , Costmode, Comment, UsedType)
+                    VALUES  ( @NewvchCode, @aVchType, @aColRowNo, @aATypeID, @aPTypeID, @aKTypeID, @aKtypeId2, @aQty, @aPrice, @aTotal, @aBlockno, @aProdate, @aUnit, @aUnitRate, @aCostmode, @aComment, '')
+					
+					SET @aMTotal = @aMTotal + @aTotal    
+                END --cursor while end
+			
+            UPDATE  dbo.tbx_Bill_M
+            SET     Total = @aMTotal
+            WHERE   VchCode = @NewVchCode
+            
+            CLOSE CreateDly_cursor
+            DEALLOCATE CreateDly_cursor
+            GOTO Finish
+        END
+------------------------------调拨单处理结束--------------------------
+------------------------------付款单---------------------------
+    IF @aVchType = 7 
+        BEGIN
+            SELECT  @execsql = 'declare CreateDly_cursor cursor for 
+								select ColRowNo, ATypeID, BTypeID, ETypeID, DTypeID, KtypeId, Total, Comment
+                                from tbx_Bill_D_Bak where Vchcode= ' + CAST(@NewVchCode AS VARCHAR(10))
+            EXEC (@execsql)
+            
+            OPEN CreateDly_cursor
+
+            WHILE 0 = 0 
+                BEGIN
+                    FETCH NEXT FROM CreateDly_cursor INTO @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aTotal, @aComment
+                    IF @@FETCH_STATUS <> 0 
+                        BREAK
+                        
+                    INSERT dbo.tbx_Bill_A_D ( VchCode, VchType, ColRowNo, AtypeId, BtypeId, EtypeId, DtypeId, Total, Comment )
+                    VALUES  ( @NewVchCode, @aVchType, @aColRowNo, @aATypeID, @aBTypeID, @aETypeID, @aDTypeID, @aTotal, @aComment)
+                        
+                    IF @@rowcount <= 0 
+                    BEGIN
+						SET @ErrorValue = '插入明细失败！'
+						GOTO ErrorRollback		
+                    END
+                    
+                    SET @aMTotal = @aMTotal + @aTotal     
+                END --cursor while end
+                
+			--应付款减少
+			IF  @aMTotal <> 0 
+			BEGIN
+				INSERT  INTO  dbo.tbx_Bill_A_D( VchCode, VchType, AtypeId, BtypeId, EtypeId, DtypeId, KtypeId, Total, InputDate )
+				VALUES  ( @NewVchCode, @aVchType, @AP_ID, @aBTypeID, @aETypeID, @aDTypeID, @aKTypeID, @aMTotal, @aInputDate )
+				IF @@rowcount <= 0 
+					GOTO ErrorRollback
+			END 
+			
+            UPDATE  dbo.tbx_Bill_M
+            SET     Total = @aMTotal
+            WHERE   VchCode = @NewVchCode
+                
+            CLOSE CreateDly_cursor
+            DEALLOCATE CreateDly_cursor
+            GOTO Finish
+        END
+------------------------------付款单处理结束----------------------
+
+	SET @ErrorValue = '没有找到单据类型！'
+	GOTO ErrorRollback 
+		    
     Success:		 --成功完成函数
     RETURN 0
     
@@ -2149,31 +2603,896 @@ AS
 		--CLOSE AccountDly_cursor
 		--DEALLOCATE AccountDly_cursor
 
-		--UPDATE  dlyndx
-		--SET     draft = 2, Period = @nPeriod, YearPeriod = @nYearPeriod
-		--WHERE   vchcode = @nVchcode
-		--IF @@rowcount <= 0 
-		--	GOTO error1A
+		UPDATE  dbo.tbx_Bill_M
+		SET     Draft = 2, Period = @aPeriod, YearPeriod = @aYearPeriod
+		WHERE   vchcode = @NewVchCode
+		IF @@rowcount <= 0 
+		BEGIN
+			SET @ErrorValue = '更新过账标志出错'
+			GOTO ErrorRollback	
+		END
+
+	   DELETE   FROM tbx_Bill_D_Bak
+	   WHERE    VchCode = @NewVchCode
+	   
     COMMIT TRAN Account
         	   	
     RETURN @nRet
     
     ErrorGeneral:    --检查数据是错误，不需要回滚
-    DELETE  FROM tbx_Bill_Order_D
-    WHERE   Vchcode = @NewVchCode
-    DELETE  FROM tbx_Bill_Order_M
-    WHERE   Vchcode = @NewVchCode	 
+
+    EXEC dbo.pbx_Bill_ClearSaveCreate 0, 0, @aVchType, @NewVchCode, @OldVchCode
+
     RETURN -1   
     
     ErrorRollback:   --数据操作是错误，需要回滚
     ROLLBACK TRAN Account 
-    DELETE  FROM tbx_Bill_Order_D
-    WHERE   Vchcode = @NewVchCode
-    DELETE  FROM tbx_Bill_Order_M
-    WHERE   Vchcode = @NewVchCode
+
+    EXEC dbo.pbx_Bill_ClearSaveCreate 0, 0, @aVchType, @NewVchCode, @OldVchCode
+
     RETURN -2 
 
 GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_CreateDraft') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_CreateDraft
+go
+
+CREATE PROCEDURE dbo.pbx_Bill_CreateDraft
+    (
+      @ModiDly INT , --是否是修改单据 0 否，1 是
+      @ADraft INT , --3 存草稿，2过账
+      @OldVchCode INT ,
+      @NewVchCode INT OUT ,
+       --下面面是存储过程必须的参数
+      @ErrorValue VARCHAR(500) OUTPUT  
+    )
+AS 
+    DECLARE @net INT ,
+        @smode CHAR ,
+        @szSql NVARCHAR(4000) ,
+        @Stab VARCHAR(50) ,
+        @Stabndx VARCHAR(50) ,
+        @inputNo VARCHAR(50)
+    DECLARE @vchtype INT
+
+    DECLARE @SYS_SALEAR_LIMIT INT
+    DECLARE @dLimit NUMERIC(22, 10) ,
+        @dAr NUMERIC(22, 10) ,
+        @dArdly NUMERIC(22, 10) ,
+        @dTemp NUMERIC(22, 10)
+
+    DECLARE @ModiVchcode VARCHAR(50)
+    DECLARE @szDtypeid VARCHAR(50) ,
+        @szKTypeID2 VARCHAR(50) ,
+        @szgatherbtypeid VARCHAR(50) ,
+        @feebtypeid VARCHAR(50) ,
+        @szzctypeid VARCHAR(50)
+
+    BEGIN TRAN updata
+    
+	UPDATE  dbo.tbx_Bill_M
+	SET     Draft = 1
+	WHERE   VchCode = @NewVchCode
+		
+    COMMIT TRAN updata
+
+    SET @net = 0
+
+
+    RETURN @net
+
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    --DELETE  FROM tbx_Bill_Order_D
+    --WHERE   Vchcode = @NewVchCode
+    --DELETE  FROM tbx_Bill_Order_M
+    --WHERE   Vchcode = @NewVchCode	 
+    RETURN -1   
+    
+    ErrorRollback:   --数据操作是错误，需要回滚
+    ROLLBACK TRAN Account 
+    --DELETE  FROM tbx_Bill_Order_D
+    --WHERE   Vchcode = @NewVchCode
+    --DELETE  FROM tbx_Bill_Order_M
+    --WHERE   Vchcode = @NewVchCode
+    RETURN -2 
+
+go
+GO
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_Is_Allot_D') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Is_Allot_D
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Bill_Is_Allot_D                                               
+--  ||   过程功能：添加调拨单的明细信息
+--  ********************************************************************************************
+
+CREATE  PROCEDURE [pbx_Bill_Is_Allot_D]
+    (
+      @RowId VARCHAR(8000) ,
+      @VchCode VARCHAR(50) ,
+      @VchType VARCHAR(50) ,
+      @ColRowNo VARCHAR(8000) ,
+      @Atypeid VARCHAR(8000) ,
+      @Btypeid VARCHAR(8000) ,
+      @Etypeid VARCHAR(8000) ,
+      @Dtypeid VARCHAR(8000) ,
+      @Ktypeid VARCHAR(8000) ,
+      @Ktypeid2 VARCHAR(8000) ,
+      @PtypeId VARCHAR(8000) ,
+      @CostMode VARCHAR(8000) ,
+      @UnitRate VARCHAR(8000) ,
+      @Unit VARCHAR(8000) ,
+      @Blockno VARCHAR(8000) ,
+      @Prodate VARCHAR(8000) ,
+      @UsefulEndDate VARCHAR(8000) = '' ,
+      @Jhdate VARCHAR(8000) ,
+      @GoodsNo VARCHAR(8000) ,
+      @Qty VARCHAR(8000) ,
+      @Price VARCHAR(8000) ,
+      @Total VARCHAR(8000) ,
+      @Discount VARCHAR(8000) ,
+      @DiscountPrice VARCHAR(8000) ,
+      @DiscountTotal VARCHAR(8000) ,
+      @TaxRate VARCHAR(8000) ,
+      @TaxPrice VARCHAR(8000) ,
+      @TaxTotal VARCHAR(8000) ,
+      @AssQty VARCHAR(8000) ,
+      @AssPrice VARCHAR(8000) ,
+      @AssDiscountPrice VARCHAR(8000) ,
+      @AssTaxPrice VARCHAR(8000) ,
+      @CostTotal VARCHAR(8000) ,
+      @CostPrice VARCHAR(8000) ,
+      @OrderCode VARCHAR(8000) = '' ,
+      @OrderDlyCode VARCHAR(8000) = '' ,
+      @OrderVchType VARCHAR(8000) = '' ,
+      @Comment VARCHAR(8000) ,
+      @InputDate VARCHAR(8000) ,
+      @Usedtype VARCHAR(8000) ,
+      @Period VARCHAR(8000) ,
+      @PStatus VARCHAR(8000) = '' ,
+      @YearPeriod VARCHAR(8000) = '' ,
+      
+      @ErrorValue VARCHAR(500) OUTPUT --返回错误信息 
+    )
+AS 
+    DECLARE @dUnitRateTemp NUMERIC(22, 10)
+
+
+    DECLARE @EndDlyOrder INT ,
+        @BeginOrderDly INT ,
+        @Ret INT
+    DECLARE @Splitstr VARCHAR(10)
+    SET @Splitstr = 'ǎǒǜ'
+
+
+    BEGIN TRAN OrderSaveDly
+
+    SELECT  @BeginOrderDly = ISNULL(MAX(DlyOrder), 0)
+    FROM    dbo.tbx_Bill_D_Bak
+
+    IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
+
+	select * into  #0 from  dbo.Fun_SplitStr(@RowId, @splitstr) RowId
+	select * into  #1 FROM  dbo.Fun_SplitStr(@ColRowNo, @splitstr) ColRowNo 
+	select * into  #2 from  dbo.Fun_SplitStr(@AtypeId, @splitstr) AtypeId 
+	select * into  #3 from  dbo.Fun_SplitStr(@BtypeId, @splitstr) BtypeId 
+	select * into  #4 FROM  dbo.Fun_SplitStr(@EtypeId, @splitstr) EtypeId 
+	select * into  #5 FROM  dbo.Fun_SplitStr(@DtypeId, @splitstr) DtypeId 
+	select * into  #6 FROM  dbo.Fun_SplitStr(@KtypeId, @splitstr) KtypeId 
+	select * into  #7 from  dbo.Fun_SplitStr(@KtypeId2, @splitstr) KtypeId2 
+	select * into  #8 FROM  dbo.Fun_SplitStr(@CostMode, @splitstr) ColRowNo 
+	select * into  #9 from  dbo.Fun_SplitStr(@Blockno, @splitstr) Blockno 
+	select * into #10 from  dbo.Fun_SplitStr(@ProDate, @splitstr) ProDate 
+	select * into #11 from  dbo.Fun_SplitStr(@UsefulEndDate, @splitstr) UsefulEndDate 
+	select * into #12 from  dbo.Fun_SplitStr(@JhDate, @splitstr) JhDate 
+	select * into #13 from  dbo.Fun_SplitStr(@Goodsno, @splitstr) Goodsno 
+	select * into #14 from  dbo.Fun_SplitStr(@AssQty, @splitstr) AssQty
+	select * into #15 from  dbo.Fun_SplitStr(@AssPrice, @splitstr) AssPrice 
+	select * into #16 from  dbo.Fun_SplitStr(@Total, @splitstr) Total 
+	select * into #17 from  dbo.Fun_SplitStr(@Discount, @splitstr) Discount 
+	select * into #18 from  dbo.Fun_SplitStr(@AssDiscountPrice, @splitstr) AssDiscountPrice 
+	select * into #19 from  dbo.Fun_SplitStr(@Discounttotal, @splitstr) Discounttotal 
+	select * into #20 from  dbo.Fun_SplitStr(@TaxRate, @splitstr) TaxRate 
+	select * into #21 from  dbo.Fun_SplitStr(@AssTaxPrice, @splitstr) AssTaxPrice 
+	select * into #22 from  dbo.Fun_SplitStr(@TaxTotal, @splitstr) TaxTotal 
+	select * into #23 from  dbo.Fun_SplitStr(@CostPrice, @splitstr) CostPrice 
+	select * into #24 from  dbo.Fun_SplitStr(@CostTotal, @splitstr) CostTotal 
+	select * into #25 from  dbo.Fun_SplitStr(@OrderVchType, @splitstr) OrderVchType 
+	select * into #26 from  dbo.Fun_SplitStr(@OrderCode, @splitstr) OrderCode 
+	select * into #27 from  dbo.Fun_SplitStr(@OrderDlyCode, @splitstr) OrderDlyCode 
+	select * into #28 from  dbo.Fun_SplitStr(@PStatus, @splitstr) PStatus 
+	select * into #29 from  dbo.Fun_SplitStr(@InputDate, @splitstr) InputDate 
+	select * into #30 from  dbo.Fun_SplitStr(@Period, @splitstr) Period 
+	select * into #31 from  dbo.Fun_SplitStr(@YearPeriod, @splitstr) YearPeriod 
+	select * into #32 from  dbo.Fun_SplitStr(@Usedtype, @splitstr) Usedtype 
+	select * into #33 from  dbo.Fun_SplitStr(@Comment, @splitstr) Comment 
+
+    INSERT  INTO dbo.tbx_Bill_D_Bak
+            ( VchCode ,
+              VchType ,
+              ColRowNo ,
+              AtypeId ,
+              BtypeId ,
+              EtypeId ,
+              DtypeId ,
+              KtypeId ,
+              KtypeId2 ,
+              PtypeId ,
+              Costmode ,
+              Unit ,
+              UnitRate ,
+              BlockNo ,
+              ProDate ,
+              UsefulEndDate ,
+              JhDate ,
+              GoodsNo ,
+              Qty ,
+              Price ,
+              Total ,
+              DisCount ,
+              DisCountPrice ,
+              DisCountTotal ,
+              TaxRate ,
+              TaxPrice ,
+              TaxTotal ,
+              AssQty ,
+              AssPrice ,
+              AssDiscountPrice ,
+              AssTaxPrice ,
+              CostPrice ,
+              CostTotal ,
+              OrderVchType ,
+              OrderCode ,
+              OrderDlyCode ,
+              PStutas ,
+              Redword ,
+              InputDate ,
+              Period ,
+              YearPeriod ,
+              UsedType ,
+              Comment 
+            )
+            SELECT  CAST(@Vchcode AS INT) ,
+                    CAST(@Vchtype AS INT) ,
+                    ISNULL(ColRowNo.Col, '') ,
+                    ISNULL(AtypeId.Col, '') ,
+                    ISNULL(BtypeId.Col, '') ,
+                    ISNULL(EtypeId.Col, '') ,
+                    ISNULL(DtypeId.Col, '') ,
+                    ISNULL(KtypeId.Col, '') ,
+                    ISNULL(KtypeId2.Col, '') ,
+                    ISNULL(P.PtypeId, '') ,
+                    ISNULL(CostMode.Col, 0) ,
+                    ISNULL(P.Unit, 0) ,
+                    ISNULL(P.URate, 0) ,
+                    ISNULL(Blockno.Col, '') ,
+                    ISNULL(ProDate.Col, '') ,
+                    ISNULL(UsefulEndDate.Col, '') ,
+                    ISNULL(JhDate.Col, '') ,
+                    ISNULL(Goodsno.Col, '') ,
+                    dbo.Fun_CovToQty(dbo.Fun_StrToNumeric(P.URate, 1) * dbo.Fun_StrToNumeric(AssQty.Col, 0)) Qty ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) Price ,
+                    ISNULL(Total.Col, 0) ,
+                    ISNULL(Discount.Col, 0) ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssDiscountPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) DiscountPrice ,
+                    ISNULL(DiscountTotal.Col, 0) ,
+                    ISNULL(TaxRate.Col, 0) ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssTaxPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) TaxPrice ,
+                    ISNULL(TaxTotal.col, 0) ,
+                    ISNULL(AssQty.Col, -11) ,
+                    ISNULL(AssPrice.Col, 0) ,
+                    ISNULL(AssDiscountPrice.Col, 0) ,
+                    ISNULL(AssTaxPrice.Col, 0) ,
+                    ISNULL(CostPrice.Col, 0) ,
+                    ISNULL(CostTotal.Col, 0) ,
+                    ISNULL(OrderVchType.Col, 0) , 
+                    ISNULL(OrderCode.col, 0) ,
+                    ISNULL(OrderDlyCode.col, 0) ,
+                    CASE WHEN PStatus.Col = '' THEN 0
+                         ELSE ISNULL(PStatus.Col, 0)
+                    END ,
+                    'F' Redword ,
+                    ISNULL([InputDate].Col, '') ,
+                    ISNULL(Period.Col, 0) ,
+                    CASE WHEN YearPeriod.Col = '' THEN 0
+                         ELSE ISNULL(YearPeriod.Col, 0)
+                    END ,
+                    ISNULL(Usedtype.Col, 0) ,
+                    ISNULL(Comment.Col, '')
+            FROM #0 szRowId
+				LEFT JOIN #1 ColRowNo ON szRowId.Id = ColRowNo.Id
+				LEFT JOIN #2 AtypeId ON szRowId.Id = AtypeId.Id
+				LEFT JOIN #3 BtypeId ON szRowId.Id = BtypeId.Id
+				LEFT JOIN #4 EtypeId ON szRowId.Id = EtypeId.Id
+				LEFT JOIN #5 DtypeId ON szRowId.Id = DtypeId.Id
+				LEFT JOIN #6 KtypeId ON szRowId.Id = KtypeId.Id
+				LEFT JOIN #7 KtypeId2 ON szRowId.Id = KtypeId2.Id
+				LEFT JOIN #8 CostMode ON szRowId.Id = CostMode.Id
+				LEFT JOIN #9 Blockno ON szRowId.Id = Blockno.Id
+				LEFT JOIN #10 ProDate ON szRowId.Id = ProDate.Id
+				LEFT JOIN #11 UsefulEndDate ON szRowId.ID = UsefulEndDate.ID
+				LEFT JOIN #12 JhDate ON szRowId.ID = JhDate.ID
+				LEFT JOIN #13 Goodsno ON szRowId.Id = Goodsno.Id
+				LEFT JOIN #14 AssQty ON szRowId.Id = AssQty.Id
+				LEFT JOIN #15 AssPrice ON szRowId.Id = AssPrice.Id
+				LEFT JOIN #16 Total ON szRowId.Id = Total.Id
+				LEFT JOIN #17 Discount ON szRowId.Id = Discount.Id
+				LEFT JOIN #18 AssDiscountPrice ON szRowId.Id = AssDiscountPrice.Id
+				LEFT JOIN #19 Discounttotal ON szRowId.Id = Discounttotal.Id
+				LEFT JOIN #20 TaxRate ON szRowId.Id = TaxRate.Id
+				LEFT JOIN #21 AssTaxPrice ON szRowId.Id = AssTaxPrice.Id
+				LEFT JOIN #22 TaxTotal ON szRowId.Id = TaxTotal.Id
+				LEFT JOIN #23 CostPrice ON szRowId.Id = CostPrice.Id
+				LEFT JOIN #24 CostTotal ON szRowId.Id = CostTotal.Id
+				LEFT JOIN #25 OrderVchType ON szRowId.Id = OrderVchType.Id
+				LEFT JOIN #26 OrderCode ON szRowId.Id = OrderCode.Id
+				LEFT JOIN #27 OrderDlyCode ON szRowId.Id = OrderDlyCode.Id
+				LEFT JOIN #28 PStatus ON szRowId.Id = PStatus.Id
+				LEFT JOIN #29 InputDate ON szRowId.Id = InputDate.Id
+				LEFT JOIN #30 Period ON szRowId.Id = Period.Id
+				LEFT JOIN #31 YearPeriod ON szRowId.Id = YearPeriod.Id
+				LEFT JOIN #32 Usedtype ON szRowId.Id = Usedtype.Id
+				LEFT JOIN #33 Comment ON szRowId.Id = Comment.Id
+				LEFT JOIN ( SELECT  pu.Id ,
+							pu.PtypeId ,
+							1 Unit ,
+							1.0 URate --ISNULL(URate, 1) URate
+					FROM    ( SELECT    PtypeIdlist.Id ,
+										PtypeIdlist.col PtypeId ,
+										1 unit--unit.col unit
+								FROM      dbo.Fun_SplitStr(@PtypeId, @splitstr) PtypeIdlist ,
+										dbo.Fun_SplitStr(@Unit, @splitstr) Unit
+								WHERE     PtypeIdlist.Id = unit.ID
+							) pu
+							--LEFT JOIN Xw_ptypeunit unit ON p.ptypeid = unit.PtypeId
+							--                               AND unit.ordid = p.unit
+                                
+					) P ON szRowId.Id = p.Id
+            WHERE   szRowId.col <> ''
+            ORDER BY szRowId.Id
+    IF @@ERROR <> 0
+    BEGIN
+		SET @ErrorValue = '批量插入明细数据失败！'
+		GOTO ErrorRollback
+    END
+        
+    SET @EndDlyOrder = @@IDENTITY
+
+IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
+
+    COMMIT TRAN OrderSaveDly
+
+    SELECT  DlyOrder
+    FROM    tbx_Bill_D_Bak
+    WHERE   DlyOrder > @BeginOrderDly
+            AND DlyOrder <= @EndDlyOrder
+    ORDER BY DlyOrder
+
+    GOTO Success
+
+    Success:		 --成功完成函数
+    RETURN 0
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    ErrorRollback:   --数据操作是错误，需要回滚
+    ROLLBACK TRAN OrderSaveDly 
+    RETURN -2 
+
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_Is_Allot_M') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Is_Allot_M
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Bill_Is_Allot_M                                                
+--  ||   过程功能：添加调拨单的主表信息
+--  ********************************************************************************************
+
+CREATE  PROCEDURE [pbx_Bill_Is_Allot_M]
+    (
+      @InputDate VARCHAR(10) ,
+      @Number VARCHAR(40) ,
+      @VchType INT ,
+      @Summary VARCHAR(256) ,
+      @Comment VARCHAR(256) ,
+      @Btypeid VARCHAR(50) ,
+      @Etypeid VARCHAR(50) ,
+      @Dtypeid VARCHAR(50) ,
+      @Ktypeid VARCHAR(50) ,
+      @Ktypeid2 VARCHAR(50) ,
+      @Period SMALLINT ,
+      @YearPeriod INT ,
+      @RedWord CHAR(1) ,
+      @Total NUMERIC ,
+      @Defdiscount NUMERIC ,
+      @GatheringDate VARCHAR(25) ,
+      
+      --下面面是存储过程必须的参数
+      @ErrorValue VARCHAR(500) OUTPUT  
+    )
+AS 
+    INSERT  INTO dbo.tbx_Bill_M ( InputDate, Number, VchType, Summary, Comment, BtypeId, EtypeId, DtypeId, KtypeId, KtypeId2, Period, YearPeriod, RedWord, Total, Defdiscount, GatheringDate )
+    VALUES  ( @InputDate, @Number, @VchType, @Summary, @Comment, @Btypeid, @EtypeId, @DtypeId, @KtypeId, @KtypeId2, @Period, @YearPeriod, @RedWord, @Total, @Defdiscount, @GatheringDate ) 
+    IF @@rowcount = 0 
+        RETURN -1
+    ELSE 
+        RETURN @@identity
+
+
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_Is_Buy_D') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Is_Buy_D
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Bill_Is_Buy_D                                               
+--  ||   过程功能：添加进货单的明细信息
+--  ********************************************************************************************
+
+CREATE  PROCEDURE [pbx_Bill_Is_Buy_D]
+    (
+      @RowId VARCHAR(8000) ,
+      @VchCode VARCHAR(50) ,
+      @VchType VARCHAR(50) ,
+      @ColRowNo VARCHAR(8000) ,
+      @Atypeid VARCHAR(8000) ,
+      @Btypeid VARCHAR(8000) ,
+      @Etypeid VARCHAR(8000) ,
+      @Dtypeid VARCHAR(8000) ,
+      @Ktypeid VARCHAR(8000) ,
+      @Ktypeid2 VARCHAR(8000) ,
+      @PtypeId VARCHAR(8000) ,
+      @CostMode VARCHAR(8000) ,
+      @UnitRate VARCHAR(8000) ,
+      @Unit VARCHAR(8000) ,
+      @Blockno VARCHAR(8000) ,
+      @Prodate VARCHAR(8000) ,
+      @UsefulEndDate VARCHAR(8000) = '' ,
+      @Jhdate VARCHAR(8000) ,
+      @GoodsNo VARCHAR(8000) ,
+      @Qty VARCHAR(8000) ,
+      @Price VARCHAR(8000) ,
+      @Total VARCHAR(8000) ,
+      @Discount VARCHAR(8000) ,
+      @DiscountPrice VARCHAR(8000) ,
+      @DiscountTotal VARCHAR(8000) ,
+      @TaxRate VARCHAR(8000) ,
+      @TaxPrice VARCHAR(8000) ,
+      @TaxTotal VARCHAR(8000) ,
+      @AssQty VARCHAR(8000) ,
+      @AssPrice VARCHAR(8000) ,
+      @AssDiscountPrice VARCHAR(8000) ,
+      @AssTaxPrice VARCHAR(8000) ,
+      @CostTotal VARCHAR(8000) ,
+      @CostPrice VARCHAR(8000) ,
+      @OrderCode VARCHAR(8000) = '' ,
+      @OrderDlyCode VARCHAR(8000) = '' ,
+      @OrderVchType VARCHAR(8000) = '' ,
+      @Comment VARCHAR(8000) ,
+      @InputDate VARCHAR(8000) ,
+      @Usedtype VARCHAR(8000) ,
+      @Period VARCHAR(8000) ,
+      @PStatus VARCHAR(8000) = '' ,
+      @YearPeriod VARCHAR(8000) = '' ,
+      
+      @ErrorValue VARCHAR(500) OUTPUT --返回错误信息 
+    )
+AS 
+    DECLARE @dUnitRateTemp NUMERIC(22, 10)
+
+
+    DECLARE @EndDlyOrder INT ,
+        @BeginOrderDly INT ,
+        @Ret INT
+    DECLARE @Splitstr VARCHAR(10)
+    SET @Splitstr = 'ǎǒǜ'
+
+	SELECT @Ret = -1
+	
+    BEGIN TRAN OrderSaveDly
+
+    SELECT  @BeginOrderDly = ISNULL(MAX(DlyOrder), 0)
+    FROM    dbo.tbx_Bill_D_Bak
+
+    IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
+
+	select * into  #0 from  dbo.Fun_SplitStr(@RowId, @splitstr) RowId
+	select * into  #1 FROM  dbo.Fun_SplitStr(@ColRowNo, @splitstr) ColRowNo 
+	select * into  #2 from  dbo.Fun_SplitStr(@AtypeId, @splitstr) AtypeId 
+	select * into  #3 from  dbo.Fun_SplitStr(@BtypeId, @splitstr) BtypeId 
+	select * into  #4 FROM  dbo.Fun_SplitStr(@EtypeId, @splitstr) EtypeId 
+	select * into  #5 FROM  dbo.Fun_SplitStr(@DtypeId, @splitstr) DtypeId 
+	select * into  #6 FROM  dbo.Fun_SplitStr(@KtypeId, @splitstr) KtypeId 
+	select * into  #7 from  dbo.Fun_SplitStr(@KtypeId2, @splitstr) KtypeId2 
+	select * into  #8 FROM  dbo.Fun_SplitStr(@CostMode, @splitstr) ColRowNo 
+	select * into  #9 from  dbo.Fun_SplitStr(@Blockno, @splitstr) Blockno 
+	select * into #10 from  dbo.Fun_SplitStr(@ProDate, @splitstr) ProDate 
+	select * into #11 from  dbo.Fun_SplitStr(@UsefulEndDate, @splitstr) UsefulEndDate 
+	select * into #12 from  dbo.Fun_SplitStr(@JhDate, @splitstr) JhDate 
+	select * into #13 from  dbo.Fun_SplitStr(@Goodsno, @splitstr) Goodsno 
+	select * into #14 from  dbo.Fun_SplitStr(@AssQty, @splitstr) AssQty
+	select * into #15 from  dbo.Fun_SplitStr(@AssPrice, @splitstr) AssPrice 
+	select * into #16 from  dbo.Fun_SplitStr(@Total, @splitstr) Total 
+	select * into #17 from  dbo.Fun_SplitStr(@Discount, @splitstr) Discount 
+	select * into #18 from  dbo.Fun_SplitStr(@AssDiscountPrice, @splitstr) AssDiscountPrice 
+	select * into #19 from  dbo.Fun_SplitStr(@Discounttotal, @splitstr) Discounttotal 
+	select * into #20 from  dbo.Fun_SplitStr(@TaxRate, @splitstr) TaxRate 
+	select * into #21 from  dbo.Fun_SplitStr(@AssTaxPrice, @splitstr) AssTaxPrice 
+	select * into #22 from  dbo.Fun_SplitStr(@TaxTotal, @splitstr) TaxTotal 
+	select * into #23 from  dbo.Fun_SplitStr(@CostPrice, @splitstr) CostPrice 
+	select * into #24 from  dbo.Fun_SplitStr(@CostTotal, @splitstr) CostTotal 
+	select * into #25 from  dbo.Fun_SplitStr(@OrderVchType, @splitstr) OrderVchType 
+	select * into #26 from  dbo.Fun_SplitStr(@OrderCode, @splitstr) OrderCode 
+	select * into #27 from  dbo.Fun_SplitStr(@OrderDlyCode, @splitstr) OrderDlyCode 
+	select * into #28 from  dbo.Fun_SplitStr(@PStatus, @splitstr) PStatus 
+	select * into #29 from  dbo.Fun_SplitStr(@InputDate, @splitstr) InputDate 
+	select * into #30 from  dbo.Fun_SplitStr(@Period, @splitstr) Period 
+	select * into #31 from  dbo.Fun_SplitStr(@YearPeriod, @splitstr) YearPeriod 
+	select * into #32 from  dbo.Fun_SplitStr(@Usedtype, @splitstr) Usedtype 
+	select * into #33 from  dbo.Fun_SplitStr(@Comment, @splitstr) Comment 
+
+    INSERT  INTO dbo.tbx_Bill_D_Bak
+            ( VchCode ,
+              VchType ,
+              ColRowNo ,
+              AtypeId ,
+              BtypeId ,
+              EtypeId ,
+              DtypeId ,
+              KtypeId ,
+              KtypeId2 ,
+              PtypeId ,
+              Costmode ,
+              Unit ,
+              UnitRate ,
+              BlockNo ,
+              ProDate ,
+              UsefulEndDate ,
+              JhDate ,
+              GoodsNo ,
+              Qty ,
+              Price ,
+              Total ,
+              DisCount ,
+              DisCountPrice ,
+              DisCountTotal ,
+              TaxRate ,
+              TaxPrice ,
+              TaxTotal ,
+              AssQty ,
+              AssPrice ,
+              AssDiscountPrice ,
+              AssTaxPrice ,
+              CostPrice ,
+              CostTotal ,
+              OrderVchType ,
+              OrderCode ,
+              OrderDlyCode ,
+              PStutas ,
+              Redword ,
+              InputDate ,
+              Period ,
+              YearPeriod ,
+              UsedType ,
+              Comment 
+            )
+            SELECT  CAST(@Vchcode AS INT) ,
+                    CAST(@Vchtype AS INT) ,
+                    ISNULL(ColRowNo.Col, '') ,
+                    ISNULL(AtypeId.Col, '') ,
+                    ISNULL(BtypeId.Col, '') ,
+                    ISNULL(EtypeId.Col, '') ,
+                    ISNULL(DtypeId.Col, '') ,
+                    ISNULL(KtypeId.Col, '') ,
+                    ISNULL(KtypeId2.Col, '') ,
+                    ISNULL(P.PtypeId, '') ,
+                    ISNULL(CostMode.Col, 0) ,
+                    ISNULL(P.Unit, 0) ,
+                    ISNULL(P.URate, 0) ,
+                    ISNULL(Blockno.Col, '') ,
+                    ISNULL(ProDate.Col, '') ,
+                    ISNULL(UsefulEndDate.Col, '') ,
+                    ISNULL(JhDate.Col, '') ,
+                    ISNULL(Goodsno.Col, '') ,
+                    dbo.Fun_CovToQty(dbo.Fun_StrToNumeric(P.URate, 1) * dbo.Fun_StrToNumeric(AssQty.Col, 0)) Qty ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) Price ,
+                    ISNULL(Total.Col, 0) ,
+                    ISNULL(Discount.Col, 0) ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssDiscountPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) DiscountPrice ,
+                    ISNULL(DiscountTotal.Col, 0) ,
+                    ISNULL(TaxRate.Col, 0) ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssTaxPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) TaxPrice ,
+                    ISNULL(TaxTotal.col, 0) ,
+                    ISNULL(AssQty.Col, -11) ,
+                    ISNULL(AssPrice.Col, 0) ,
+                    ISNULL(AssDiscountPrice.Col, 0) ,
+                    ISNULL(AssTaxPrice.Col, 0) ,
+                    ISNULL(CostPrice.Col, 0) ,
+                    ISNULL(CostTotal.Col, 0) ,
+                    ISNULL(OrderVchType.Col, 0) , 
+                    ISNULL(OrderCode.col, 0) ,
+                    ISNULL(OrderDlyCode.col, 0) ,
+                    CASE WHEN PStatus.Col = '' THEN 0
+                         ELSE ISNULL(PStatus.Col, 0)
+                    END ,
+                    'F' Redword ,
+                    ISNULL([InputDate].Col, '') ,
+                    ISNULL(Period.Col, 0) ,
+                    CASE WHEN YearPeriod.Col = '' THEN 0
+                         ELSE ISNULL(YearPeriod.Col, 0)
+                    END ,
+                    ISNULL(Usedtype.Col, 0) ,
+                    ISNULL(Comment.Col, '')
+            FROM #0 szRowId
+				LEFT JOIN #1 ColRowNo ON szRowId.Id = ColRowNo.Id
+				LEFT JOIN #2 AtypeId ON szRowId.Id = AtypeId.Id
+				LEFT JOIN #3 BtypeId ON szRowId.Id = BtypeId.Id
+				LEFT JOIN #4 EtypeId ON szRowId.Id = EtypeId.Id
+				LEFT JOIN #5 DtypeId ON szRowId.Id = DtypeId.Id
+				LEFT JOIN #6 KtypeId ON szRowId.Id = KtypeId.Id
+				LEFT JOIN #7 KtypeId2 ON szRowId.Id = KtypeId2.Id
+				LEFT JOIN #8 CostMode ON szRowId.Id = CostMode.Id
+				LEFT JOIN #9 Blockno ON szRowId.Id = Blockno.Id
+				LEFT JOIN #10 ProDate ON szRowId.Id = ProDate.Id
+				LEFT JOIN #11 UsefulEndDate ON szRowId.ID = UsefulEndDate.ID
+				LEFT JOIN #12 JhDate ON szRowId.ID = JhDate.ID
+				LEFT JOIN #13 Goodsno ON szRowId.Id = Goodsno.Id
+				LEFT JOIN #14 AssQty ON szRowId.Id = AssQty.Id
+				LEFT JOIN #15 AssPrice ON szRowId.Id = AssPrice.Id
+				LEFT JOIN #16 Total ON szRowId.Id = Total.Id
+				LEFT JOIN #17 Discount ON szRowId.Id = Discount.Id
+				LEFT JOIN #18 AssDiscountPrice ON szRowId.Id = AssDiscountPrice.Id
+				LEFT JOIN #19 Discounttotal ON szRowId.Id = Discounttotal.Id
+				LEFT JOIN #20 TaxRate ON szRowId.Id = TaxRate.Id
+				LEFT JOIN #21 AssTaxPrice ON szRowId.Id = AssTaxPrice.Id
+				LEFT JOIN #22 TaxTotal ON szRowId.Id = TaxTotal.Id
+				LEFT JOIN #23 CostPrice ON szRowId.Id = CostPrice.Id
+				LEFT JOIN #24 CostTotal ON szRowId.Id = CostTotal.Id
+				LEFT JOIN #25 OrderVchType ON szRowId.Id = OrderVchType.Id
+				LEFT JOIN #26 OrderCode ON szRowId.Id = OrderCode.Id
+				LEFT JOIN #27 OrderDlyCode ON szRowId.Id = OrderDlyCode.Id
+				LEFT JOIN #28 PStatus ON szRowId.Id = PStatus.Id
+				LEFT JOIN #29 InputDate ON szRowId.Id = InputDate.Id
+				LEFT JOIN #30 Period ON szRowId.Id = Period.Id
+				LEFT JOIN #31 YearPeriod ON szRowId.Id = YearPeriod.Id
+				LEFT JOIN #32 Usedtype ON szRowId.Id = Usedtype.Id
+				LEFT JOIN #33 Comment ON szRowId.Id = Comment.Id
+				LEFT JOIN ( SELECT  pu.Id ,
+							pu.PtypeId ,
+							1 Unit ,
+							1.0 URate --ISNULL(URate, 1) URate
+					FROM    ( SELECT    PtypeIdlist.Id ,
+										PtypeIdlist.col PtypeId ,
+										1 unit--unit.col unit
+								FROM      dbo.Fun_SplitStr(@PtypeId, @splitstr) PtypeIdlist ,
+										dbo.Fun_SplitStr(@Unit, @splitstr) Unit
+								WHERE     PtypeIdlist.Id = unit.ID
+							) pu
+							--LEFT JOIN Xw_ptypeunit unit ON p.ptypeid = unit.PtypeId
+							--                               AND unit.ordid = p.unit
+                                
+					) P ON szRowId.Id = p.Id
+            WHERE   szRowId.col <> ''
+            ORDER BY szRowId.Id
+    IF @@ERROR <> 0
+    BEGIN
+		SET @ErrorValue = '批量插入明细数据失败！'
+		GOTO ErrorRollback
+    END
+        
+    SET @EndDlyOrder = @@IDENTITY
+
+IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
+
+    COMMIT TRAN OrderSaveDly
+
+    SELECT  DlyOrder
+    FROM    tbx_Bill_D_Bak
+    WHERE   DlyOrder > @BeginOrderDly
+            AND DlyOrder <= @EndDlyOrder
+    ORDER BY DlyOrder
+
+    GOTO Success
+
+    Success:		 --成功完成函数
+    RETURN 0
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    ErrorRollback:   --数据操作是错误，需要回滚
+    ROLLBACK TRAN OrderSaveDly 
+    RETURN -2 
+
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_Is_Buy_M') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Is_Buy_M
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Bill_Is_Buy_M                                                
+--  ||   过程功能：添加进货单的主表信息
+--  ********************************************************************************************
+
+CREATE  PROCEDURE [pbx_Bill_Is_Buy_M]
+    (
+      @InputDate VARCHAR(10) ,
+      @Number VARCHAR(40) ,
+      @VchType INT ,
+      @Summary VARCHAR(256) ,
+      @Comment VARCHAR(256) ,
+      @Btypeid VARCHAR(50) ,
+      @Etypeid VARCHAR(50) ,
+      @Dtypeid VARCHAR(50) ,
+      @Ktypeid VARCHAR(50) ,
+      @Ktypeid2 VARCHAR(50) ,
+      @Period SMALLINT ,
+      @YearPeriod INT ,
+      @RedWord CHAR(1) ,
+      @Total NUMERIC ,
+      @Defdiscount NUMERIC ,
+      @GatheringDate VARCHAR(25) ,
+      
+      --下面面是存储过程必须的参数
+      @ErrorValue VARCHAR(500) OUTPUT  
+    )
+AS 
+    INSERT  INTO dbo.tbx_Bill_M ( InputDate, Number, VchType, Summary, Comment, BtypeId, EtypeId, DtypeId, KtypeId, KtypeId2, Period, YearPeriod, RedWord, Total, Defdiscount, GatheringDate )
+    VALUES  ( @InputDate, @Number, @VchType, @Summary, @Comment, @Btypeid, @EtypeId, @DtypeId, @KtypeId, @KtypeId2, @Period, @YearPeriod, @RedWord, @Total, @Defdiscount, @GatheringDate ) 
+    IF @@rowcount = 0 
+        RETURN -1
+    ELSE 
+        RETURN @@identity
+
+
+go
 
 
 
@@ -2250,6 +3569,76 @@ AS
     SELECT  @BeginOrderDly = ISNULL(MAX(DlyOrder), 0)
     FROM    dbo.tbx_Bill_Order_D
 
+    IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
+
+	select * into  #0 from  dbo.Fun_SplitStr(@RowId, @splitstr) RowId
+	select * into  #1 FROM  dbo.Fun_SplitStr(@ColRowNo, @splitstr) ColRowNo 
+	select * into  #2 from  dbo.Fun_SplitStr(@AtypeId, @splitstr) AtypeId 
+	select * into  #3 from  dbo.Fun_SplitStr(@BtypeId, @splitstr) BtypeId 
+	select * into  #4 FROM  dbo.Fun_SplitStr(@EtypeId, @splitstr) EtypeId 
+	select * into  #5 FROM  dbo.Fun_SplitStr(@DtypeId, @splitstr) DtypeId 
+	select * into  #6 FROM  dbo.Fun_SplitStr(@KtypeId, @splitstr) KtypeId 
+	select * into  #7 from  dbo.Fun_SplitStr(@KtypeId2, @splitstr) KtypeId2 
+	select * into  #8 FROM  dbo.Fun_SplitStr(@CostMode, @splitstr) ColRowNo 
+	select * into  #9 from  dbo.Fun_SplitStr(@Blockno, @splitstr) Blockno 
+	select * into #10 from  dbo.Fun_SplitStr(@ProDate, @splitstr) ProDate 
+	select * into #11 from  dbo.Fun_SplitStr(@UsefulEndDate, @splitstr) UsefulEndDate 
+	select * into #12 from  dbo.Fun_SplitStr(@JhDate, @splitstr) JhDate 
+	select * into #13 from  dbo.Fun_SplitStr(@Goodsno, @splitstr) Goodsno 
+	select * into #14 from  dbo.Fun_SplitStr(@AssQty, @splitstr) AssQty
+	select * into #15 from  dbo.Fun_SplitStr(@AssPrice, @splitstr) AssPrice 
+	select * into #16 from  dbo.Fun_SplitStr(@Total, @splitstr) Total 
+	select * into #17 from  dbo.Fun_SplitStr(@Discount, @splitstr) Discount 
+	select * into #18 from  dbo.Fun_SplitStr(@AssDiscountPrice, @splitstr) AssDiscountPrice 
+	select * into #19 from  dbo.Fun_SplitStr(@Discounttotal, @splitstr) Discounttotal 
+	select * into #20 from  dbo.Fun_SplitStr(@TaxRate, @splitstr) TaxRate 
+	select * into #21 from  dbo.Fun_SplitStr(@AssTaxPrice, @splitstr) AssTaxPrice 
+	select * into #22 from  dbo.Fun_SplitStr(@TaxTotal, @splitstr) TaxTotal 
+	select * into #23 from  dbo.Fun_SplitStr(@CostPrice, @splitstr) CostPrice 
+	select * into #24 from  dbo.Fun_SplitStr(@CostTotal, @splitstr) CostTotal 
+	select * into #25 from  dbo.Fun_SplitStr(@OrderVchType, @splitstr) OrderVchType 
+	select * into #26 from  dbo.Fun_SplitStr(@OrderCode, @splitstr) OrderCode 
+	select * into #27 from  dbo.Fun_SplitStr(@OrderDlyCode, @splitstr) OrderDlyCode 
+	select * into #28 from  dbo.Fun_SplitStr(@PStatus, @splitstr) PStatus 
+	select * into #29 from  dbo.Fun_SplitStr(@InputDate, @splitstr) InputDate 
+	select * into #30 from  dbo.Fun_SplitStr(@Period, @splitstr) Period 
+	select * into #31 from  dbo.Fun_SplitStr(@YearPeriod, @splitstr) YearPeriod 
+	select * into #32 from  dbo.Fun_SplitStr(@Usedtype, @splitstr) Usedtype 
+	select * into #33 from  dbo.Fun_SplitStr(@Comment, @splitstr) Comment 
+
     INSERT  INTO dbo.tbx_Bill_Order_D
             ( VchCode ,
               VchType ,
@@ -2313,14 +3702,14 @@ AS
                     ISNULL(UsefulEndDate.Col, '') ,
                     ISNULL(JhDate.Col, '') ,
                     ISNULL(Goodsno.Col, '') ,
-                    dbo.Fun_CovToQty(ISNULL(P.URate, 1) * ISNULL(AssQty.Col, 0)) Qty ,
-                    dbo.Fun_CovToPrice(ISNULL(AssPrice.Col, 0) / ISNULL(P.URate, 1)) Price ,
+                    dbo.Fun_CovToQty(dbo.Fun_StrToNumeric(P.URate, 1) * dbo.Fun_StrToNumeric(AssQty.Col, 0)) Qty ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) Price ,
                     ISNULL(Total.Col, 0) ,
                     ISNULL(Discount.Col, 0) ,
-                    dbo.Fun_CovToPrice(ISNULL(AssDiscountPrice.Col, 0) / ISNULL(P.URate, 1)) DiscountPrice ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssDiscountPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) DiscountPrice ,
                     ISNULL(DiscountTotal.Col, 0) ,
                     ISNULL(TaxRate.Col, 0) ,
-                    dbo.Fun_CovToPrice(ISNULL(AssTaxPrice.Col, 0) / ISNULL(P.URate, 1)) TaxPrice ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssTaxPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) TaxPrice ,
                     ISNULL(TaxTotal.col, 0) ,
                     ISNULL(AssQty.Col, -11) ,
                     ISNULL(AssPrice.Col, 0) ,
@@ -2342,57 +3731,58 @@ AS
                     END ,
                     ISNULL(Usedtype.Col, 0) ,
                     ISNULL(Comment.Col, '')
-            FROM    dbo.Fun_SplitStr(@RowId, @splitstr) szRowId
-                    LEFT JOIN dbo.Fun_SplitStr(@ColRowNo, @splitstr) ColRowNo ON szRowId.Id = ColRowNo.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@AtypeId, @splitstr) AtypeId ON szRowId.Id = AtypeId.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@BtypeId, @splitstr) BtypeId ON szRowId.Id = BtypeId.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@EtypeId, @splitstr) EtypeId ON szRowId.Id = EtypeId.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@DtypeId, @splitstr) DtypeId ON szRowId.Id = DtypeId.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@KtypeId, @splitstr) KtypeId ON szRowId.Id = KtypeId.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@KtypeId2, @splitstr) KtypeId2 ON szRowId.Id = KtypeId2.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@CostMode, @splitstr) CostMode ON szRowId.Id = CostMode.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@Blockno, @splitstr) Blockno ON szRowId.Id = Blockno.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@ProDate, @splitstr) ProDate ON szRowId.Id = ProDate.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@UsefulEndDate, @splitstr) UsefulEndDate ON szRowId.ID = UsefulEndDate.ID
-                    LEFT JOIN dbo.Fun_SplitStr(@JhDate, @splitstr) JhDate ON szRowId.ID = JhDate.ID
-                    LEFT JOIN dbo.Fun_SplitStr(@Goodsno, @splitstr) Goodsno ON szRowId.Id = Goodsno.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@AssQty, @splitstr) AssQty ON szRowId.Id = AssQty.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@AssPrice, @splitstr) AssPrice ON szRowId.Id = AssPrice.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@Total, @splitstr) Total ON szRowId.Id = Total.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@Discount, @splitstr) Discount ON szRowId.Id = Discount.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@AssDiscountPrice, @splitstr) AssDiscountPrice ON szRowId.Id = AssDiscountPrice.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@Discounttotal, @splitstr) Discounttotal ON szRowId.Id = Discounttotal.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@TaxRate, @splitstr) TaxRate ON szRowId.Id = TaxRate.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@AssTaxPrice, @splitstr) AssTaxPrice ON szRowId.Id = AssTaxPrice.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@TaxTotal, @splitstr) TaxTotal ON szRowId.Id = TaxTotal.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@CostPrice, @splitstr) CostPrice ON szRowId.Id = CostPrice.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@CostTotal, @splitstr) CostTotal ON szRowId.Id = CostTotal.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@OrderVchType, @splitstr) OrderVchType ON szRowId.Id = OrderVchType.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@OrderCode, @splitstr) OrderCode ON szRowId.Id = OrderCode.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@OrderDlyCode, @splitstr) OrderDlyCode ON szRowId.Id = OrderDlyCode.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@PStatus, @splitstr) PStatus ON szRowId.Id = PStatus.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@InputDate, @splitstr) InputDate ON szRowId.Id = InputDate.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@Period, @splitstr) Period ON szRowId.Id = Period.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@YearPeriod, @splitstr) YearPeriod ON szRowId.Id = YearPeriod.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@Usedtype, @splitstr) Usedtype ON szRowId.Id = Usedtype.Id
-                    LEFT JOIN dbo.Fun_SplitStr(@Comment, @splitstr) Comment ON szRowId.Id = Comment.Id
-                    LEFT JOIN ( SELECT  pu.Id ,
-                                        pu.PtypeId ,
-                                        1 Unit ,
-                                        1 URate --ISNULL(URate, 1) URate
-                                FROM    ( SELECT    PtypeIdlist.Id ,
-                                                    PtypeIdlist.col PtypeId ,
-                                                    1 unit--unit.col unit
-                                          FROM      dbo.Fun_SplitStr(@PtypeId, @splitstr) PtypeIdlist ,
-                                                    dbo.Fun_SplitStr(@Unit, @splitstr) Unit
-                                          WHERE     PtypeIdlist.Id = unit.ID
-                                        ) pu
-                                        --LEFT JOIN Xw_ptypeunit unit ON p.ptypeid = unit.PtypeId
-                                        --                               AND unit.ordid = p.unit
+            FROM #0 szRowId
+				LEFT JOIN #1 ColRowNo ON szRowId.Id = ColRowNo.Id
+				LEFT JOIN #2 AtypeId ON szRowId.Id = AtypeId.Id
+				LEFT JOIN #3 BtypeId ON szRowId.Id = BtypeId.Id
+				LEFT JOIN #4 EtypeId ON szRowId.Id = EtypeId.Id
+				LEFT JOIN #5 DtypeId ON szRowId.Id = DtypeId.Id
+				LEFT JOIN #6 KtypeId ON szRowId.Id = KtypeId.Id
+				LEFT JOIN #7 KtypeId2 ON szRowId.Id = KtypeId2.Id
+				LEFT JOIN #8 CostMode ON szRowId.Id = CostMode.Id
+				LEFT JOIN #9 Blockno ON szRowId.Id = Blockno.Id
+				LEFT JOIN #10 ProDate ON szRowId.Id = ProDate.Id
+				LEFT JOIN #11 UsefulEndDate ON szRowId.ID = UsefulEndDate.ID
+				LEFT JOIN #12 JhDate ON szRowId.ID = JhDate.ID
+				LEFT JOIN #13 Goodsno ON szRowId.Id = Goodsno.Id
+				LEFT JOIN #14 AssQty ON szRowId.Id = AssQty.Id
+				LEFT JOIN #15 AssPrice ON szRowId.Id = AssPrice.Id
+				LEFT JOIN #16 Total ON szRowId.Id = Total.Id
+				LEFT JOIN #17 Discount ON szRowId.Id = Discount.Id
+				LEFT JOIN #18 AssDiscountPrice ON szRowId.Id = AssDiscountPrice.Id
+				LEFT JOIN #19 Discounttotal ON szRowId.Id = Discounttotal.Id
+				LEFT JOIN #20 TaxRate ON szRowId.Id = TaxRate.Id
+				LEFT JOIN #21 AssTaxPrice ON szRowId.Id = AssTaxPrice.Id
+				LEFT JOIN #22 TaxTotal ON szRowId.Id = TaxTotal.Id
+				LEFT JOIN #23 CostPrice ON szRowId.Id = CostPrice.Id
+				LEFT JOIN #24 CostTotal ON szRowId.Id = CostTotal.Id
+				LEFT JOIN #25 OrderVchType ON szRowId.Id = OrderVchType.Id
+				LEFT JOIN #26 OrderCode ON szRowId.Id = OrderCode.Id
+				LEFT JOIN #27 OrderDlyCode ON szRowId.Id = OrderDlyCode.Id
+				LEFT JOIN #28 PStatus ON szRowId.Id = PStatus.Id
+				LEFT JOIN #29 InputDate ON szRowId.Id = InputDate.Id
+				LEFT JOIN #30 Period ON szRowId.Id = Period.Id
+				LEFT JOIN #31 YearPeriod ON szRowId.Id = YearPeriod.Id
+				LEFT JOIN #32 Usedtype ON szRowId.Id = Usedtype.Id
+				LEFT JOIN #33 Comment ON szRowId.Id = Comment.Id
+				LEFT JOIN ( SELECT  pu.Id ,
+							pu.PtypeId ,
+							1 Unit ,
+							1.0 URate --ISNULL(URate, 1) URate
+					FROM    ( SELECT    PtypeIdlist.Id ,
+										PtypeIdlist.col PtypeId ,
+										1 unit--unit.col unit
+								FROM      dbo.Fun_SplitStr(@PtypeId, @splitstr) PtypeIdlist ,
+										dbo.Fun_SplitStr(@Unit, @splitstr) Unit
+								WHERE     PtypeIdlist.Id = unit.ID
+							) pu
+							--LEFT JOIN Xw_ptypeunit unit ON p.ptypeid = unit.PtypeId
+							--                               AND unit.ordid = p.unit
                                 
-                              ) P ON szRowId.Id = p.Id
-            WHERE   szRowId.col <> ''
-            ORDER BY szRowId.Id
+					) P ON szRowId.Id = p.Id
+				WHERE   szRowId.col <> ''
+				ORDER BY szRowId.Id
+
     IF @@ERROR <> 0
     BEGIN
 		SET @ErrorValue = '批量插入明细数据失败！'
@@ -2400,6 +3790,41 @@ AS
     END
         
     SET @EndDlyOrder = @@IDENTITY
+
+    IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
 
     COMMIT TRAN OrderSaveDly
 
@@ -2467,6 +3892,884 @@ go
 
 
 
+IF OBJECT_ID('dbo.pbx_Bill_Is_PRMoney_D') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Is_PRMoney_D
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Bill_Is_PRMoney_D                                               
+--  ||   过程功能：添加收付款单的明细信息
+--  ********************************************************************************************
+
+CREATE  PROCEDURE [pbx_Bill_Is_PRMoney_D]
+    (
+      @RowId VARCHAR(8000) ,
+      @VchCode VARCHAR(50) ,
+      @VchType VARCHAR(50) ,
+      @ColRowNo VARCHAR(8000) ,
+      @Atypeid VARCHAR(8000) ,
+      @Btypeid VARCHAR(8000) ,
+      @Etypeid VARCHAR(8000) ,
+      @Dtypeid VARCHAR(8000) ,
+      @Ktypeid VARCHAR(8000) ,
+      @Ktypeid2 VARCHAR(8000) ,
+      @PtypeId VARCHAR(8000) ,
+      @CostMode VARCHAR(8000) ,
+      @UnitRate VARCHAR(8000) ,
+      @Unit VARCHAR(8000) ,
+      @Blockno VARCHAR(8000) ,
+      @Prodate VARCHAR(8000) ,
+      @UsefulEndDate VARCHAR(8000) = '' ,
+      @Jhdate VARCHAR(8000) ,
+      @GoodsNo VARCHAR(8000) ,
+      @Qty VARCHAR(8000) ,
+      @Price VARCHAR(8000) ,
+      @Total VARCHAR(8000) ,
+      @Discount VARCHAR(8000) ,
+      @DiscountPrice VARCHAR(8000) ,
+      @DiscountTotal VARCHAR(8000) ,
+      @TaxRate VARCHAR(8000) ,
+      @TaxPrice VARCHAR(8000) ,
+      @TaxTotal VARCHAR(8000) ,
+      @AssQty VARCHAR(8000) ,
+      @AssPrice VARCHAR(8000) ,
+      @AssDiscountPrice VARCHAR(8000) ,
+      @AssTaxPrice VARCHAR(8000) ,
+      @CostTotal VARCHAR(8000) ,
+      @CostPrice VARCHAR(8000) ,
+      @OrderCode VARCHAR(8000) = '' ,
+      @OrderDlyCode VARCHAR(8000) = '' ,
+      @OrderVchType VARCHAR(8000) = '' ,
+      @Comment VARCHAR(8000) ,
+      @InputDate VARCHAR(8000) ,
+      @Usedtype VARCHAR(8000) ,
+      @Period VARCHAR(8000) ,
+      @PStatus VARCHAR(8000) = '' ,
+      @YearPeriod VARCHAR(8000) = '' ,
+      
+      @ErrorValue VARCHAR(500) OUTPUT --返回错误信息 
+    )
+AS 
+    DECLARE @dUnitRateTemp NUMERIC(22, 10)
+
+
+    DECLARE @EndDlyOrder INT ,
+        @BeginOrderDly INT ,
+        @Ret INT
+    DECLARE @Splitstr VARCHAR(10)
+    SET @Splitstr = 'ǎǒǜ'
+
+	SELECT @Ret = -1
+	
+    BEGIN TRAN OrderSaveDly
+
+    SELECT  @BeginOrderDly = ISNULL(MAX(DlyOrder), 0)
+    FROM    dbo.tbx_Bill_D_Bak
+
+    IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
+
+	select * into  #0 from  dbo.Fun_SplitStr(@RowId, @splitstr) RowId
+	select * into  #1 FROM  dbo.Fun_SplitStr(@ColRowNo, @splitstr) ColRowNo 
+	select * into  #2 from  dbo.Fun_SplitStr(@AtypeId, @splitstr) AtypeId 
+	select * into  #3 from  dbo.Fun_SplitStr(@BtypeId, @splitstr) BtypeId 
+	select * into  #4 FROM  dbo.Fun_SplitStr(@EtypeId, @splitstr) EtypeId 
+	select * into  #5 FROM  dbo.Fun_SplitStr(@DtypeId, @splitstr) DtypeId 
+	select * into  #6 FROM  dbo.Fun_SplitStr(@KtypeId, @splitstr) KtypeId 
+	select * into  #7 from  dbo.Fun_SplitStr(@KtypeId2, @splitstr) KtypeId2 
+	select * into  #8 FROM  dbo.Fun_SplitStr(@CostMode, @splitstr) ColRowNo 
+	select * into  #9 from  dbo.Fun_SplitStr(@Blockno, @splitstr) Blockno 
+	select * into #10 from  dbo.Fun_SplitStr(@ProDate, @splitstr) ProDate 
+	select * into #11 from  dbo.Fun_SplitStr(@UsefulEndDate, @splitstr) UsefulEndDate 
+	select * into #12 from  dbo.Fun_SplitStr(@JhDate, @splitstr) JhDate 
+	select * into #13 from  dbo.Fun_SplitStr(@Goodsno, @splitstr) Goodsno 
+	select * into #14 from  dbo.Fun_SplitStr(@AssQty, @splitstr) AssQty
+	select * into #15 from  dbo.Fun_SplitStr(@AssPrice, @splitstr) AssPrice 
+	select * into #16 from  dbo.Fun_SplitStr(@Total, @splitstr) Total 
+	select * into #17 from  dbo.Fun_SplitStr(@Discount, @splitstr) Discount 
+	select * into #18 from  dbo.Fun_SplitStr(@AssDiscountPrice, @splitstr) AssDiscountPrice 
+	select * into #19 from  dbo.Fun_SplitStr(@Discounttotal, @splitstr) Discounttotal 
+	select * into #20 from  dbo.Fun_SplitStr(@TaxRate, @splitstr) TaxRate 
+	select * into #21 from  dbo.Fun_SplitStr(@AssTaxPrice, @splitstr) AssTaxPrice 
+	select * into #22 from  dbo.Fun_SplitStr(@TaxTotal, @splitstr) TaxTotal 
+	select * into #23 from  dbo.Fun_SplitStr(@CostPrice, @splitstr) CostPrice 
+	select * into #24 from  dbo.Fun_SplitStr(@CostTotal, @splitstr) CostTotal 
+	select * into #25 from  dbo.Fun_SplitStr(@OrderVchType, @splitstr) OrderVchType 
+	select * into #26 from  dbo.Fun_SplitStr(@OrderCode, @splitstr) OrderCode 
+	select * into #27 from  dbo.Fun_SplitStr(@OrderDlyCode, @splitstr) OrderDlyCode 
+	select * into #28 from  dbo.Fun_SplitStr(@PStatus, @splitstr) PStatus 
+	select * into #29 from  dbo.Fun_SplitStr(@InputDate, @splitstr) InputDate 
+	select * into #30 from  dbo.Fun_SplitStr(@Period, @splitstr) Period 
+	select * into #31 from  dbo.Fun_SplitStr(@YearPeriod, @splitstr) YearPeriod 
+	select * into #32 from  dbo.Fun_SplitStr(@Usedtype, @splitstr) Usedtype 
+	select * into #33 from  dbo.Fun_SplitStr(@Comment, @splitstr) Comment 
+
+    INSERT  INTO dbo.tbx_Bill_D_Bak
+            ( VchCode ,
+              VchType ,
+              ColRowNo ,
+              AtypeId ,
+              BtypeId ,
+              EtypeId ,
+              DtypeId ,
+              KtypeId ,
+              KtypeId2 ,
+              PtypeId ,
+              Costmode ,
+              Unit ,
+              UnitRate ,
+              BlockNo ,
+              ProDate ,
+              UsefulEndDate ,
+              JhDate ,
+              GoodsNo ,
+              Qty ,
+              Price ,
+              Total ,
+              DisCount ,
+              DisCountPrice ,
+              DisCountTotal ,
+              TaxRate ,
+              TaxPrice ,
+              TaxTotal ,
+              AssQty ,
+              AssPrice ,
+              AssDiscountPrice ,
+              AssTaxPrice ,
+              CostPrice ,
+              CostTotal ,
+              OrderVchType ,
+              OrderCode ,
+              OrderDlyCode ,
+              PStutas ,
+              Redword ,
+              InputDate ,
+              Period ,
+              YearPeriod ,
+              UsedType ,
+              Comment 
+            )
+            SELECT  CAST(@Vchcode AS INT) ,
+                    CAST(@Vchtype AS INT) ,
+                    ISNULL(ColRowNo.Col, '') ,
+                    ISNULL(AtypeId.Col, '') ,
+                    ISNULL(BtypeId.Col, '') ,
+                    ISNULL(EtypeId.Col, '') ,
+                    ISNULL(DtypeId.Col, '') ,
+                    ISNULL(KtypeId.Col, '') ,
+                    ISNULL(KtypeId2.Col, '') ,
+                    ISNULL(P.PtypeId, '') ,
+                    ISNULL(CostMode.Col, 0) ,
+                    ISNULL(P.Unit, 0) ,
+                    ISNULL(P.URate, 0) ,
+                    ISNULL(Blockno.Col, '') ,
+                    ISNULL(ProDate.Col, '') ,
+                    ISNULL(UsefulEndDate.Col, '') ,
+                    ISNULL(JhDate.Col, '') ,
+                    ISNULL(Goodsno.Col, '') ,
+                    dbo.Fun_CovToQty(dbo.Fun_StrToNumeric(P.URate, 1) * dbo.Fun_StrToNumeric(AssQty.Col, 0)) Qty ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) Price ,
+                    ISNULL(Total.Col, 0) ,
+                    ISNULL(Discount.Col, 0) ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssDiscountPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) DiscountPrice ,
+                    ISNULL(DiscountTotal.Col, 0) ,
+                    ISNULL(TaxRate.Col, 0) ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssTaxPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) TaxPrice ,
+                    ISNULL(TaxTotal.col, 0) ,
+                    ISNULL(AssQty.Col, -11) ,
+                    ISNULL(AssPrice.Col, 0) ,
+                    ISNULL(AssDiscountPrice.Col, 0) ,
+                    ISNULL(AssTaxPrice.Col, 0) ,
+                    ISNULL(CostPrice.Col, 0) ,
+                    ISNULL(CostTotal.Col, 0) ,
+                    ISNULL(OrderVchType.Col, 0) , 
+                    ISNULL(OrderCode.col, 0) ,
+                    ISNULL(OrderDlyCode.col, 0) ,
+                    CASE WHEN PStatus.Col = '' THEN 0
+                         ELSE ISNULL(PStatus.Col, 0)
+                    END ,
+                    'F' Redword ,
+                    ISNULL([InputDate].Col, '') ,
+                    ISNULL(Period.Col, 0) ,
+                    CASE WHEN YearPeriod.Col = '' THEN 0
+                         ELSE ISNULL(YearPeriod.Col, 0)
+                    END ,
+                    ISNULL(Usedtype.Col, 0) ,
+                    ISNULL(Comment.Col, '')
+            FROM #0 szRowId
+				LEFT JOIN #1 ColRowNo ON szRowId.Id = ColRowNo.Id
+				LEFT JOIN #2 AtypeId ON szRowId.Id = AtypeId.Id
+				LEFT JOIN #3 BtypeId ON szRowId.Id = BtypeId.Id
+				LEFT JOIN #4 EtypeId ON szRowId.Id = EtypeId.Id
+				LEFT JOIN #5 DtypeId ON szRowId.Id = DtypeId.Id
+				LEFT JOIN #6 KtypeId ON szRowId.Id = KtypeId.Id
+				LEFT JOIN #7 KtypeId2 ON szRowId.Id = KtypeId2.Id
+				LEFT JOIN #8 CostMode ON szRowId.Id = CostMode.Id
+				LEFT JOIN #9 Blockno ON szRowId.Id = Blockno.Id
+				LEFT JOIN #10 ProDate ON szRowId.Id = ProDate.Id
+				LEFT JOIN #11 UsefulEndDate ON szRowId.ID = UsefulEndDate.ID
+				LEFT JOIN #12 JhDate ON szRowId.ID = JhDate.ID
+				LEFT JOIN #13 Goodsno ON szRowId.Id = Goodsno.Id
+				LEFT JOIN #14 AssQty ON szRowId.Id = AssQty.Id
+				LEFT JOIN #15 AssPrice ON szRowId.Id = AssPrice.Id
+				LEFT JOIN #16 Total ON szRowId.Id = Total.Id
+				LEFT JOIN #17 Discount ON szRowId.Id = Discount.Id
+				LEFT JOIN #18 AssDiscountPrice ON szRowId.Id = AssDiscountPrice.Id
+				LEFT JOIN #19 Discounttotal ON szRowId.Id = Discounttotal.Id
+				LEFT JOIN #20 TaxRate ON szRowId.Id = TaxRate.Id
+				LEFT JOIN #21 AssTaxPrice ON szRowId.Id = AssTaxPrice.Id
+				LEFT JOIN #22 TaxTotal ON szRowId.Id = TaxTotal.Id
+				LEFT JOIN #23 CostPrice ON szRowId.Id = CostPrice.Id
+				LEFT JOIN #24 CostTotal ON szRowId.Id = CostTotal.Id
+				LEFT JOIN #25 OrderVchType ON szRowId.Id = OrderVchType.Id
+				LEFT JOIN #26 OrderCode ON szRowId.Id = OrderCode.Id
+				LEFT JOIN #27 OrderDlyCode ON szRowId.Id = OrderDlyCode.Id
+				LEFT JOIN #28 PStatus ON szRowId.Id = PStatus.Id
+				LEFT JOIN #29 InputDate ON szRowId.Id = InputDate.Id
+				LEFT JOIN #30 Period ON szRowId.Id = Period.Id
+				LEFT JOIN #31 YearPeriod ON szRowId.Id = YearPeriod.Id
+				LEFT JOIN #32 Usedtype ON szRowId.Id = Usedtype.Id
+				LEFT JOIN #33 Comment ON szRowId.Id = Comment.Id
+				LEFT JOIN ( SELECT  pu.Id ,
+							pu.PtypeId ,
+							1 Unit ,
+							1.0 URate --ISNULL(URate, 1) URate
+					FROM    ( SELECT    PtypeIdlist.Id ,
+										PtypeIdlist.col PtypeId ,
+										1 unit--unit.col unit
+								FROM      dbo.Fun_SplitStr(@PtypeId, @splitstr) PtypeIdlist ,
+										dbo.Fun_SplitStr(@Unit, @splitstr) Unit
+								WHERE     PtypeIdlist.Id = unit.ID
+							) pu
+							--LEFT JOIN Xw_ptypeunit unit ON p.ptypeid = unit.PtypeId
+							--                               AND unit.ordid = p.unit
+                                
+					) P ON szRowId.Id = p.Id
+            WHERE   szRowId.col <> ''
+            ORDER BY szRowId.Id
+    IF @@ERROR <> 0
+    BEGIN
+		SET @ErrorValue = '批量插入明细数据失败！'
+		GOTO ErrorRollback
+    END
+        
+    SET @EndDlyOrder = @@IDENTITY
+
+	IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
+
+    COMMIT TRAN OrderSaveDly
+
+    SELECT  DlyOrder
+    FROM    tbx_Bill_D_Bak
+    WHERE   DlyOrder > @BeginOrderDly
+            AND DlyOrder <= @EndDlyOrder
+    ORDER BY DlyOrder
+
+    GOTO Success
+
+    Success:		 --成功完成函数
+    RETURN 0
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    ErrorRollback:   --数据操作是错误，需要回滚
+    ROLLBACK TRAN OrderSaveDly 
+    RETURN -2 
+
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_Is_PRMoney_M') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Is_PRMoney_M
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Bill_Is_PRMoney_M                                                
+--  ||   过程功能：添加收付款单的主表信息
+--  ********************************************************************************************
+
+CREATE  PROCEDURE [pbx_Bill_Is_PRMoney_M]
+    (
+      @InputDate VARCHAR(10) ,
+      @Number VARCHAR(40) ,
+      @VchType INT ,
+      @Summary VARCHAR(256) ,
+      @Comment VARCHAR(256) ,
+      @Btypeid VARCHAR(50) ,
+      @Etypeid VARCHAR(50) ,
+      @Dtypeid VARCHAR(50) ,
+      @Ktypeid VARCHAR(50) ,
+      @Ktypeid2 VARCHAR(50) ,
+      @Period SMALLINT ,
+      @YearPeriod INT ,
+      @RedWord CHAR(1) ,
+      @Total NUMERIC ,
+      @Defdiscount NUMERIC ,
+      @GatheringDate VARCHAR(25) ,
+      
+      --下面面是存储过程必须的参数
+      @ErrorValue VARCHAR(500) OUTPUT  
+    )
+AS 
+    INSERT  INTO dbo.tbx_Bill_M ( InputDate, Number, VchType, Summary, Comment, BtypeId, EtypeId, DtypeId, KtypeId, KtypeId2, Period, YearPeriod, RedWord, Total, Defdiscount, GatheringDate )
+    VALUES  ( @InputDate, @Number, @VchType, @Summary, @Comment, @Btypeid, @EtypeId, @DtypeId, @KtypeId, @KtypeId2, @Period, @YearPeriod, @RedWord, @Total, @Defdiscount, @GatheringDate ) 
+    IF @@rowcount = 0 
+        RETURN -1
+    ELSE 
+        RETURN @@identity
+
+
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_Is_Sale_D') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Is_Sale_D
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Bill_Is_Sale_D                                               
+--  ||   过程功能：添加销售单的明细信息
+--  ********************************************************************************************
+
+CREATE  PROCEDURE [pbx_Bill_Is_Sale_D]
+    (
+      @RowId VARCHAR(8000) ,
+      @VchCode VARCHAR(50) ,
+      @VchType VARCHAR(50) ,
+      @ColRowNo VARCHAR(8000) ,
+      @Atypeid VARCHAR(8000) ,
+      @Btypeid VARCHAR(8000) ,
+      @Etypeid VARCHAR(8000) ,
+      @Dtypeid VARCHAR(8000) ,
+      @Ktypeid VARCHAR(8000) ,
+      @Ktypeid2 VARCHAR(8000) ,
+      @PtypeId VARCHAR(8000) ,
+      @CostMode VARCHAR(8000) ,
+      @UnitRate VARCHAR(8000) ,
+      @Unit VARCHAR(8000) ,
+      @Blockno VARCHAR(8000) ,
+      @Prodate VARCHAR(8000) ,
+      @UsefulEndDate VARCHAR(8000) = '' ,
+      @Jhdate VARCHAR(8000) ,
+      @GoodsNo VARCHAR(8000) ,
+      @Qty VARCHAR(8000) ,
+      @Price VARCHAR(8000) ,
+      @Total VARCHAR(8000) ,
+      @Discount VARCHAR(8000) ,
+      @DiscountPrice VARCHAR(8000) ,
+      @DiscountTotal VARCHAR(8000) ,
+      @TaxRate VARCHAR(8000) ,
+      @TaxPrice VARCHAR(8000) ,
+      @TaxTotal VARCHAR(8000) ,
+      @AssQty VARCHAR(8000) ,
+      @AssPrice VARCHAR(8000) ,
+      @AssDiscountPrice VARCHAR(8000) ,
+      @AssTaxPrice VARCHAR(8000) ,
+      @CostTotal VARCHAR(8000) ,
+      @CostPrice VARCHAR(8000) ,
+      @OrderCode VARCHAR(8000) = '' ,
+      @OrderDlyCode VARCHAR(8000) = '' ,
+      @OrderVchType VARCHAR(8000) = '' ,
+      @Comment VARCHAR(8000) ,
+      @InputDate VARCHAR(8000) ,
+      @Usedtype VARCHAR(8000) ,
+      @Period VARCHAR(8000) ,
+      @PStatus VARCHAR(8000) = '' ,
+      @YearPeriod VARCHAR(8000) = '' ,
+      
+      @ErrorValue VARCHAR(500) OUTPUT --返回错误信息 
+    )
+AS 
+    DECLARE @dUnitRateTemp NUMERIC(22, 10)
+
+
+    DECLARE @EndDlyOrder INT ,
+        @BeginOrderDly INT ,
+        @Ret INT
+    DECLARE @Splitstr VARCHAR(10)
+    SET @Splitstr = 'ǎǒǜ'
+
+
+    BEGIN TRAN OrderSaveDly
+
+    SELECT  @BeginOrderDly = ISNULL(MAX(DlyOrder), 0)
+    FROM    dbo.tbx_Bill_D_Bak
+
+    IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
+
+	select * into  #0 from  dbo.Fun_SplitStr(@RowId, @splitstr) RowId
+	select * into  #1 FROM  dbo.Fun_SplitStr(@ColRowNo, @splitstr) ColRowNo 
+	select * into  #2 from  dbo.Fun_SplitStr(@AtypeId, @splitstr) AtypeId 
+	select * into  #3 from  dbo.Fun_SplitStr(@BtypeId, @splitstr) BtypeId 
+	select * into  #4 FROM  dbo.Fun_SplitStr(@EtypeId, @splitstr) EtypeId 
+	select * into  #5 FROM  dbo.Fun_SplitStr(@DtypeId, @splitstr) DtypeId 
+	select * into  #6 FROM  dbo.Fun_SplitStr(@KtypeId, @splitstr) KtypeId 
+	select * into  #7 from  dbo.Fun_SplitStr(@KtypeId2, @splitstr) KtypeId2 
+	select * into  #8 FROM  dbo.Fun_SplitStr(@CostMode, @splitstr) ColRowNo 
+	select * into  #9 from  dbo.Fun_SplitStr(@Blockno, @splitstr) Blockno 
+	select * into #10 from  dbo.Fun_SplitStr(@ProDate, @splitstr) ProDate 
+	select * into #11 from  dbo.Fun_SplitStr(@UsefulEndDate, @splitstr) UsefulEndDate 
+	select * into #12 from  dbo.Fun_SplitStr(@JhDate, @splitstr) JhDate 
+	select * into #13 from  dbo.Fun_SplitStr(@Goodsno, @splitstr) Goodsno 
+	select * into #14 from  dbo.Fun_SplitStr(@AssQty, @splitstr) AssQty
+	select * into #15 from  dbo.Fun_SplitStr(@AssPrice, @splitstr) AssPrice 
+	select * into #16 from  dbo.Fun_SplitStr(@Total, @splitstr) Total 
+	select * into #17 from  dbo.Fun_SplitStr(@Discount, @splitstr) Discount 
+	select * into #18 from  dbo.Fun_SplitStr(@AssDiscountPrice, @splitstr) AssDiscountPrice 
+	select * into #19 from  dbo.Fun_SplitStr(@Discounttotal, @splitstr) Discounttotal 
+	select * into #20 from  dbo.Fun_SplitStr(@TaxRate, @splitstr) TaxRate 
+	select * into #21 from  dbo.Fun_SplitStr(@AssTaxPrice, @splitstr) AssTaxPrice 
+	select * into #22 from  dbo.Fun_SplitStr(@TaxTotal, @splitstr) TaxTotal 
+	select * into #23 from  dbo.Fun_SplitStr(@CostPrice, @splitstr) CostPrice 
+	select * into #24 from  dbo.Fun_SplitStr(@CostTotal, @splitstr) CostTotal 
+	select * into #25 from  dbo.Fun_SplitStr(@OrderVchType, @splitstr) OrderVchType 
+	select * into #26 from  dbo.Fun_SplitStr(@OrderCode, @splitstr) OrderCode 
+	select * into #27 from  dbo.Fun_SplitStr(@OrderDlyCode, @splitstr) OrderDlyCode 
+	select * into #28 from  dbo.Fun_SplitStr(@PStatus, @splitstr) PStatus 
+	select * into #29 from  dbo.Fun_SplitStr(@InputDate, @splitstr) InputDate 
+	select * into #30 from  dbo.Fun_SplitStr(@Period, @splitstr) Period 
+	select * into #31 from  dbo.Fun_SplitStr(@YearPeriod, @splitstr) YearPeriod 
+	select * into #32 from  dbo.Fun_SplitStr(@Usedtype, @splitstr) Usedtype 
+	select * into #33 from  dbo.Fun_SplitStr(@Comment, @splitstr) Comment 
+
+    INSERT  INTO dbo.tbx_Bill_D_Bak
+            ( VchCode ,
+              VchType ,
+              ColRowNo ,
+              AtypeId ,
+              BtypeId ,
+              EtypeId ,
+              DtypeId ,
+              KtypeId ,
+              KtypeId2 ,
+              PtypeId ,
+              Costmode ,
+              Unit ,
+              UnitRate ,
+              BlockNo ,
+              ProDate ,
+              UsefulEndDate ,
+              JhDate ,
+              GoodsNo ,
+              Qty ,
+              Price ,
+              Total ,
+              DisCount ,
+              DisCountPrice ,
+              DisCountTotal ,
+              TaxRate ,
+              TaxPrice ,
+              TaxTotal ,
+              AssQty ,
+              AssPrice ,
+              AssDiscountPrice ,
+              AssTaxPrice ,
+              CostPrice ,
+              CostTotal ,
+              OrderVchType ,
+              OrderCode ,
+              OrderDlyCode ,
+              PStutas ,
+              Redword ,
+              InputDate ,
+              Period ,
+              YearPeriod ,
+              UsedType ,
+              Comment 
+            )
+            SELECT  CAST(@Vchcode AS INT) ,
+                    CAST(@Vchtype AS INT) ,
+                    ISNULL(ColRowNo.Col, '') ,
+                    ISNULL(AtypeId.Col, '') ,
+                    ISNULL(BtypeId.Col, '') ,
+                    ISNULL(EtypeId.Col, '') ,
+                    ISNULL(DtypeId.Col, '') ,
+                    ISNULL(KtypeId.Col, '') ,
+                    ISNULL(KtypeId2.Col, '') ,
+                    ISNULL(P.PtypeId, '') ,
+                    ISNULL(CostMode.Col, 0) ,
+                    ISNULL(P.Unit, 0) ,
+                    ISNULL(P.URate, 0) ,
+                    ISNULL(Blockno.Col, '') ,
+                    ISNULL(ProDate.Col, '') ,
+                    ISNULL(UsefulEndDate.Col, '') ,
+                    ISNULL(JhDate.Col, '') ,
+                    ISNULL(Goodsno.Col, '') ,
+                    dbo.Fun_CovToQty(dbo.Fun_StrToNumeric(P.URate, 1) * dbo.Fun_StrToNumeric(AssQty.Col, 0)) Qty ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) Price ,
+                    ISNULL(Total.Col, 0) ,
+                    ISNULL(Discount.Col, 0) ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssDiscountPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) DiscountPrice ,
+                    ISNULL(DiscountTotal.Col, 0) ,
+                    ISNULL(TaxRate.Col, 0) ,
+                    dbo.Fun_CovToPrice(dbo.Fun_StrToNumeric(AssTaxPrice.Col, 0) / dbo.Fun_StrToNumeric(P.URate, 1)) TaxPrice ,
+                    ISNULL(TaxTotal.col, 0) ,
+                    ISNULL(AssQty.Col, -11) ,
+                    ISNULL(AssPrice.Col, 0) ,
+                    ISNULL(AssDiscountPrice.Col, 0) ,
+                    ISNULL(AssTaxPrice.Col, 0) ,
+                    ISNULL(CostPrice.Col, 0) ,
+                    ISNULL(CostTotal.Col, 0) ,
+                    ISNULL(OrderVchType.Col, 0) , 
+                    ISNULL(OrderCode.col, 0) ,
+                    ISNULL(OrderDlyCode.col, 0) ,
+                    CASE WHEN PStatus.Col = '' THEN 0
+                         ELSE ISNULL(PStatus.Col, 0)
+                    END ,
+                    'F' Redword ,
+                    ISNULL([InputDate].Col, '') ,
+                    ISNULL(Period.Col, 0) ,
+                    CASE WHEN YearPeriod.Col = '' THEN 0
+                         ELSE ISNULL(YearPeriod.Col, 0)
+                    END ,
+                    ISNULL(Usedtype.Col, 0) ,
+                    ISNULL(Comment.Col, '')
+            FROM #0 szRowId
+				LEFT JOIN #1 ColRowNo ON szRowId.Id = ColRowNo.Id
+				LEFT JOIN #2 AtypeId ON szRowId.Id = AtypeId.Id
+				LEFT JOIN #3 BtypeId ON szRowId.Id = BtypeId.Id
+				LEFT JOIN #4 EtypeId ON szRowId.Id = EtypeId.Id
+				LEFT JOIN #5 DtypeId ON szRowId.Id = DtypeId.Id
+				LEFT JOIN #6 KtypeId ON szRowId.Id = KtypeId.Id
+				LEFT JOIN #7 KtypeId2 ON szRowId.Id = KtypeId2.Id
+				LEFT JOIN #8 CostMode ON szRowId.Id = CostMode.Id
+				LEFT JOIN #9 Blockno ON szRowId.Id = Blockno.Id
+				LEFT JOIN #10 ProDate ON szRowId.Id = ProDate.Id
+				LEFT JOIN #11 UsefulEndDate ON szRowId.ID = UsefulEndDate.ID
+				LEFT JOIN #12 JhDate ON szRowId.ID = JhDate.ID
+				LEFT JOIN #13 Goodsno ON szRowId.Id = Goodsno.Id
+				LEFT JOIN #14 AssQty ON szRowId.Id = AssQty.Id
+				LEFT JOIN #15 AssPrice ON szRowId.Id = AssPrice.Id
+				LEFT JOIN #16 Total ON szRowId.Id = Total.Id
+				LEFT JOIN #17 Discount ON szRowId.Id = Discount.Id
+				LEFT JOIN #18 AssDiscountPrice ON szRowId.Id = AssDiscountPrice.Id
+				LEFT JOIN #19 Discounttotal ON szRowId.Id = Discounttotal.Id
+				LEFT JOIN #20 TaxRate ON szRowId.Id = TaxRate.Id
+				LEFT JOIN #21 AssTaxPrice ON szRowId.Id = AssTaxPrice.Id
+				LEFT JOIN #22 TaxTotal ON szRowId.Id = TaxTotal.Id
+				LEFT JOIN #23 CostPrice ON szRowId.Id = CostPrice.Id
+				LEFT JOIN #24 CostTotal ON szRowId.Id = CostTotal.Id
+				LEFT JOIN #25 OrderVchType ON szRowId.Id = OrderVchType.Id
+				LEFT JOIN #26 OrderCode ON szRowId.Id = OrderCode.Id
+				LEFT JOIN #27 OrderDlyCode ON szRowId.Id = OrderDlyCode.Id
+				LEFT JOIN #28 PStatus ON szRowId.Id = PStatus.Id
+				LEFT JOIN #29 InputDate ON szRowId.Id = InputDate.Id
+				LEFT JOIN #30 Period ON szRowId.Id = Period.Id
+				LEFT JOIN #31 YearPeriod ON szRowId.Id = YearPeriod.Id
+				LEFT JOIN #32 Usedtype ON szRowId.Id = Usedtype.Id
+				LEFT JOIN #33 Comment ON szRowId.Id = Comment.Id
+				LEFT JOIN ( SELECT  pu.Id ,
+							pu.PtypeId ,
+							1 Unit ,
+							1.0 URate --ISNULL(URate, 1) URate
+					FROM    ( SELECT    PtypeIdlist.Id ,
+										PtypeIdlist.col PtypeId ,
+										1 unit--unit.col unit
+								FROM      dbo.Fun_SplitStr(@PtypeId, @splitstr) PtypeIdlist ,
+										dbo.Fun_SplitStr(@Unit, @splitstr) Unit
+								WHERE     PtypeIdlist.Id = unit.ID
+							) pu
+							--LEFT JOIN Xw_ptypeunit unit ON p.ptypeid = unit.PtypeId
+							--                               AND unit.ordid = p.unit
+                                
+					) P ON szRowId.Id = p.Id
+            WHERE   szRowId.col <> ''
+            ORDER BY szRowId.Id
+    IF @@ERROR <> 0
+    BEGIN
+		SET @ErrorValue = '批量插入明细数据失败！'
+		GOTO ErrorRollback
+    END
+        
+    SET @EndDlyOrder = @@IDENTITY
+
+	IF OBJECT_ID('tempdb..#0') IS NOT NULL DROP TABLE #0
+	IF OBJECT_ID('tempdb..#1') IS NOT NULL DROP TABLE #1
+	IF OBJECT_ID('tempdb..#2') IS NOT NULL DROP TABLE #2
+	IF OBJECT_ID('tempdb..#3') IS NOT NULL DROP TABLE #3
+	IF OBJECT_ID('tempdb..#4') IS NOT NULL DROP TABLE #4
+	IF OBJECT_ID('tempdb..#5') IS NOT NULL DROP TABLE #5
+	IF OBJECT_ID('tempdb..#6') IS NOT NULL DROP TABLE #6
+	IF OBJECT_ID('tempdb..#7') IS NOT NULL DROP TABLE #7
+	IF OBJECT_ID('tempdb..#8') IS NOT NULL DROP TABLE #8
+	IF OBJECT_ID('tempdb..#9') IS NOT NULL DROP TABLE #9
+	IF OBJECT_ID('tempdb..#10') IS NOT NULL DROP TABLE #10
+	IF OBJECT_ID('tempdb..#11') IS NOT NULL DROP TABLE #11
+	IF OBJECT_ID('tempdb..#12') IS NOT NULL DROP TABLE #12
+	IF OBJECT_ID('tempdb..#13') IS NOT NULL DROP TABLE #13
+	IF OBJECT_ID('tempdb..#14') IS NOT NULL DROP TABLE #14
+	IF OBJECT_ID('tempdb..#15') IS NOT NULL DROP TABLE #15
+	IF OBJECT_ID('tempdb..#16') IS NOT NULL DROP TABLE #16
+	IF OBJECT_ID('tempdb..#17') IS NOT NULL DROP TABLE #17
+	IF OBJECT_ID('tempdb..#18') IS NOT NULL DROP TABLE #18
+	IF OBJECT_ID('tempdb..#19') IS NOT NULL DROP TABLE #19
+	IF OBJECT_ID('tempdb..#20') IS NOT NULL DROP TABLE #20
+	IF OBJECT_ID('tempdb..#21') IS NOT NULL DROP TABLE #21
+	IF OBJECT_ID('tempdb..#22') IS NOT NULL DROP TABLE #22
+	IF OBJECT_ID('tempdb..#23') IS NOT NULL DROP TABLE #23
+	IF OBJECT_ID('tempdb..#24') IS NOT NULL DROP TABLE #24
+	IF OBJECT_ID('tempdb..#25') IS NOT NULL DROP TABLE #25
+	IF OBJECT_ID('tempdb..#26') IS NOT NULL DROP TABLE #26
+	IF OBJECT_ID('tempdb..#27') IS NOT NULL DROP TABLE #27
+	IF OBJECT_ID('tempdb..#28') IS NOT NULL DROP TABLE #28
+	IF OBJECT_ID('tempdb..#29') IS NOT NULL DROP TABLE #29
+	IF OBJECT_ID('tempdb..#30') IS NOT NULL DROP TABLE #30
+	IF OBJECT_ID('tempdb..#31') IS NOT NULL DROP TABLE #31
+	IF OBJECT_ID('tempdb..#32') IS NOT NULL DROP TABLE #32
+	IF OBJECT_ID('tempdb..#33') IS NOT NULL DROP TABLE #33
+
+    COMMIT TRAN OrderSaveDly
+
+    SELECT  DlyOrder
+    FROM    tbx_Bill_D_Bak
+    WHERE   DlyOrder > @BeginOrderDly
+            AND DlyOrder <= @EndDlyOrder
+    ORDER BY DlyOrder
+
+    GOTO Success
+
+    Success:		 --成功完成函数
+    RETURN 0
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    ErrorRollback:   --数据操作是错误，需要回滚
+    ROLLBACK TRAN OrderSaveDly 
+    RETURN -2 
+
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_Is_Sale_M') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Is_Sale_M
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Bill_Is_Sale_M                                                
+--  ||   过程功能：添加销售单的主表信息
+--  ********************************************************************************************
+
+CREATE  PROCEDURE [pbx_Bill_Is_Sale_M]
+    (
+      @InputDate VARCHAR(10) ,
+      @Number VARCHAR(40) ,
+      @VchType INT ,
+      @Summary VARCHAR(256) ,
+      @Comment VARCHAR(256) ,
+      @Btypeid VARCHAR(50) ,
+      @Etypeid VARCHAR(50) ,
+      @Dtypeid VARCHAR(50) ,
+      @Ktypeid VARCHAR(50) ,
+      @Ktypeid2 VARCHAR(50) ,
+      @Period SMALLINT ,
+      @YearPeriod INT ,
+      @RedWord CHAR(1) ,
+      @Total NUMERIC ,
+      @Defdiscount NUMERIC ,
+      @GatheringDate VARCHAR(25) ,
+      
+      --下面面是存储过程必须的参数
+      @ErrorValue VARCHAR(500) OUTPUT  
+    )
+AS 
+    INSERT  INTO dbo.tbx_Bill_M ( InputDate, Number, VchType, Summary, Comment, BtypeId, EtypeId, DtypeId, KtypeId, KtypeId2, Period, YearPeriod, RedWord, Total, Defdiscount, GatheringDate )
+    VALUES  ( @InputDate, @Number, @VchType, @Summary, @Comment, @Btypeid, @EtypeId, @DtypeId, @KtypeId, @KtypeId2, @Period, @YearPeriod, @RedWord, @Total, @Defdiscount, @GatheringDate ) 
+    IF @@rowcount = 0 
+        RETURN -1
+    ELSE 
+        RETURN @@identity
+
+
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_Load_D') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Load_D
+go
+
+--单据查询明细
+
+CREATE PROCEDURE pbx_Bill_Load_D
+    (
+      @VchType INT ,
+      @VchCode INT ,
+      @BillState INT --单据是否过账等状态
+    )
+AS 
+    SET NOCOUNT ON
+	
+    DECLARE @DBTable VARCHAR(50) ,
+        @SQL VARCHAR(8000)
+      
+    IF @VchType IN ( 1, 2 ) --订单
+        BEGIN
+            SET @DBTable = 'tbx_Bill_Order_D'	
+        END
+    ELSE 
+        BEGIN
+            IF @BillState <> 3 
+                BEGIN
+                    SET @DBTable = 'tbx_Bill_D_Bak'	
+                END
+            ELSE 
+                BEGIN
+                    IF @VchType = 3 
+                        BEGIN
+                            SET @DBTable = 'tbx_Bill_Buy_D'	
+                        END
+                    ELSE 
+                        IF @VchType = 4 
+                            BEGIN
+                                SET @DBTable = 'tbx_Bill_Sale_D'	
+                            END
+                END
+        END
+    SET @SQL = 'SELECT  *
+                FROM    ' + @DBTable + ' d
+                        LEFT JOIN dbo.tbx_Base_Ptype p ON d.PtypeId = p.PTypeId
+                WHERE   d.VchCode = ' + CAST(@VchCode AS VARCHAR(20)) + '
+                ORDER BY d.DlyOrder '
+    EXEC (@SQL)
+    RETURN 0
+
+GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Bill_Load_M') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_Load_M
+go
+
+--装入一条单据主表内容
+
+CREATE PROCEDURE pbx_Bill_Load_M
+    (
+      @VchCode INT ,
+      @VchType INT
+    )
+AS 
+    SET NOCOUNT ON
+
+    IF @VchType IN ( 1, 2 ) --订单
+        BEGIN
+            SELECT  *
+            FROM    dbo.tbx_Bill_Order_M
+            WHERE   VchCode = @VchCode
+                    AND VchType = @VchType 
+        END
+    ELSE 
+        BEGIN
+            SELECT  *
+            FROM    dbo.tbx_Bill_M
+            WHERE   VchCode = @VchCode
+                    AND VchType = @VchType 
+        END
+    RETURN 0
+
+GO 
+
+
+
 IF OBJECT_ID('dbo.pbx_Bill_ModifyDbf') IS NOT NULL 
     DROP PROCEDURE dbo.pbx_Bill_ModifyDbf
 go
@@ -2498,7 +4801,8 @@ CREATE PROCEDURE dbo.pbx_Bill_ModifyDbf
     )
 AS 
     DECLARE @nRet INT ,
-        @inputNo VARCHAR(50)
+        @inputNo VARCHAR(50) ,
+        @GoodsDate VARCHAR(50)
         
     DECLARE @Costmode INT 
 -------Costing  method------------
@@ -2529,6 +4833,8 @@ AS
     DECLARE @goodsorderId INTEGER ,
         @UpdategoodsorderId INTEGER
      
+    SELECT @GoodsDate = CONVERT(varchar(100), GETDATE(), 21)
+    
     DECLARE @nInputZero INT    
     SET @nInputZero = 0 --如果是出库单据,表示是否0成本强制出库 0 不是, 1 是;如果是入库，则此标志表示是否采用0单价入库 0 不是, 1 是(此时用于获赠单)
     
@@ -2598,7 +4904,7 @@ AS
                                                 
                                             --库存变动 dlyorder暂填0，等有了后再填
                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(@dTotal, @dQty), @dTotal, GETDATE() )
+                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(@dTotal, @dQty), @dTotal, @GoodsDate )
                                             IF @@RowCount = 0 
                                                 GOTO ErrorNoRec	
                                             SELECT  @dCostTotalOut = @dTotal
@@ -2621,7 +4927,7 @@ AS
                                                         
 															--库存变动 dlyorder暂填0，等有了后再填
                                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, -1 * Dbo.Fun_CovTotalDivQty(@dCosttotaltemp, @dQty), -1 * @dCosttotaltemp, GETDATE() )
+                                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, -1 * Dbo.Fun_CovTotalDivQty(@dCosttotaltemp, @dQty), -1 * @dCosttotaltemp, @GoodsDate )
                                                             IF @@RowCount = 0 
                                                                 GOTO ErrorNoRec	
                                                             SELECT  @dCostTotalOut = -@dCostTotaltemp
@@ -2652,7 +4958,7 @@ AS
                                                                 
 															--库存变动 dlyorder暂填0，等有了后再填
                                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(( @dTotaltemp - @dCosttotaltemp ), @dQty), ( @dTotaltemp - @dCosttotaltemp ), GETDATE() )
+                                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(( @dTotaltemp - @dCosttotaltemp ), @dQty), ( @dTotaltemp - @dCosttotaltemp ), @GoodsDate )
                                                             IF @@RowCount = 0 
                                                                 GOTO ErrorNoRec
                                                             SELECT  @dCostTotalOut = @dTotaltemp - @dCosttotaltemp
@@ -2711,7 +5017,7 @@ AS
                                                         
                                                     --库存变动 dlyorder暂填0，等有了后再填    
                                                     INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                                    VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, @dCostPricetemp, @dCostTotalOut, GETDATE() )
+                                                    VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, @dCostPricetemp, @dCostTotalOut, @GoodsDate )
                                                     IF @@RowCount = 0 
                                                         GOTO ErrorNoRec
                                                     GOTO Success
@@ -2756,14 +5062,14 @@ AS
                                     IF @dQty = 0 
                                         BEGIN
                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, 0, @dTotal, GETDATE() )
+                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, 0, @dTotal, @GoodsDate )
                                             IF @@RowCount = 0 
                                                 GOTO ErrorNoRec
                                         END	
                                     ELSE 
                                         BEGIN
                                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(@dTotal, @dQty), @dTotal, GETDATE() )
+                                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, Dbo.Fun_CovTotalDivQty(@dTotal, @dQty), @dTotal, @GoodsDate )
                                             IF @@RowCount = 0 
                                                 GOTO ErrorNoRec
                                         END
@@ -2801,7 +5107,7 @@ AS
                             
                             --库存变动 dlyorder暂填0，等有了后再填   
                             INSERT  INTO tbx_Stock_Glide ( VchCode, VchType, DlyOrder, ptypeid, ktypeid, GoodsOrder, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsDate )
-                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, @dCostPricetemp, @dTotal, GETDATE() )
+                            VALUES  ( @nVchCode, @nVchType, 0, @szptypeid, @szktypeid, 0, @szBlockno, @szProdate, @dQty, @dCostPricetemp, @dTotal, @GoodsDate )
                             IF @@RowCount = 0 
                                 GOTO ErrorNoRec
                             SELECT  @dCostTotalOut = @dTotal
@@ -2938,7 +5244,7 @@ AS
             SET @YPratypeid = '0000100009' --预付账款
         END
 
-    IF @szBTypeID <> '' 
+    IF ISNULL(@szBTypeID, '') <> '' 
         IF NOT EXISTS ( SELECT  btypeid
                         FROM    dbo.tbx_Base_Btype
                         WHERE   btypeid = @szBTypeID
@@ -2948,7 +5254,7 @@ AS
                 SET @ErrorValue = '单位不存在或者已经删除'
                 GOTO ErrorGeneral
             END
-    IF @szETypeID <> '' 
+    IF ISNULL(@szETypeID, '') <> '' 
         IF NOT EXISTS ( SELECT  etypeid
                         FROM    dbo.tbx_Base_Etype
                         WHERE   etypeid = @szETypeID
@@ -2958,7 +5264,7 @@ AS
                 SET @ErrorValue = '经手人不存在或者已经删除'
                 GOTO ErrorGeneral
             END
-    IF @DeptID <> '' 
+    IF ISNULL(@DeptID, '') <> '' 
         IF NOT EXISTS ( SELECT  Dtypeid
                         FROM    dbo.tbx_Base_Dtype
                         WHERE   Dtypeid = @DeptID
@@ -2968,7 +5274,7 @@ AS
                 SET @ErrorValue = '部门不存在或者已经删除'
                 GOTO ErrorGeneral
             END
-    IF @inputNo <> ''
+    IF ISNULL(@inputNo, '') <> ''
         AND @inputNo <> '00000' 
         IF NOT EXISTS ( SELECT  etypeid
                         FROM    tbx_Base_Etype
@@ -3156,7 +5462,7 @@ AS
                                     AND btypeid = @szBTypeID
                                     AND InputDate = @sdate ) 
                 BEGIN
-                    SET @net = -823
+                    SET @ErrorValue = '本单据已经在其它地方修改，不能修改/删除'
                     GOTO ErrorGeneral	
                 END
         END 
@@ -3348,6 +5654,575 @@ GO
 
 
 
+IF OBJECT_ID('dbo.pbx_Bill_VchNumber') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Bill_VchNumber
+GO
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Bill_VchNumber                                                
+--  ||   过程功能：获取或者检查单据编号
+--@DoWork=1 ：传入单据编号@VchNumberIn, 单据中是否有相同的单据编号，
+--@DoWork=2 ：传入单据类型和日期，单据编号
+--  ********************************************************************************************
+
+CREATE PROCEDURE pbx_Bill_VchNumber
+    (
+      @DoWork INT ,
+      @VchType INT ,
+      @OldVchCode INT ,
+      @NewVchCode INT ,
+      @BillDate VARCHAR(10) ,--格式2008-11-02
+      @VchNumberIn VARCHAR(50) ,
+      @VchNumber VARCHAR(50) OUT ,
+      @ErrorValue VARCHAR(500) OUT
+    )
+AS 
+    SET NOCOUNT ON
+
+    DECLARE @SNFormat VARCHAR(50) ,
+        @NumberPrefix VARCHAR(50) ,
+        @FormatMax VARCHAR(50) ,
+        @ComputerID VARCHAR(50) ,
+        @Period INT ,
+        @LoopType INT
+        
+
+    DECLARE @nMax INT
+
+    SET @nMax = 0
+    SET @VchNumber = '0'
+    SET @LoopType = 1 --1每月循环编号
+    SET @ComputerID = ''
+	
+    SELECT  @SNFormat = SNFormat, @NumberPrefix = NumberPrefix
+    FROM    dbo.tbx_Base_Vtype
+    WHERE   VchType = @VchType
+	
+    SELECT  @nMax = MaxNo
+    FROM    tbx_Bill_NumberRecords
+    WHERE   VchType = @VchType
+	
+    SET @nMax = ISNULL(@nMax, 0) + 1
+	
+    SELECT  @FormatMax = RIGHT(CAST(POWER(10, 3) AS VARCHAR) + @nMax, 3)
+    
+    SET @VchNumber = @NumberPrefix + '-' + @BillDate + '-' + @FormatMax  
+    
+    IF @LoopType = 0 
+        BEGIN
+            SET @Period = DAY(@BillDate)	
+        END
+    ELSE 
+        IF @LoopType = 1 
+            BEGIN
+                SET @Period = MONTH(@BillDate)	
+            END 
+        ELSE 
+            IF @LoopType = 2 
+                BEGIN
+                    SET @Period = YEAR(@BillDate)	
+                END 
+    IF @DoWork = 1 
+        BEGIN
+            IF RTRIM(@VchNumberIn) = '' 
+                BEGIN
+                    GOTO Success
+                END
+            IF @VchType IN ( 1, 2 ) 
+                BEGIN
+                    IF EXISTS ( SELECT  VchCode
+                                FROM    dbo.tbx_Bill_Order_M
+                                WHERE   Number = @VchNumberIn
+                                        AND VchCode <> @OldVchCode
+                                        AND VchCode <> @NewVchCode ) 
+                        BEGIN
+                            SET @ErrorValue = '在已保存的单据中已经有此单据编号，不能保存!'
+                            GOTO ErrorGeneral 	
+                        END
+
+                END
+            ELSE 
+                IF @VchType IN ( 3, 4 ) 
+                    BEGIN
+                        IF EXISTS ( SELECT  VchCode
+                                    FROM    dbo.tbx_Bill_M
+                                    WHERE   Number = @VchNumberIn
+                                            AND VchCode <> @OldVchCode
+                                            AND VchCode <> @NewVchCode ) 
+                            BEGIN
+                                SET @ErrorValue = '在已保存的单据中已经有此单据编号，不能保存!'
+                                GOTO ErrorGeneral 	
+                            END
+                    END
+        END
+    ELSE 
+        IF @DoWork = 2 
+            BEGIN
+                IF ( EXISTS ( SELECT    1
+                              FROM      dbo.tbx_Bill_NumberRecords
+                              WHERE     VchType = @VchType
+                                        AND Period = @Period
+                                        AND ComputerID = @ComputerID
+                                        AND LoopType = @LoopType ) ) 
+                    BEGIN
+                        UPDATE  dbo.tbx_Bill_NumberRecords
+                        SET     MaxNo = MaxNo + 1
+                        WHERE   VchType = @VchType
+                                AND Period = @Period
+                                AND ComputerID = @ComputerID
+                                AND LoopType = @LoopType 
+                    END
+                ELSE 
+                    BEGIN
+                        INSERT  dbo.tbx_Bill_NumberRecords ( ComputerID, VchType, LoopType, Period, MaxNo )
+                        VALUES  ( @ComputerID, @VchType, @LoopType, @Period, @nMax )
+                    END
+            END
+	    	          
+    GOTO Success
+	
+    Success:		 --成功完成函数
+    RETURN 0
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    ErrorRollback:   --数据操作是错误，需要回滚
+    --ROLLBACK TRAN insertproc 
+    RETURN -2 
+
+
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Flow_AddWork') IS NOT NULL
+    DROP PROCEDURE dbo.pbx_Flow_AddWork
+GO
+
+--增加一条单据或者其它的审核
+
+CREATE PROCEDURE pbx_Flow_AddWork
+    (
+      @CETypeId VARCHAR(50) ,  --新增这个审核的职员ID
+      @Info VARCHAR(255) , --摘要信息,自动生成,方便汇总处理时查看
+      @WorkID VARCHAR(50) ,--与具体业务功能模块关联的Id,如单据的MoudelNo等
+      @BillID INT ,--要审核的记录的ID
+      @BillType INT ,--要审核的记录的类型，可能同一个窗体，多个功能
+      @TaskProcID INT ,--使用的流程作业ID表,0就使用默认的流程作业
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS
+    SET NOCOUNT ON
+    DECLARE @aSQL VARCHAR(8000)
+
+   
+    DECLARE @SetWorkID VARCHAR(50)    
+	
+    IF EXISTS ( SELECT TOP 1
+                        ProcePathID
+                FROM    dbo.tbx_Flow_ProcePath
+                WHERE   WorkID = @WorkID
+                        AND BillID = @BillID
+                        AND BillType = @BillType )
+        BEGIN
+            SET @ErrorValue = '此记录已经存在审批流程'
+            RETURN -1
+        END
+
+    IF ( @TaskProcID <> 0 )
+        BEGIN
+            SELECT  @SetWorkID = b.WorkID
+            FROM    dbo.tbx_Flow_TaskProc a
+                    LEFT JOIN dbo.tbx_Flow_TaskType b ON b.TaskID = a.TaskID
+            WHERE   a.TaskProcID = @TaskProcID   
+        END
+    ELSE
+        BEGIN
+            SELECT  @SetWorkID = b.WorkID, @TaskProcID = a.TaskProcID
+            FROM    dbo.tbx_Flow_TaskProc a
+                    LEFT JOIN dbo.tbx_Flow_TaskType b ON b.TaskID = a.TaskID
+            WHERE   a.DefaultProc = 1   
+        END
+
+
+    IF ( @SetWorkID <> @WorkID )
+        BEGIN
+            SET @ErrorValue = '选择的流程作业与业务功能模块不匹配'
+            RETURN -1
+        END     
+
+    IF NOT EXISTS ( SELECT TOP 1
+                            ProcessID
+                    FROM    dbo.tbx_Flow_Process
+                    WHERE   TaskProcID = @TaskProcID )
+        BEGIN
+            SET @ErrorValue = '选择的流程作业没有具体审批项目'
+            RETURN -1
+        END
+
+    INSERT  dbo.tbx_Flow_ProcePath ( ProcessID, BillID, BillType, WorkID, FlowETypeID, ProceResult, Info, CreaterETypeID, CreateTime )
+    SELECT  fp.ProcessID, @BillID, @BillType, @WorkID, fpp.OperId, '', @Info, @CETypeId, CONVERT(VARCHAR, GETDATE(), 120)
+    FROM    dbo.tbx_Flow_Process fp
+            LEFT JOIN dbo.tbx_Flow_ProcePermi fpp ON fpp.ProcessID = fp.ProcessID
+            LEFT JOIN dbo.tbx_Flow_TaskProc ft ON ft.TaskProcID = fp.TaskProcID
+    WHERE   ft.TaskProcID = @TaskProcID
+    ORDER BY fp.ProceOrder 
+
+    --EXEC(@aSQL)        
+    RETURN 0
+
+GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Flow_Del') IS NOT NULL
+    DROP PROCEDURE dbo.pbx_Flow_Del
+GO
+--  ********************************************************************************************
+--  ||                                                                                        
+--  ||   过程名称：pbx_Flow_Del
+--  ||   过程功能：删除流程
+--  ||=========================================================================================
+
+CREATE    PROCEDURE pbx_Flow_Del
+    (
+      @TaskID INT , --流程作业ID
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS
+    DELETE  dbo.tbx_Flow_ProcePermi
+    WHERE   ProcessID IN ( SELECT   ProcessID
+                           FROM     dbo.tbx_Flow_Process a
+                                    LEFT JOIN dbo.tbx_Flow_TaskProc b ON a.TaskProcID = b.TaskProcID
+                           WHERE    b.TaskID = @TaskID )
+
+    DELETE  dbo.tbx_Flow_Process
+    WHERE   TaskProcID IN ( SELECT  TaskProcID
+                            FROM    dbo.tbx_Flow_TaskProc
+                            WHERE   TaskID = @TaskID )
+
+
+    DELETE  dbo.tbx_Flow_TaskProc
+    WHERE   TaskID = @TaskID 
+	
+    GOTO Success
+
+    Success:
+    RETURN 0
+
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1  
+
+
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Flow_DoOne') IS NOT NULL
+    DROP PROCEDURE dbo.pbx_Flow_DoOne
+GO
+
+--处理一条审核记录
+
+CREATE PROCEDURE pbx_Flow_DoOne
+    (
+      @ETypeId VARCHAR(50) ,  --职员的ID
+      @ProcePathID INT ,--tbx_Flow_ProcePath的ID
+      @ProceResult INT ,--未处理0，通过1，终止2，退回-1
+      @FlowInfo VARCHAR(255) ,--审批意见
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS
+    SET NOCOUNT ON
+    DECLARE @aSQL VARCHAR(8000)
+    DECLARE @BillID INT
+    DECLARE @BillType INT
+    DECLARE @WorkID VARCHAR(50)
+
+    IF NOT ( EXISTS ( SELECT    *
+                      FROM      dbo.tbx_Flow_ProcePath
+                      WHERE     ProcePathID = @ProcePathID ) )
+        BEGIN
+            SET @ErrorValue = '没有找到审批路径'
+            RETURN -1
+        END
+       
+    IF ( EXISTS ( SELECT    *
+                  FROM      dbo.tbx_Flow_ProcePath
+                  WHERE     ProceResult <> 0
+                            AND ProcePathID = @ProcePathID ) )
+        BEGIN
+            SET @ErrorValue = '已经审批过，不能重复审批'
+            RETURN -1
+        END
+
+    SELECT  @BillID = BillID, @BillType = BillType, @WorkID = WorkID
+    FROM    dbo.tbx_Flow_ProcePath
+    WHERE   ProcePathID = @ProcePathID 
+
+    IF ( EXISTS ( SELECT TOP 1
+                            ProcePathID
+                  FROM      dbo.tbx_Flow_ProcePath
+                  WHERE     BillType = @BillType
+                            AND BillID = @BillID
+                            AND WorkID = @WorkID
+                            AND ProcePathID < @ProcePathID
+                            AND ProceResult = 0 ) )
+        BEGIN
+            SET @ErrorValue = '前面还有流程没有审批完成，等完成后在审批'
+            RETURN -1  
+        END
+
+    INSERT  dbo.tbx_Flow_His ( ProcePathID, ProceResult, FlowInfo, CreaterETypeID, CreateTime )
+    VALUES  ( @ProcePathID, @ProceResult, @FlowInfo, @ETypeId, CONVERT(VARCHAR, GETDATE(), 120) )
+
+    IF ( @ProceResult = 1 )
+        BEGIN
+            UPDATE  dbo.tbx_Flow_ProcePath
+            SET     ProceResult = 1, FlowInfo = @FlowInfo
+            WHERE   ProcePathID = @ProcePathID
+        END 
+
+    IF ( @ProceResult = 2 )
+        BEGIN
+            UPDATE  dbo.tbx_Flow_ProcePath
+            SET     ProceResult = 2, FlowInfo = @FlowInfo
+            WHERE   ProcePathID = @ProcePathID
+        END 
+
+    IF ( @ProceResult = -1 )
+        BEGIN
+            UPDATE  dbo.tbx_Flow_ProcePath
+            SET     ProceResult = 0, FlowInfo = ''
+            WHERE   ProcePathID = ( SELECT TOP 1
+                                            ProcePathID
+                                    FROM    dbo.tbx_Flow_ProcePath
+                                    WHERE   BillType = @BillType
+                                            AND BillID = @BillID
+                                            AND WorkID = @WorkID
+                                            AND ProcePathID < @ProcePathID
+                                    ORDER BY ProcePathID DESC
+                                  )
+
+			--如果是第一个审批就退回就删除所有的审批流程
+            IF ( @ProcePathID = ( SELECT TOP 1
+                                            ProcePathID
+                                  FROM      dbo.tbx_Flow_ProcePath
+                                  WHERE     BillType = @BillType
+                                            AND BillID = @BillID
+                                            AND WorkID = @WorkID
+                                  ORDER BY  ProcePathID
+                                ) )
+                BEGIN
+                    DELETE  dbo.tbx_Flow_ProcePath
+                    WHERE   BillType = @BillType
+                            AND BillID = @BillID
+                            AND WorkID = @WorkID
+                END
+        END  
+    --EXEC(@aSQL)        
+    RETURN 0
+
+GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Flow_QryData') IS NOT NULL
+    DROP PROCEDURE dbo.pbx_Flow_QryData
+GO
+
+--查询审核
+
+CREATE PROCEDURE pbx_Flow_QryData
+    (
+      @QryType INT ,  --1流程作业,2流程作业具体项目
+      @Custom VARCHAR(500) = '' ,--默认参数 
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS
+    SET NOCOUNT ON
+    DECLARE @aSQL VARCHAR(8000)
+
+    IF ( @QryType = 1 )
+        BEGIN
+            SELECT  *
+            FROM    dbo.tbx_Flow_TaskType
+            ORDER BY TaskID
+        END
+
+    IF ( @QryType = 2 )
+        BEGIN
+            IF @Custom <> ''
+                BEGIN
+                    SELECT  *
+                    FROM    dbo.tbx_Flow_TaskProc a
+                            LEFT JOIN dbo.tbx_Flow_TaskType b ON b.TaskID = a.TaskID
+                    WHERE   a.TaskID = CAST(@Custom AS INT)
+                    ORDER BY DefaultProc DESC, a.TaskID
+                END  
+            ELSE
+                BEGIN
+                    SELECT  *
+                    FROM    dbo.tbx_Flow_TaskProc a
+                            LEFT JOIN dbo.tbx_Flow_TaskType b ON b.TaskID = a.TaskID
+                    ORDER BY DefaultProc DESC, a.TaskID
+                END
+        END
+
+    IF ( @QryType = 3 )
+        BEGIN
+            SELECT  *
+            FROM    dbo.tbx_Flow_Process fp
+                    LEFT JOIN dbo.tbx_Flow_TaskProc ft ON fp.TaskProcID = ft.TaskProcID
+                    LEFT JOIN dbo.tbx_Flow_TaskType ftt ON ft.TaskID = ftt.TaskID
+            WHERE   ftt.TaskID = CAST(@Custom AS INT)
+            ORDER BY ft.DefaultProc DESC, fp.TaskProcID, fp.ProceOrder
+        END
+     
+    IF ( @QryType = 4 )
+        BEGIN
+            SELECT  *
+            FROM    dbo.tbx_Flow_Process fp
+                    LEFT JOIN dbo.tbx_Flow_TaskProc ft ON fp.TaskProcID = ft.TaskProcID
+                    LEFT JOIN dbo.tbx_Flow_TaskType ftt ON ft.TaskID = ftt.TaskID
+                    LEFT JOIN dbo.tbx_Flow_ProcePermi ffp ON ffp.ProcessID = fp.ProcessID
+                    LEFT JOIN dbo.tbx_Base_Etype e ON ffp.OperId = e.ETypeId
+            WHERE   ft.TaskID = CAST(@Custom AS INT)
+            ORDER BY ft.DefaultProc DESC, fp.TaskProcID, fp.ProceOrder
+        END
+      
+    IF ( @QryType = 5 )
+        BEGIN
+            SELECT  fpp.*, e.EFullname AS CEFullname
+            FROM    dbo.tbx_Flow_ProcePath fpp
+                    LEFT JOIN dbo.tbx_Base_Etype e ON fpp.CreaterETypeID = e.ETypeId
+                    LEFT JOIN dbo.tbx_Flow_ProcePath fs ON fs.BillID = fpp.BillID --没得终止的
+                                                           AND fs.BillType = fpp.BillType
+                                                           AND fs.WorkID = fpp.WorkID
+                                                           AND fs.ProceResult = 2
+            WHERE   fpp.ProceResult = 0
+                    AND fpp.FlowETypeID = @Custom
+                    AND fs.ProcePathID IS NULL
+            ORDER BY fpp.CreateTime
+        END      
+
+    IF ( @QryType = 6 )
+        BEGIN
+            SET @aSQL = 'SELECT  fh.*, fp.ProcesseName, e.EFullname
+						FROM    dbo.tbx_Flow_His fh
+								LEFT JOIN dbo.tbx_Flow_ProcePath fpp ON fpp.ProcePathID = fh.ProcePathID
+								LEFT JOIN dbo.tbx_Flow_Process fp ON fp.ProcessID = fpp.ProcessID
+								LEFT JOIN dbo.tbx_Base_Etype e ON fh.CreaterETypeID = e.ETypeId
+						WHERE   ' + @Custom + ' 
+						ORDER BY fh.CreateTime'
+
+            EXEC(@aSQL) 
+        END  
+    IF ( @QryType = 7 )
+        BEGIN
+            SET @aSQL = 'SELECT  fpp.*, e.EFullname
+						FROM    dbo.tbx_Flow_ProcePath fpp LEFT JOIN dbo.tbx_Base_Etype e ON fpp.FlowETypeID = e.ETypeId 
+						WHERE   ' + @Custom + ' 
+						ORDER BY fpp.ProcePathID'
+            EXEC(@aSQL) 
+        END            
+    RETURN 0
+
+GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Flow_Save_Set') IS NOT NULL
+    DROP PROCEDURE dbo.pbx_Flow_Save_Set
+GO
+--  ********************************************************************************************
+--  ||                                                                                        
+--  ||   过程名称：pbx_Flow_Save_Set
+--  ||   过程功能：配置一个审批流程
+--  ||=========================================================================================
+
+CREATE    PROCEDURE pbx_Flow_Save_Set
+    (
+      @TaskID INT , --流程作业ID
+      @TType INT , --单据业务0；人事1；
+      @TComment VARCHAR(255) ,--备注
+      @TaskProcName VARCHAR(8000) ,--流程名称
+      @ProcesseName VARCHAR(8000) ,--项目名称
+      @OperType VARCHAR(8000) ,--操作类型，0审核，1知会，2执行。（知会不需要输入审批意见）
+      @ProceOrder VARCHAR(8000) ,--项目顺序,从小到大执行
+      --@PermiType VARCHAR(8000) ,--0职员
+      @OperId VARCHAR(8000) ,
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS
+    DECLARE @Splitstr VARCHAR(10)
+    SET @Splitstr = 'ǎǒǜ'
+
+    UPDATE  tbx_Flow_TaskType
+    SET     TType = @TType, TComment = @TComment
+    WHERE   TaskID = @TaskID
+
+	--删除原来的记录
+    DELETE  dbo.tbx_Flow_ProcePermi
+    WHERE   ProcessID IN ( SELECT   ProcessID
+                           FROM     dbo.tbx_Flow_Process a
+                                    LEFT JOIN dbo.tbx_Flow_TaskProc b ON a.TaskProcID = b.TaskProcID
+                           WHERE    b.TaskID = @TaskID )
+
+    DELETE  dbo.tbx_Flow_Process
+    WHERE   TaskProcID IN ( SELECT  TaskProcID
+                            FROM    dbo.tbx_Flow_TaskProc
+                            WHERE   TaskID = @TaskID )
+
+
+    DELETE  dbo.tbx_Flow_TaskProc
+    WHERE   TaskID = @TaskID 
+
+	--插入新记录
+    INSERT  INTO dbo.tbx_Flow_TaskProc ( TaskID, TaskProcName )
+    SELECT DISTINCT
+            @TaskID, a.Col
+    FROM    dbo.Fun_SplitStr(@TaskProcName, @Splitstr) a
+    WHERE   ISNULL(a.Col, '') <> ''
+
+    INSERT  INTO dbo.tbx_Flow_Process ( TaskProcID, ProcesseName, OperType, ProceOrder )
+    SELECT  DISTINCT
+            e.TaskProcID, a.Col, b.Col, c.Col
+    FROM    dbo.Fun_SplitStr(@ProcesseName, @Splitstr) a
+            LEFT JOIN dbo.Fun_SplitStr(@OperType, @Splitstr) b ON b.ID = a.ID
+            LEFT JOIN dbo.Fun_SplitStr(@ProceOrder, @Splitstr) c ON c.ID = a.ID
+            LEFT JOIN dbo.Fun_SplitStr(@TaskProcName, @Splitstr) d ON d.ID = a.ID
+            LEFT JOIN dbo.tbx_Flow_TaskProc e ON d.Col = e.TaskProcName
+    WHERE   ISNULL(c.Col, '') <> '' 
+
+    INSERT  INTO dbo.tbx_Flow_ProcePermi ( ProcessID, PermiType, OperId )
+    SELECT  DISTINCT
+            b.ProcessID, 0, a.Col1
+    FROM    ( SELECT    a1.Col Col1, a2.Col Col2, a3.Col Col3
+              FROM      dbo.Fun_SplitStr(@OperId, @Splitstr) a1
+                        LEFT JOIN dbo.Fun_SplitStr(@ProcesseName, @Splitstr) a2 ON a2.ID = a1.ID
+                        LEFT JOIN dbo.Fun_SplitStr(@TaskProcName, @Splitstr) a3 ON a3.ID = a1.ID
+              WHERE     ISNULL(a3.Col, '') <> ''
+            ) a
+            LEFT JOIN ( SELECT  b1.ProcessID, b1.ProcesseName, b2.TaskProcName
+                        FROM    dbo.tbx_Flow_Process b1
+                                LEFT JOIN dbo.tbx_Flow_TaskProc b2 ON b2.TaskProcID = b1.TaskProcID
+                      ) b ON a.Col2 = b.ProcesseName
+                             AND a.Col3 = b.TaskProcName
+    WHERE   b.ProcessID IS NOT NULL
+			 
+    GOTO Success
+
+    Success:
+    RETURN 0
+
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1  
+
+
+GO
+
+
+
 IF OBJECT_ID('dbo.pbx_IntToStr') IS NOT NULL 
     DROP PROCEDURE dbo.pbx_IntToStr
 go
@@ -3371,6 +6246,761 @@ AS
     SELECT  @szId = RIGHT(@sztemp, 5)
 
 
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Limit_Check') IS NOT NULL
+    DROP PROCEDURE dbo.pbx_Limit_Check
+GO
+
+--判断某个用户是否具有某种权限点某种操作
+
+CREATE PROCEDURE pbx_Limit_Check
+    (
+      @LimitId VARCHAR(50) ,  -- 权限ID
+      @LimitDo INT ,  --基本信息的相关操作，单据的相关操作，等等
+      @UserId VARCHAR(50) ,--tbx_Limit_RU表的用户ID
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS
+    SET NOCOUNT ON
+    DECLARE @aSQL VARCHAR(8000)
+    DECLARE @aRUType INT
+    DECLARE @aLAType INT
+    DECLARE @aLimitValue INT
+    DECLARE @aRet INT
+    DECLARE @aLAName VARCHAR(50)
+    
+    DECLARE @Limit_Base_View INT = 1--基本信息权限-查看
+    DECLARE @Limit_Base_Add INT = 2--基本信息权限-新增
+    DECLARE @Limit_Base_Class INT = 4--基本信息权限-分类
+    DECLARE @Limit_Base_Modify INT = 8--基本信息权限-修改
+    DECLARE @Limit_Base_Del INT = 16--基本信息权限-删除
+    DECLARE @Limit_Base_Print INT = 32--基本信息权限-打印
+  
+    DECLARE @Limit_Bill_View INT = 1--单据权限-查看
+    DECLARE @Limit_Bill_Input INT = 2--单据权限-输入
+    DECLARE @Limit_Bill_Settle INT = 4--单据权限-过账
+    DECLARE @Limit_Bill_Print INT = 8--单据权限-打印
+    
+    DECLARE @Limit_Report_View INT = 1--报表权限-查看
+    DECLARE @Limit_Report_Print INT = 2--报表权限-打印
+    
+    SET @aRUType = 2 --通过用户查询
+    SET @aLimitValue = 0
+    
+    IF @LimitDo = 0
+        RETURN -1
+     
+    IF ( @UserId = '00000' )--超级管理员
+        BEGIN
+            RETURN 0
+        END   
+    --IF ( @LimitType = 0 ) 
+    BEGIN     
+        SELECT  @aLimitValue = ISNULL(MAX(ru.LimitValue), 0), @aLAType = la.LAType, @aLAName = la.LAName
+        FROM    dbo.tbx_Limit_Action la
+                LEFT JOIN ( SELECT  lar.LAGUID, lar.LimitValue
+                            FROM    dbo.tbx_Limit_Action_Role lar
+                                    INNER JOIN dbo.tbx_Limit_RU lr ON lr.LRGUID = lar.RUID
+                                                                      AND lar.RUType = 1
+                                                                      AND lr.UserId = @UserId
+                                                                      AND ( ( lar.LimitValue & @LimitDo ) = @LimitDo )
+                          ) ru ON la.LAGUID = ru.LAGUID
+        WHERE   la.LAGUID = @LimitId
+        GROUP BY la.LAGUID, la.LAType, la.LAName 
+    END
+
+    SET @aRet = CASE @aLimitValue & @LimitDo
+                  WHEN @LimitDo THEN 0
+                  ELSE -1
+                END      
+                   
+    IF ( @aRet <> 0 )
+        BEGIN
+            IF ( @aLAType = 1 ) --0未配置，1基本信息，2单据，3报表，4数据，5其它 
+                BEGIN
+                    SET @ErrorValue = '没有功能[(' + @aLAName + ')->('	
+                    SET @ErrorValue = @ErrorValue + CASE @LimitDo
+                                                      WHEN @Limit_Base_View THEN '查看'
+                                                      WHEN @Limit_Base_Add THEN '新增'
+                                                      WHEN @Limit_Base_Class THEN '分类'
+                                                      WHEN @Limit_Base_Modify THEN '修改'
+                                                      WHEN @Limit_Base_Del THEN '删除'
+                                                      WHEN @Limit_Base_Print THEN '打印'
+                                                      ELSE '未定义'
+                                                    END    
+				
+                    SET @ErrorValue = @ErrorValue + ')]权限'
+                END	
+            ELSE
+                IF ( @aLAType = 2 )
+                    BEGIN
+                        SET @ErrorValue = '没有功能[(' + @aLAName + ')->('	
+                        SET @ErrorValue = @ErrorValue + CASE @LimitDo
+                                                          WHEN @Limit_Bill_View THEN '查看'
+                                                          WHEN @Limit_Bill_Input THEN '输入'
+                                                          WHEN @Limit_Bill_Settle THEN '过账'
+                                                          WHEN @Limit_Bill_Print THEN '打印'
+                                                          ELSE '未定义'
+                                                        END    
+				
+                        SET @ErrorValue = @ErrorValue + ')]权限'
+                    END	
+                ELSE
+                    IF ( @aLAType = 3 )
+                        BEGIN
+                            SET @ErrorValue = '没有功能[(' + @aLAName + ')->('	
+                            SET @ErrorValue = @ErrorValue + CASE @LimitDo
+                                                              WHEN @Limit_Report_View THEN '查看'
+                                                              WHEN @Limit_Report_Print THEN '打印'
+                                                              ELSE '未定义'
+                                                            END    
+				
+                            SET @ErrorValue = @ErrorValue + ')]权限'
+                        END	
+            RETURN -1 
+        END    
+    --EXEC(@aSQL)        
+    RETURN 0
+
+GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Limit_QryData') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Limit_QryData
+go
+
+--查询用户或角色列表
+
+CREATE PROCEDURE pbx_Limit_QryData
+    (
+      @QryType INT ,  --1角色，2角色用户映射表,
+      @Custom VARCHAR(500) = '' ,--默认参数 
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+    SET NOCOUNT ON
+    DECLARE @aSQL VARCHAR(8000)
+
+    IF ( @QryType = 1 ) 
+        BEGIN
+            SELECT  *
+            FROM    dbo.tbx_Limit_Role
+            ORDER BY LRRowIndex
+        END
+    ELSE 
+        IF ( @QryType = 2 ) 
+            BEGIN
+                SELECT  lr.*, be.EFullname
+                FROM    dbo.tbx_Limit_RU lr
+                        LEFT JOIN dbo.tbx_Base_Etype be ON lr.UserId = be.ETypeId
+                WHERE   lr.LRGUID = @Custom
+                ORDER BY lr.UserId  	
+            END
+        ELSE 
+            IF ( @QryType = 3 ) 
+                BEGIN
+                    SELECT  lr.*, be.EFullname
+                    FROM    dbo.tbx_Limit_RU lr
+                            LEFT JOIN dbo.tbx_Base_Etype be ON lr.UserId = be.ETypeId
+                    WHERE   lr.LRGUID = @Custom
+                    ORDER BY lr.UserId  	
+                END
+            
+    --EXEC(@aSQL)        
+    RETURN 0
+
+GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Limit_Save_RA') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Limit_Save_RA
+GO
+--  ********************************************************************************************
+--  ||                                                                                        
+--  ||   过程名称：pbx_Limit_Save_RA
+--  ||   过程功能：增加或者修改一个角色的一条权限记录
+--  ||=========================================================================================
+
+CREATE    PROCEDURE pbx_Limit_Save_RA
+    (
+      @LAGUID VARCHAR(50) , --权限功能ID
+      @RUID VARCHAR(50) , --角色或用户ID
+      @RUType INT, --0未定义，1角色ID，2用户ID
+      @LimitValue INT ,  --权限值
+      
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+	IF EXISTS(SELECT * FROM dbo.tbx_Limit_Action_Role WHERE LAGUID = @LAGUID AND RUID = @RUID AND RUType = @RUType)
+	BEGIN
+		IF (@LimitValue <> 0) 
+		BEGIN
+			UPDATE dbo.tbx_Limit_Action_Role
+			SET LimitValue = @LimitValue
+			WHERE LAGUID = @LAGUID AND RUID = @RUID AND RUType = @RUType 
+		END	
+		ELSE
+		BEGIN
+			DELETE dbo.tbx_Limit_Action_Role WHERE LAGUID = @LAGUID AND RUID = @RUID AND RUType = @RUType  
+		END
+	END
+	ELSE 
+	BEGIN
+		INSERT INTO dbo.tbx_Limit_Action_Role ( LAGUID, RUID, RUType, LimitValue )
+		VALUES  ( @LAGUID, @RUID, @RUType, @LimitValue)	
+	END
+	
+
+    Success:
+    RETURN 0
+
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1  
+
+
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Limit_Save_RU') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Limit_Save_RU
+GO
+--  ********************************************************************************************
+--  ||                                                                                        
+--  ||   过程名称：pbx_Limit_Save_RU
+--  ||   过程功能：增加一个用户和角色点映射关系
+--  ||=========================================================================================
+
+CREATE    PROCEDURE pbx_Limit_Save_RU
+    (
+      @LRGUID VARCHAR(50) , --角色ID
+      @UserId VARCHAR(50) , --用户ID
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+    IF NOT EXISTS ( SELECT  *
+                    FROM    dbo.tbx_Limit_RU
+                    WHERE   LRGUID = @LRGUID
+                            AND UserId = @UserId ) 
+        BEGIN
+            INSERT  INTO dbo.tbx_Limit_RU ( LRGUID, UserId )
+            VALUES  ( @LRGUID, @UserId )	
+        END
+	
+
+    Success:
+    RETURN 0
+
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1  
+
+
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Limit_User') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Limit_User
+go
+
+--查询用户或角色权限
+
+CREATE PROCEDURE pbx_Limit_User
+    (
+      @RUID VARCHAR(50) , --角色或用户ID
+      @RUType INT ,  --0未定义，1角色ID，2用户ID
+      @LimitType INT ,  --0未配置，1基本信息，2单据，3报表，4数据，5其它
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+    SET NOCOUNT ON
+    DECLARE @aSQL VARCHAR(8000)
+
+    IF ( @LimitType = 1 ) 
+        BEGIN
+            SELECT  la.LAGUID, la.LAName, ISNULL(LimitValue, 0) LimitValue, 
+				CASE ISNULL(LimitValue & 1, 0) WHEN 1 THEN 1 ELSE 0 END LView, 
+				CASE ISNULL(LimitValue & 2, 0) WHEN 2 THEN 1 ELSE 0 END LAdd, 
+				CASE ISNULL(LimitValue & 4, 0) WHEN 4 THEN 1 ELSE 0 END LClass, 
+				CASE ISNULL(LimitValue & 8, 0) WHEN 8 THEN 1 ELSE 0 END LModify, 
+				CASE ISNULL(LimitValue & 16, 0) WHEN 16 THEN 1 ELSE 0 END LDel, 
+				CASE ISNULL(LimitValue & 32, 0) WHEN 32 THEN 1 ELSE 0 END LPrint
+            FROM    tbx_Limit_Action la
+                    LEFT JOIN tbx_Limit_Action_Role lar ON la.LAGUID = lar.LAGUID
+                                                           AND lar.RUType = @RUType
+                                                           AND lar.RUID = @RUID
+            WHERE   la.LAType = @LimitType
+            ORDER BY la.LARowIndex
+        END
+	 ELSE IF ( @LimitType = 2 )
+		 BEGIN
+			SELECT  la.LAGUID, la.LAName, ISNULL(LimitValue, 0) LimitValue, 
+				CASE ISNULL(LimitValue & 1, 0) WHEN 1 THEN 1 ELSE 0 END LView, 
+				CASE ISNULL(LimitValue & 2, 0) WHEN 2 THEN 1 ELSE 0 END LInput, 
+				CASE ISNULL(LimitValue & 4, 0) WHEN 4 THEN 1 ELSE 0 END LSettle, 
+				CASE ISNULL(LimitValue & 8, 0) WHEN 8 THEN 1 ELSE 0 END LPrint
+			FROM    tbx_Limit_Action la
+					LEFT JOIN tbx_Limit_Action_Role lar ON la.LAGUID = lar.LAGUID
+														   AND lar.RUType = @RUType
+														   AND lar.RUID = @RUID
+			WHERE   la.LAType = @LimitType
+			ORDER BY la.LARowIndex
+		 END      
+	  ELSE IF ( @LimitType = 3 )
+		 BEGIN
+			SELECT  la.LAGUID, la.LAName, ISNULL(LimitValue, 0) LimitValue, 
+				CASE ISNULL(LimitValue & 1, 0) WHEN 1 THEN 1 ELSE 0 END LView, 
+				CASE ISNULL(LimitValue & 2, 0) WHEN 2 THEN 1 ELSE 0 END LPrint
+			FROM    tbx_Limit_Action la
+					LEFT JOIN tbx_Limit_Action_Role lar ON la.LAGUID = lar.LAGUID
+														   AND lar.RUType = @RUType
+														   AND lar.RUID = @RUID
+			WHERE   la.LAType = @LimitType
+			ORDER BY la.LARowIndex
+		 END     
+    --EXEC(@aSQL)        
+    RETURN 0
+
+GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Login') IS NOT NULL
+    DROP PROCEDURE dbo.pbx_Login
+GO
+
+CREATE PROCEDURE pbx_Login
+    (
+      @userName VARCHAR(20) ,
+      @userPSW VARCHAR(60) ,
+      @errorValue VARCHAR(100) OUTPUT ,
+      @userId VARCHAR(50) OUTPUT
+    )
+AS
+    SET NOCOUNT ON
+
+    DECLARE @idtemp VARCHAR(50)
+    SELECT  @idtemp = ''
+
+    SELECT  @idtemp = ETypeId
+    FROM    dbo.tbx_Base_Etype
+    WHERE   ( EFullname = @userName
+              OR EUsercode = @userName
+            )
+
+    IF ( ISNULL(@idtemp, '') = '' )
+        BEGIN
+            SET @errorValue = '账号不存在或密码错误'
+            RETURN -1
+        END
+
+    SET @userId = @idtemp
+
+    RETURN 0
+
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Report_BillOrder') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Report_BillOrder
+GO
+
+--进货订单和销售订单统计和查询报表
+
+CREATE PROCEDURE pbx_Report_BillOrder
+    @VchType INT ,	--单据类型--1时为进货订单,2为销售订单
+    @CMode CHAR(2) ,	--L--单据列表, 统计方式：P-商品，B-单位，E-经手人,后面加'D'为对应明细列表
+    @BeginDate VARCHAR(50) ,
+    @EndDate VARCHAR(50) ,
+    @TypeID VARCHAR(50) ,--单位、商品或职员的ID号
+    @PTypeId VARCHAR(50) ,
+    @BTypeId VARCHAR(50) ,
+    @ETypeId VARCHAR(50) ,
+    @KTypeId VARCHAR(50) ,
+    @OperatorID VARCHAR(50)
+AS 
+    DECLARE @sql VARCHAR(8000)
+    
+    --L.单据列表
+    IF @CMode = 'L' 
+        BEGIN
+            SET @SQL = 'SELECT  m.*, v.VFullname
+						FROM    dbo.tbx_Bill_Order_M m
+								LEFT JOIN dbo.tbx_Base_Vtype v ON m.VchType = v.VchType
+						WHERE m.VchType = ' + CAST(@VchType AS VARCHAR(20))
+        END
+    PRINT ( @SQL )
+    EXEC(@SQL)
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Report_BillVch') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Report_BillVch
+GO
+
+--进货单和销售单统计和查询报表
+
+CREATE PROCEDURE pbx_Report_BillVch
+    @VchType INT ,	--单据类型--1时为进货订单,2为销售订单
+    @CMode CHAR(2) ,	--L--单据列表, 统计方式：P-商品，B-单位，E-经手人,后面加'D'为对应明细列表
+    @BeginDate VARCHAR(50) ,
+    @EndDate VARCHAR(50) ,
+    @TypeID VARCHAR(50) ,--单位、商品或职员的ID号
+    @PTypeId VARCHAR(50) ,
+    @BTypeId VARCHAR(50) ,
+    @ETypeId VARCHAR(50) ,
+    @KTypeId VARCHAR(50) ,
+    @OperatorID VARCHAR(50)
+AS 
+    DECLARE @sql VARCHAR(8000)
+    
+    --L.单据列表
+    IF @CMode = 'L' 
+        BEGIN
+            SET @SQL = 'SELECT  m.*, v.VFullname
+						FROM    dbo.tbx_Bill_M m
+								LEFT JOIN dbo.tbx_Base_Vtype v ON m.VchType = v.VchType
+						WHERE m.VchType = ' + CAST(@VchType AS VARCHAR(20))
+        END
+    PRINT ( @SQL )
+    EXEC(@SQL)
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Stock_LoadIni') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Stock_LoadIni
+go
+
+--查询期初库存商品信息
+
+CREATE PROCEDURE pbx_Stock_LoadIni
+    (
+      @ParPTypeId VARCHAR(50) ,
+      @KTypeId VARCHAR(50) ,
+      @Operator VARCHAR(50)    --操作员ID
+    )
+AS 
+    SET NOCOUNT ON
+    DECLARE @aSQL VARCHAR(8000)
+    
+    DECLARE @id_len INT ,
+        @NewParPTypeId VARCHAR(50)
+
+    IF @ParPTypeId = '' 
+        SET @ParPTypeId = '00000'
+        
+    IF @ParPTypeId = '00000'
+        OR @ParPTypeId = '%' 
+        SELECT  @id_len = 5, @NewParPTypeId = '%'
+    ELSE 
+        BEGIN
+            SELECT  @id_len = LEN(@ParPTypeId) + 5, @NewParPTypeId = @ParPTypeId + '%'	
+        END 
+       
+        
+    IF @KTypeId = '00000'
+        OR @KTypeId = '' 
+        SELECT  @KTypeId = '%'
+    ELSE 
+        SELECT  @KTypeId = @KTypeId + '%'
+        
+    SELECT  bp.*, ISNULL(Qty, 0) Qty, ISNULL(Total, 0) Total, ISNULL(GoodsOrderId, 0) GoodsOrderId, CASE WHEN QTY <> 0 THEN dbo.Fun_CovTotalDivQty(Total, Qty)
+                                                                                                         ELSE 0
+                                                                                                    END Price
+    FROM    ( SELECT    p.PTypeId, p.PUsercode, p.PFullname, p.Parid, p.RowIndex
+              FROM      dbo.tbx_Base_Ptype p
+              WHERE     p.ptypeid LIKE CASE WHEN @ParPTypeId = '00000' THEN ''
+                                            ELSE @ParPTypeId
+                                       END + '%'
+                        AND deleted = 0
+            ) bp
+            LEFT JOIN ( SELECT  LEFT(sg.PTypeId, @id_len) PTypeId, SUM(Qty) Qty, SUM(Total) Total, MIN(CASE WHEN LEN(LEFT(sg.PTypeId, @id_len)) < LEN(sg.PTypeId) THEN 0
+                                                                                                            ELSE GoodsOrderId
+                                                                                                       END) GoodsOrderId
+                        FROM    dbo.tbx_Stock_Goods_Ini sg
+                        WHERE   sg.KTypeId LIKE '%'
+                                AND sg.PTypeId LIKE '%'
+                        GROUP BY LEFT(sg.PTypeId, @id_len)
+                      ) sgi ON bp.PTypeId = sgi.PTypeId
+    WHERE   bp.Parid = @ParPTypeId
+    ORDER BY bp.RowIndex 
+            
+    --EXEC(@aSQL)        
+    RETURN 0
+
+GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Stock_ModifyIni') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Stock_ModifyIni
+go
+
+-- 期初商品库存修改
+
+CREATE PROCEDURE pbx_Stock_ModifyIni
+    (
+      @PTypeId VARCHAR(25) ,
+      @KTypeId VARCHAR(25) ,
+      @Qty NUMERIC(22, 10) ,
+      @Total NUMERIC(22, 10) ,
+      @Memo VARCHAR(255) ,    --序列号说明
+      @JobNumber VARCHAR(20) ,     --批号（查询序列号时用）
+      @OrderID INT OUTPUT ,
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+    DECLARE @Return INT
+    DECLARE @InitOver INT
+    
+    SELECT  @InitOver = PValue
+    FROM    dbo.tbx_Sys_Param
+    WHERE   PName = 'InitOver'
+    
+    IF ISNULL(@InitOver, 0) = 1
+    BEGIN
+		SET @ErrorValue='已经开账，不能修改期初数据！'
+		GOTO ErrorGeneral 	
+    END
+    
+    IF NOT EXISTS ( SELECT  1
+                    FROM    dbo.tbx_Base_Ptype
+                    WHERE   PTypeId = @PTypeId
+                            AND PSonnum = 0
+                            AND Deleted = 0 ) 
+        BEGIN
+            SET @ErrorValue = '该商品已经被删除或者分类！'	
+            GOTO ErrorGeneral
+        END
+    IF NOT EXISTS ( SELECT  1
+                    FROM    dbo.tbx_Base_Ktype
+                    WHERE   KTypeId = @KTypeId
+                            AND KSonnum = 0
+                            AND Deleted = 0 ) 
+        BEGIN
+            SET @ErrorValue = '该仓库已经被删除或者分类！'	
+            GOTO ErrorGeneral
+        END
+    IF NOT EXISTS ( SELECT  1
+                    FROM    dbo.tbx_Base_Ptype
+                    WHERE   PTypeId = @PTypeId
+                            AND Costmode = 0 ) 
+        BEGIN
+            SET @ErrorValue = '该商品成本算法已经被更改！'	
+            GOTO ErrorGeneral
+        END
+
+    DELETE  FROM dbo.tbx_Stock_Goods_Ini
+    WHERE   PTypeId = @PTypeId
+            AND KTypeId = @KTypeId
+            
+    IF ( @Qty = 0 ) 
+        GOTO Success
+        
+    INSERT  dbo.tbx_Stock_Goods_Ini ( PTypeId, KTypeId, Qty, Price, Total )
+    VALUES  ( @PTypeId, @KTypeId, @Qty, dbo.Fun_CovTotalDivQty(@Total, @Qty), @Total )
+
+    SET @Return = @@ERROR
+    IF @@ROWCOUNT = 0 
+        GOTO OtherError
+	
+    SET @OrderID = @@IDENTITY
+    
+    GOTO Success
+
+    Success:		 --成功完成函数
+    RETURN 0
+    
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    
+    ErrorRollback:   --数据操作是错误，需要回滚
+    --ROLLBACK TRAN insertproc 
+    RETURN -2 
+    
+    OtherError:
+    RETURN @Return
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Stock_OneCheck') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Stock_OneCheck
+GO
+--  ********************************************************************************************
+--  ||                                                                                        
+--  ||   过程名称：pbx_Stock_OneCheck
+--  ||   过程功能：获取或者增加一个盘点数据标记
+--  ||=========================================================================================
+
+CREATE    PROCEDURE pbx_Stock_OneCheck
+    (
+      @KTypeId VARCHAR(50) , --仓库ID
+      @ETypeid VARCHAR(50) , --操作员ID
+      @CheckDate VARCHAR(10) OUTPUT , --盘点日期
+      @Updatetag INT OUT ,  --盘点号
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+    IF @CheckDate = '' 
+        BEGIN
+            SELECT  @Updatetag = MIN(UpdateTag)
+            FROM    dbo.tbx_Stock_Check
+            WHERE   UpdateTag < 0
+                    AND KTypeId = @KTypeId
+                    
+            SELECT  @Updatetag = UpdateTag, @CheckDate = CheckDate
+            FROM    dbo.tbx_Stock_Check
+            WHERE   UpdateTag = @Updatetag 
+        END
+    ELSE 
+        BEGIN   -- first
+            SELECT  @UpdateTag = ISNULL(MIN(UpdateTag), 0)
+            FROM    dbo.tbx_Stock_Check
+            WHERE   UpdateTag < 0
+                    AND KTypeId = @KTypeId
+                    
+            IF @UpdateTag <> 0 
+                BEGIN
+                    SELECT  @Updatetag = UpdateTag, @CheckDate = CheckDate
+                    FROM    dbo.tbx_Stock_Check
+                    WHERE   UpdateTag = @UpdateTag  
+                    GOTO Success
+                END
+                
+            SELECT  @Updatetag = ( ISNULL(MIN(UpdateTag), -1000000) - 1 )
+            FROM    dbo.tbx_Stock_Check
+            WHERE   updatetag < 0 
+            --IF @CheckDate < dbo.f_getCurYearPerStart(0) 
+            --    GOTO error102
+                
+            SELECT  @Updatetag = ( ISNULL(MIN(UpdateTag), -1000000) - 1 )
+            FROM    dbo.tbx_Stock_Check
+            WHERE   UpdateTag < 0 
+            
+            INSERT  INTO dbo.tbx_Stock_Check ( KTypeId, PTypeId, CheckDate, UpdateTag, ETypeId )
+            VALUES  ( @KTypeId, '', @CheckDate, @Updatetag, @ETypeid )
+            
+            IF @@RowCount = 0 
+                GOTO ErrorGeneral
+            ELSE 
+                GOTO Success
+
+        END
+
+    Success:
+    RETURN 0
+
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1  
+
+
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Stock_QryCheck') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Stock_QryCheck
+go
+
+--查询盘点
+
+CREATE PROCEDURE pbx_Stock_QryCheck
+    (
+      @KTypeId VARCHAR(50) , --仓库ID
+      @ETypeid VARCHAR(50) , --操作员ID
+      @CheckDate VARCHAR(10) , --盘点日期
+      @Updatetag INT ,  --盘点号
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+    SET NOCOUNT ON
+    DECLARE @aSQL VARCHAR(8000)
+
+    SELECT  *
+    FROM    dbo.tbx_Stock_Check sc LEFT JOIN dbo.tbx_Base_Ptype bp ON sc.PTypeId = bp.PTypeId
+    WHERE   ISNULL(sc.PTypeId, '') <> ''
+            AND sc.UpdateTag = @Updatetag
+            
+    --EXEC(@aSQL)        
+    RETURN 0
+
+GO 
+
+
+
+IF OBJECT_ID('dbo.pbx_Stock_SaveCheck') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Stock_SaveCheck
+go
+
+--  ********************************************************************************************                                                                                  
+--  ||   过程名称：pbx_Stock_SaveCheck                                                
+--  ||   过程功能：保存一条盘点记录
+--  ********************************************************************************************
+
+CREATE PROCEDURE pbx_Stock_SaveCheck
+    (
+      @KTypeId VARCHAR(50) ,
+      @PTypeId VARCHAR(50) ,
+      @GoodsOrder INT , --对应库存表中的Goodsorder字段
+      @CheckedQty NUMERIC(22, 10) ,--盘点数量
+      @UpdateTag INT ,--盘点号
+      @CheckDate VARCHAR(10) ,--盘点日期
+      @SCId INT ,
+      @JobNumber VARCHAR(20) ,--批号
+      @OutFactoryDate VARCHAR(13) ,--生产日期
+      @Total NUMERIC(22, 10) ,--
+      @ETypeId VARCHAR(50) ,--操作员
+      --下面面是基本信息必须的参数
+      @errorValue VARCHAR(500) OUTPUT --返回错误信息
+    )
+AS 
+    SET NOCOUNT ON
+	
+    DECLARE @CostMode INT
+    DECLARE @StockQty NUMERIC(22, 10) --库存量
+    
+    SELECT  @CostMode = Costmode
+    FROM    dbo.tbx_Base_Ptype
+    WHERE   PTypeId = @PTypeId
+	
+	SET @StockQty = 0
+	
+    BEGIN TRAN insertproc
+    
+    IF @SCId = 0 
+        BEGIN
+            INSERT  INTO dbo.tbx_Stock_Check ( KTypeId, PTypeId, GoodsOrder, CostMode, CheckedQty, UpdateTag, StockQty, CheckDate, JobNumber, OutFactoryDate, Total, ETypeId )
+            VALUES  ( @KTypeId, @PTypeId, @GoodsOrder, @CostMode, @CheckedQty, @UpdateTag, @StockQty, @CheckDate, @JobNumber, @OutFactoryDate, @Total, @ETypeId )	
+        END
+    ELSE 
+        BEGIN
+            UPDATE  dbo.tbx_Stock_Check
+            SET     KTypeId = @KTypeId, PTypeId = @PTypeId, GoodsOrder = @GoodsOrder,
+					CostMode = @CostMode, CheckedQty = @CheckedQty, UpdateTag = @UpdateTag,
+					StockQty = @StockQty, CheckDate = @CheckDate, JobNumber = @JobNumber,
+					OutFactoryDate = @OutFactoryDate, Total = @Total, ETypeId = @ETypeId
+            WHERE   SCId = @SCId 
+        END 
+        
+    COMMIT TRAN insertproc
+    GOTO success
+
+    Success:		 --成功完成函数
+    RETURN 0
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    ErrorRollback:   --数据操作是错误，需要回滚
+    ROLLBACK TRAN insertproc 
+    RETURN -2 
 go
 
 
@@ -3431,6 +7061,117 @@ go
 
 
 
+IF OBJECT_ID('dbo.pbx_Sys_GetParam') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Sys_GetParam
+GO
+
+--获取系统参数
+
+CREATE PROCEDURE pbx_Sys_GetParam
+    (
+      @PName VARCHAR(30) ,
+      @ValueReturn VARCHAR(1000) OUTPUT
+    )
+AS 
+    SET NOCOUNT OFF
+
+    IF NOT EXISTS ( SELECT  *
+                    FROM    dbo.tbx_Sys_Param
+                    WHERE   PName = @PName ) 
+        BEGIN
+            INSERT  INTO dbo.tbx_Sys_Param ( PName )
+            VALUES  ( @PName ) 
+        END
+
+        
+    SELECT  @ValueReturn = PValue
+    FROM    dbo.tbx_Sys_Param
+    WHERE   PName = @PName
+    
+    RETURN 0
+
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Sys_InitOver') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Sys_InitOver
+go
+
+-- 开帐、反开帐
+
+CREATE PROCEDURE pbx_Sys_InitOver
+    (
+      @DoType INT ,--0:反开账,1:开账
+      @ErrorValue VARCHAR(500) OUTPUT 
+    )
+AS 
+    DECLARE @Return INT
+    DECLARE @IsInitOver INT
+    
+    IF @DoType = 1 
+        BEGIN
+            SELECT  @IsInitOver = PValue
+            FROM    dbo.tbx_Sys_Param
+            WHERE   PName = 'InitOver'
+            IF @IsInitOver = 1 
+                BEGIN
+                    SET @ErrorValue = '系统已经开账，可以作账了，不能再开账'
+                    GOTO ErrorGeneral
+                END
+                
+            DELETE  dbo.tbx_Stock_Goods_Ini
+            WHERE   Qty = 0 AND Total = 0
+            IF @@ERROR <> 0 
+                BEGIN
+                    SET @ErrorValue = '删除期初库存失败'
+                    GOTO ErrorGeneral
+                END
+                
+            BEGIN TRAN InitOver
+            --设置开帐标志
+            UPDATE  dbo.tbx_Sys_Param SET PValue = '1' WHERE PName = 'InitOver'
+            IF @@ERROR <> 0 goto ErrorRollback		
+            
+            --将期初库存复制到库存库
+            TRUNCATE TABLE dbo.tbx_Stock_Goods
+            SET IDENTITY_INSERT tbx_Stock_Goods ON
+            INSERT  INTO dbo.tbx_Stock_Goods ( GoodsOrderId, PTypeId, KTypeId, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsOrder )
+                    SELECT  GoodsOrderId, PTypeId, KTypeId, JobNumber, OutFactoryDate, Qty, Price, Total, GoodsOrder
+                    FROM    dbo.tbx_Stock_Goods_Ini 
+            SET IDENTITY_INSERT tbx_Stock_Goods OFF
+            
+            --  修改aType库存商品应收应付
+            --	计算储值余额
+            --	写入期初资本
+            COMMIT TRAN InitOver
+        END
+    ELSE 
+        BEGIN
+			BEGIN TRAN InitOver
+            --设置开帐标志
+            UPDATE  dbo.tbx_Sys_Param SET PValue = '0' WHERE PName = 'InitOver'
+            
+			TRUNCATE TABLE dbo.tbx_Stock_Goods
+			
+            COMMIT TRAN InitOver
+        END
+    
+    GOTO Success
+
+    Success:		 --成功完成函数
+    RETURN 0
+    
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    
+    ErrorRollback:   --数据操作是错误，需要回滚
+    ROLLBACK TRAN InitOver 
+    RETURN -2 
+GO
+
+
+
 IF OBJECT_ID('dbo.pbx_Sys_ModfifyTbx') IS NOT NULL 
     DROP PROCEDURE dbo.pbx_Sys_ModfifyTbx
 go
@@ -3462,7 +7203,7 @@ AS
             GOTO ErrorGeneral
         END
         
-    GOTO success    
+    GOTO Success    
 
     Success:		 --成功完成函数
     RETURN 0
@@ -3473,7 +7214,96 @@ AS
     ErrorRollback:   --数据操作是错误，需要回滚
     --ROLLBACK TRAN insertproc 
     RETURN -2 
+GO
+
+
+
+IF OBJECT_ID('dbo.pbx_Sys_ReBuild') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Sys_ReBuild
 go
+
+--  ********************************************************************************************                                                                               
+--  ||   过程名称：pbx_Sys_ReBuild                                                 
+--  ||   过程功能：系统重建                                          
+--  ********************************************************************************************
+CREATE PROCEDURE pbx_Sys_ReBuild
+    (
+      @ClearStock INT ,--清除库存商品和会计科目的期初值
+      @ClearBak INT ,--清除草稿库
+      --下面面是必须的参数
+      @ErrorValue VARCHAR(500) OUTPUT  
+    )
+AS 
+    SET NOCOUNT ON
+    
+    BEGIN TRAN DelBill
+	
+    TRUNCATE TABLE dbo.tbx_Bill_Order_M
+    TRUNCATE TABLE dbo.tbx_Bill_Order_D
+    TRUNCATE TABLE dbo.tbx_Bill_M
+    TRUNCATE TABLE dbo.tbx_Bill_D_Bak
+    TRUNCATE TABLE dbo.tbx_Bill_Buy_D
+    TRUNCATE TABLE dbo.tbx_Bill_Sale_D
+    TRUNCATE TABLE dbo.tbx_Bill_Other_D
+    TRUNCATE TABLE dbo.tbx_Bill_NumberRecords
+    
+    TRUNCATE TABLE dbo.tbx_Bill_A_D
+    TRUNCATE TABLE dbo.tbx_Bill_A_Gathering
+        
+    IF @ClearStock = 1
+    BEGIN
+		TRUNCATE TABLE dbo.tbx_Stock_Goods
+		TRUNCATE TABLE dbo.tbx_Stock_Goods_Ini
+		TRUNCATE TABLE dbo.tbx_Stock_Glide	
+		TRUNCATE TABLE dbo.tbx_Stock_Check
+    END
+    
+    UPDATE dbo.tbx_Sys_Param SET PValue = '0' WHERE PName = 'InitOver'
+      
+    COMMIT TRAN DelBill
+    
+    GOTO Success    
+
+    Success:		 --成功完成函数
+    RETURN 0
+    
+    ErrorGeneral:    --检查数据是错误，不需要回滚
+    RETURN -1   
+    
+    ErrorRollback:   --数据操作是错误，需要回滚
+    ROLLBACK TRAN DelBill
+    RETURN -2 
+go
+
+
+
+IF OBJECT_ID('dbo.pbx_Sys_SetParam') IS NOT NULL 
+    DROP PROCEDURE dbo.pbx_Sys_SetParam
+GO
+
+--设置系统参数
+
+CREATE PROCEDURE pbx_Sys_SetParam
+    (
+      @PName VARCHAR(30) ,
+      @PValue VARCHAR(1000)
+    )
+AS 
+    SET NOCOUNT OFF
+
+    IF EXISTS ( SELECT  1
+                FROM    dbo.tbx_Sys_Param
+                WHERE   PName = @PName ) 
+        UPDATE  dbo.tbx_Sys_Param
+        SET     PValue = @PValue
+        WHERE   PName = @PName 
+    ELSE 
+        INSERT  INTO dbo.tbx_Sys_Param ( PName, PValue )
+        VALUES  ( @PName, @PValue )
+    
+    RETURN 0
+
+GO
 
 
 

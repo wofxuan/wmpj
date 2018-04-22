@@ -8,7 +8,7 @@ unit uFactoryFormIntf;
 
 interface
 
-uses Classes, Controls, uParamObject, uDefCom;
+uses Classes, Controls, Forms, uParamObject, uDefCom;
 
 type
   //业务窗体接口
@@ -21,6 +21,7 @@ type
     procedure FrmFree;
     procedure FrmClose;
     procedure ResizeFrm(AParentForm: TWinControl);//窗体容器大小发生改变
+    function GetForm: TForm;
   end;
 
   //业务窗体调度控制接口

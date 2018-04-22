@@ -92,7 +92,6 @@ begin
       Exit;
     end;
   end;
-
   
   try
     for i := 0 to FpluginList.Count - 1 do

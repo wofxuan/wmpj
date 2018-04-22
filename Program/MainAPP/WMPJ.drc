@@ -8,6 +8,32 @@
   resources were bound to the produced executable.
 */
 
+#define cxEditConsts_scxRegExprHexNumberExpected0 65488
+#define cxEditConsts_scxRegExprHexNumberExpected 65489
+#define cxEditConsts_scxRegExprMissing 65490
+#define cxEditConsts_scxRegExprUnnecessary 65491
+#define cxEditConsts_scxRegExprIncorrectSpace 65492
+#define cxEditConsts_scxRegExprNotCompiled 65493
+#define cxEditConsts_scxRegExprIncorrectParameterQuantifier 65494
+#define cxEditConsts_scxRegExprCantUseParameterQuantifier 65495
+#define cxEditConsts_scxMaskEditRegExprError 65496
+#define cxEditConsts_scxMaskEditInvalidEditValue 65497
+#define cxEditConsts_scxSEditRepositoryMaskItem 65504
+#define cxEditConsts_scxSEditRepositoryTextItem 65505
+#define cxEditConsts_scxRegExprLine 65506
+#define cxEditConsts_scxRegExprChar 65507
+#define cxEditConsts_scxRegExprNotAssignedSourceStream 65508
+#define cxEditConsts_scxRegExprEmptySourceStream 65509
+#define cxEditConsts_scxRegExprCantUsePlusQuantifier 65510
+#define cxEditConsts_scxRegExprCantUseStarQuantifier 65511
+#define cxEditConsts_scxRegExprCantCreateEmptyAlt 65512
+#define cxEditConsts_scxRegExprCantCreateEmptyBlock 65513
+#define cxEditConsts_scxRegExprIllegalSymbol 65514
+#define cxEditConsts_scxRegExprIllegalQuantifier 65515
+#define cxEditConsts_scxRegExprIllegalIntegerValue 65516
+#define cxEditConsts_scxRegExprTooBigReferenceNumber 65517
+#define cxEditConsts_scxRegExprCantCreateEmptyEnum 65518
+#define cxEditConsts_scxRegExprSubrangeOrder 65519
 #define cxPCConsts_scxPCImageListIndexError 65520
 #define cxPCConsts_scxPCNoBaseImages 65521
 #define cxPCConsts_scxPCNoRegisteredStyles 65522
@@ -17,8 +43,41 @@
 #define cxPCConsts_scxPCTabVisibleIndexOutsOfBounds 65526
 #define cxPCConsts_scxPCVisibleTabListEmpty 65527
 #define cxPCConsts_scxPCAllowRotateError 65528
+#define cxDataConsts_cxSDataReadError 65529
+#define cxDataConsts_cxSDataWriteError 65530
+#define cxEditConsts_cxSEditInvalidRepositoryItem 65531
+#define cxEditConsts_cxSEditNumericValueConvertError 65532
+#define cxEditConsts_cxSEditValidateErrorText 65533
+#define cxEditConsts_cxSEditValueOutOfBounds 65534
+#define cxEditConsts_scxSEditRepositoryButtonItem 65535
 STRINGTABLE
 BEGIN
+	cxEditConsts_scxRegExprHexNumberExpected0,	"Hexadecimal number expected"
+	cxEditConsts_scxRegExprHexNumberExpected,	"Hexadecimal number expected but '%s' found"
+	cxEditConsts_scxRegExprMissing,	"Missing '%s'"
+	cxEditConsts_scxRegExprUnnecessary,	"Unnecessary '%s'"
+	cxEditConsts_scxRegExprIncorrectSpace,	"The space character is not allowed after '\\'"
+	cxEditConsts_scxRegExprNotCompiled,	"Regular expression is not compiled"
+	cxEditConsts_scxRegExprIncorrectParameterQuantifier,	"Incorrect parameter quantifier"
+	cxEditConsts_scxRegExprCantUseParameterQuantifier,	"The parameter quantifier cannot be applied here"
+	cxEditConsts_scxMaskEditRegExprError,	"Regular expression errors:"
+	cxEditConsts_scxMaskEditInvalidEditValue,	"The edit value is invalid"
+	cxEditConsts_scxSEditRepositoryMaskItem,	"MaskEdit|Represents a generic masked edit control."
+	cxEditConsts_scxSEditRepositoryTextItem,	"TextEdit|Represents a single line text editor"
+	cxEditConsts_scxRegExprLine,	"Line"
+	cxEditConsts_scxRegExprChar,	"Char"
+	cxEditConsts_scxRegExprNotAssignedSourceStream,	"The source stream is not assigned"
+	cxEditConsts_scxRegExprEmptySourceStream,	"The source stream is empty"
+	cxEditConsts_scxRegExprCantUsePlusQuantifier,	"The '+' quantifier cannot be applied here"
+	cxEditConsts_scxRegExprCantUseStarQuantifier,	"The '*' quantifier cannot be applied here"
+	cxEditConsts_scxRegExprCantCreateEmptyAlt,	"The alternative should not be empty"
+	cxEditConsts_scxRegExprCantCreateEmptyBlock,	"The block should not be empty"
+	cxEditConsts_scxRegExprIllegalSymbol,	"Illegal '%s'"
+	cxEditConsts_scxRegExprIllegalQuantifier,	"Illegal quantifier '%s'"
+	cxEditConsts_scxRegExprIllegalIntegerValue,	"Illegal integer value"
+	cxEditConsts_scxRegExprTooBigReferenceNumber,	"Too big reference number"
+	cxEditConsts_scxRegExprCantCreateEmptyEnum,	"Can't create empty enumeration"
+	cxEditConsts_scxRegExprSubrangeOrder,	"The starting character of the subrange must be less than the finishing one"
 	cxPCConsts_scxPCImageListIndexError,	"Index (%d) must be between 0 and %d"
 	cxPCConsts_scxPCNoBaseImages,	"BaseImages is not assigned"
 	cxPCConsts_scxPCNoRegisteredStyles,	"There are no styles registered"
@@ -28,5 +87,12 @@ BEGIN
 	cxPCConsts_scxPCTabVisibleIndexOutsOfBounds,	"TabVisibleIndex (%d) must be between 0 and %d"
 	cxPCConsts_scxPCVisibleTabListEmpty,	"There are no visible tabs"
 	cxPCConsts_scxPCAllowRotateError,	"%s style does not support rotation of tabs"
+	cxDataConsts_cxSDataReadError,	"Stream read error"
+	cxDataConsts_cxSDataWriteError,	"Stream write error"
+	cxEditConsts_cxSEditInvalidRepositoryItem,	"The repository item is not acceptable"
+	cxEditConsts_cxSEditNumericValueConvertError,	"Could not convert to numeric value"
+	cxEditConsts_cxSEditValidateErrorText,	"Invalid input value. Use escape key to abandon changes"
+	cxEditConsts_cxSEditValueOutOfBounds,	"Value out of bounds"
+	cxEditConsts_scxSEditRepositoryButtonItem,	"ButtonEdit|Represents an edit control with embedded buttons"
 END
 

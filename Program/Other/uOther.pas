@@ -2,7 +2,7 @@ unit uOther;
 
 interface
 
-uses SysUtils, Dialogs, Controls, uSvcInfoIntf, uDefCom, uOtherIntf;
+uses SysUtils, Dialogs, Controls, Forms, uSvcInfoIntf, uDefCom, uOtherIntf;
 
 const
   LogDir = 'Log';//保存日志的目录
@@ -148,16 +148,18 @@ end;
 
 function TMsgBox.MsgBox(AMsg, ACaption: string; AMsgType: TMessageBoxType;
   AButtons: TMessageBoxButtons): Integer;
+var
+  aFrm: TfrmMsgBox;
 begin
-  with TfrmMsgBox.Create(nil) do
+  aFrm := TfrmMsgBox.Create(Application); //要用Application不然可能出错
   try
-    Captions := ACaption;
-    Messages := AMsg;
-    MsgType := AMsgType;
-    Buttons := AButtons;
-    Result := ShowModal;
+    aFrm.Captions := ACaption;
+    aFrm.Messages := AMsg;
+    aFrm.MsgType := AMsgType;
+    aFrm.Buttons := AButtons;
+    Result := aFrm.ShowModal;
   finally
-    Free
+    aFrm.Free
   end;
 end;
 

@@ -45,7 +45,8 @@ requires
   cxExportVCLD7,
   dxBarD7,
   dxComnD7,
-  dxBarExtItemsD7;
+  dxBarExtItemsD7,
+  wmDefCom;
 
 contains
   uSysConfigExport in 'uSysConfigExport.pas',
@@ -58,6 +59,9 @@ contains
   uFrmStockGoodCheck in 'uFrmStockGoodCheck.pas' {frmStockGoodCheck},
   uFrmBaseTbxCfg in 'uFrmBaseTbxCfg.pas' {frmBaseTbxCfg},
   uFrmReBuild in 'uFrmReBuild.pas' {frmReBuild},
-  uFrmLoadItemSet in 'uFrmLoadItemSet.pas' {frmLoadItemSet};
+  uFrmLoadItemSet in 'uFrmLoadItemSet.pas' {frmLoadItemSet},
+  uFrmMyFlow in 'uFrmMyFlow.pas' {frmMyFlow},
+  uFrmFlow in 'uFrmFlow.pas' {frmFlow},
+  uFrmFlowWork in 'uFrmFlowWork.pas' {frmFlowWork};
 
 end.

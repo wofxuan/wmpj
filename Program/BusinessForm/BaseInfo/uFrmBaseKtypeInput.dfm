@@ -95,7 +95,7 @@ inherited frmBaseKtypeInput: TfrmBaseKtypeInput
       Width = 545
     end
     object edtUsercode: TcxButtonEdit
-      Left = 72
+      Left = 75
       Top = 38
       Properties.Buttons = <
         item
@@ -138,7 +138,7 @@ inherited frmBaseKtypeInput: TfrmBaseKtypeInput
       Width = 81
     end
     object edtAddress: TcxButtonEdit
-      Left = 72
+      Left = 75
       Top = 70
       Properties.Buttons = <
         item

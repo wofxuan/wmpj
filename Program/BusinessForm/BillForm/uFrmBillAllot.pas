@@ -29,6 +29,7 @@ type
   private
     { Private declarations }
     procedure BeforeFormShow; override;
+    procedure InitParamList; override;
 
     procedure InitMasterTitles(Sender: TObject); override;
     procedure InitGrids(Sender: TObject); override;
@@ -107,8 +108,6 @@ end;
 procedure TfrmBillAllot.InitMasterTitles(Sender: TObject);
 begin
   inherited;
-  MoudleNo := fnMdlBillAllot;
-
   Title := 'µ÷²¦µ¥';
 
   DBComItem.AddItem(deBillDate, 'InputDate');
@@ -121,6 +120,12 @@ begin
 
   DBComItem.AddItem(edtSummary, 'Summary');
   DBComItem.AddItem(edtComment, 'Comment');
+end;
+
+procedure TfrmBillAllot.InitParamList;
+begin
+  inherited;
+  MoudleNo := fnMdlBillAllot;
 end;
 
 function TfrmBillAllot.LoadBillDataGrid: Boolean;

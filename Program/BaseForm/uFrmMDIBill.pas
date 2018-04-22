@@ -10,7 +10,7 @@ uses
   cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxGrid,
   cxContainer, cxTreeView, ExtCtrls, cxLabel, cxDropDownEdit, cxCalendar,
   cxTextEdit, cxMaskEdit, cxButtonEdit, uDefCom, uBillData, uPackData,
-  uModelBaseIntf, uModelFunIntf;
+  uModelBaseIntf, uModelFunIntf, uModelFlowIntf;
 
 type
   TfrmMDIBill = class(TfrmMDI)
@@ -31,9 +31,12 @@ type
     actSaveSettle: TAction;
     actSelectBill: TAction;
     btnSelectBill: TdxBarLargeButton;
+    btnFlow: TdxBarLargeButton;
+    actFlow: TAction;
     procedure actSaveDraftExecute(Sender: TObject);
     procedure actSaveSettleExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure actFlowExecute(Sender: TObject);
   private
     { Private declarations }
     FBillSaveState: TBillSaveState; //单据保存类型状态
@@ -43,12 +46,13 @@ type
   protected
     FVchCode, FVchType, FNewVchCode: Integer;//单据ID，单据类型
     FModelBill: IModelBill;
+    FModelFlow: IModelFlow;//审批相关
     FReadOnlyFlag: boolean;//是否能够修改单据
     
     procedure BeforeFormShow; override;
     procedure BeforeFormDestroy; override;
     
-    procedure InitParamList; override;
+    procedure InitParamList; override;//对MoudleNo点赋值应该放在此函数里面才会判断是否有查看单据点权限
     procedure SetTitle(const Value: string); override;
 
     function LoadBillData: Boolean; virtual;//加载单据
@@ -79,6 +83,7 @@ type
 
     procedure GetBillNumber;
     procedure SetQtyPriceTotal(ATotal, AQty, APrice: string);//设置数量单价金额的公式
+    function AuditState: Integer; //此单据的审批状态 0没有审批，-1审批中，1审批完成, 2终止
   public
     { Public declarations }
      property BillSaveState: TBillSaveState read FBillSaveState write FBillSaveState;
@@ -92,7 +97,7 @@ var
 
 implementation
 
-uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf,
+uses uSysSvc, uBaseFormPlugin, uMoudleNoDef, uParamObject, uModelControlIntf, uMainFormIntf,
      uBaseInfoDef, uGridConfig, uFrmApp, uVchTypeDef, uOtherIntf, uFunApp, uModelLimitIntf;
 
 {$R *.dfm}
@@ -109,7 +114,9 @@ procedure TfrmMDIBill.BeforeFormShow;
 begin
   inherited;
   FGridItem.SetGridCellSelect(True);
-  
+
+  FModelFlow := IModelFlow((SysService as IModelControl).GetModelIntf(IModelFlow));
+
   InitMasterTitles(Self);
   InitGrids(self);
   InitMenuItem(self);
@@ -168,8 +175,60 @@ begin
 end;
 
 procedure TfrmMDIBill.InitOthers(Sender: TObject);
+var
+  aCdsTmp: TClientDataSet;
+  aParam: TParamObject;
+  aState: Integer;
 begin
-
+  aState := AuditState();
+  
+  if (BillOpenState <> bosAudit) and (aState = 0) then
+  begin
+    actFlow.Caption := '提交审批';
+    aCdsTmp := TClientDataSet.Create(nil);
+    try
+      aParam := TParamObject.Create;
+      try
+        aParam.Add('@QryType', Flow_TaskProc);
+        aParam.Add('@Custom', '');
+        FModelFlow.FlowData(aParam, aCdsTmp);
+        actFlow.Enabled := False;
+        aCdsTmp.First;
+        while not aCdsTmp.Eof do
+        begin
+          if aCdsTmp.FieldByName('WorkID').AsString = IntToStr(MoudleNo) then
+          begin
+            actFlow.Enabled := True;
+            Exit;
+          end;
+          aCdsTmp.Next;
+        end
+      finally
+        aParam.Free;
+      end;
+    finally
+      aCdsTmp.Free;
+    end;
+  end
+  else
+  begin
+    BillOpenState := bosAudit;
+    actFlow.Caption := '审批';
+    if aState = 1 then
+    begin
+      actFlow.Caption := '审批完成';
+      actFlow.Enabled := False;
+      actSaveDraft.Enabled := False;
+      actSaveSettle.Enabled := False;
+    end
+    else if aState = 2 then
+    begin
+      actFlow.Caption := '审批终止';
+      actFlow.Enabled := False;
+      actSaveDraft.Enabled := False;
+      actSaveSettle.Enabled := False;
+    end;
+  end;
 end;
 
 procedure TfrmMDIBill.InitParamList;
@@ -395,7 +454,7 @@ begin
       FReadOnlyFlag := True;
     end;
   end
-  else if BillOpenState = bosView then 
+  else if BillOpenState in [bosView, bosAudit] then
   begin
     BillCurrState := bcsView; //查看凭证
     FReadOnlyFlag := True;
@@ -437,7 +496,18 @@ end;
 
 function TfrmMDIBill.CheckSaveBillData(
   ASaveState: TBillSaveState): Boolean;
+var
+  aCdsTmp: TClientDataSet;
+  aParam: TParamObject;
 begin
+  Result := False;
+
+  if AuditState() <> 0 then
+  begin
+    (SysService as IMsgBox).MsgBox('存在审批流程，不能修改！');
+    Exit;
+  end;
+  
   Result := True;
 end;
 
@@ -475,4 +545,87 @@ begin
   end;
 end;
 
+procedure TfrmMDIBill.actFlowExecute(Sender: TObject);
+var
+  aParam: TParamObject;
+begin
+  inherited;
+  aParam := TParamObject.Create;
+  try
+    aParam.Add('BillType', FVchType);
+    aParam.Add('BillID', FVchCode);
+    aParam.Add('WorkID', MoudleNo);
+    if BillOpenState <> bosAudit then
+    begin
+      if (FVchType = 0) or (FVchCode = 0) then
+      begin
+        (SysService as IMsgBox).MsgBox('请先保存单据，在提交审批！');
+        Exit;
+      end;
+      aParam.Add('Info', '单据类型:' + Title + ',单据号:' +  edtBillNumber.Text);
+      if FModelFlow.SaveOneFlow(aParam) <> 0 then
+      begin
+        aParam.Add('ProcePathID', ParamList.AsInteger('ProcePathID'));
+      end;  
+    end
+    else
+    begin
+      aParam.Add('ProcePathID', ParamList.AsInteger('ProcePathID'));
+      (SysService as IMainForm).CallFormClass(fnFlowWork, aParam);
+    end;
+  finally
+    aParam.Free;
+  end;
+end;
+
+function TfrmMDIBill.AuditState: Integer;
+var
+  aCdsTmp: TClientDataSet;
+  aParam: TParamObject;
+begin
+  Result := -99;
+  if FVchCode <> 0 then
+  begin
+    aCdsTmp := TClientDataSet.Create(nil);
+    try
+      aParam := TParamObject.Create;
+      try
+        aParam.Add('@QryType', Flow_OneWork);
+        aParam.Add('@BillID', FVchCode);
+        aParam.Add('@BillType', FVchType);
+        aParam.Add('@WorkID', MoudleNo);
+        FModelFlow.FlowData(aParam, aCdsTmp);
+        if aCdsTmp.RecordCount > 0 then
+        begin
+          aCdsTmp.First;
+          while not aCdsTmp.Eof do
+          begin
+            if aCdsTmp.FieldByName('ProceResult').AsInteger = Flow_State_Stop then
+            begin
+              Result := 2;
+              Exit;
+            end
+            else if aCdsTmp.FieldByName('ProceResult').AsInteger = 0 then
+            begin
+              Result := -1;
+              if aCdsTmp.FieldByName('FlowETypeID').AsString = OperatorID then
+              begin
+                ParamList.Add('ProcePathID', aCdsTmp.FieldByName('ProcePathID').AsInteger);
+              end;
+            end;
+            aCdsTmp.Next;
+          end;
+          if Result = -99 then Result := 1;
+          Exit;
+        end;
+      finally
+        aParam.Free;
+      end;
+    finally
+      aCdsTmp.Free;
+    end;
+  end;
+  
+  Result := 0;
+end;
 end.

@@ -199,7 +199,8 @@ begin
   if afrmParent.FrmShowStyle = fssShow then
   begin
     afrmParent.CreateFrmParamList((SysService as IMainForm).GetMDIShowClient, AParam);
-    afrmParent.Parent := (SysService as IMainForm).GetMDIShowClient;
+//    afrmParent.Parent := (SysService as IMainForm).GetMDIShowClient; //这样设置时焦点会跳转到嵌入窗体的第一个控件
+    afrmParent.ParentWindow := (SysService as IMainForm).GetMDIShowClient.Handle;
     afrmParent.WindowState := wsMaximized; 
   end
   else

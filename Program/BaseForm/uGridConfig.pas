@@ -10,7 +10,8 @@ interface
 
 uses
   Windows, Classes, Db, DBClient, SysUtils, Controls, cxGrid, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
-  cxGridDBTableView, cxGraphics, uBaseInfoDef, uModelBaseIntf, uModelFunIntf, cxEdit, uDefCom, cxCustomData, uOtherDefine;
+  cxGridDBTableView, cxGraphics, uBaseInfoDef, uModelBaseIntf, uModelFunIntf, cxEdit, uDefCom, cxCustomData, uOtherDefine,
+  cxStyles;
 
 const
   SpecialCharList: array[0..1] of string = ('[', ']');
@@ -52,7 +53,7 @@ type
   TGridItem = class(TObject)
   private
     FModelFun: IModelFun;
-    FGridID: Integer;
+    FGridID: string;
     FGrid: TcxGrid;
     FGridTV: TcxGridTableView;
     FBasicType: TBasicType; //表格如果要分组的需要根据类型在去ptypeid等的儿子数来看是否显示*
@@ -82,7 +83,7 @@ type
     procedure GridColEditValueChanged(Sender: TObject); //设置公式字段后，单元格值改变事件时计算公式
     procedure InitExpression; //初始化公式设置
   public
-    constructor Create(AGridID: Integer; AGrid: TcxGrid; AGridTV: TcxGridTableView);
+    constructor Create(AGridID: string; AGrid: TcxGrid; AGridTV: TcxGridTableView);
     destructor Destroy; override;
 
     procedure ClearField; //清空表格的所有列数据
@@ -90,6 +91,7 @@ type
     function AddField(AFileName, AShowCaption: string; AWidth: Integer = 100; AColShowType: TColField = cfString): TColInfo; overload;
     procedure AddField(ABasicType: TBasicType); overload;
     function AddCheckBoxCol(AFileName, AShowCaption: string; AValueChecked, ValueUnchecked: Variant): TColInfo;
+    function AddBtnCol(AFileName, AShowCaption, ABtnCaption: string; AClickEvent: TcxEditButtonClickEvent): TColInfo;
     function GetCellValue(ADBName: string; ARowIndex: Integer): Variant; //获取单元格值
     procedure SetCellValue(ADBName: string; ARowIndex: Integer; AValue: Variant); //设置单元格值
     procedure InitGridData;
@@ -106,6 +108,10 @@ type
     function FindColByCaption(AShowCaption: string): TColInfo; //根据表头查找列
     function FindColByFieldName(AFieldName: string): TColInfo; //根据数据库字段名称查找列
     procedure AddFooterSummary(AColInfo: TColInfo; ASummaryKind: TcxSummaryKind); //增加一个合计行字段
+    function AddRow: Integer; //增加一行
+    function RecordCount: Integer; //有多少数据行
+    procedure DeleteRow(ARow: Integer); //删除指定行
+    procedure SetReadOnly(AReadOnly: Boolean); //是否能修改表格
 
     property ShowMaxRow: Boolean read FShowMaxRow write FShowMaxRow;
   published
@@ -188,7 +194,6 @@ var
   aColInfo: TColInfo;
 begin
   aCol := FGridTV.CreateColumn;
-//  aCol.DataBinding.FieldName := AFileName;
   aCol.Caption := AShowCaption;
   aCol.PropertiesClass := TcxCheckBoxProperties;
   TcxCheckBoxProperties(aCol.Properties).ValueChecked := AValueChecked;
@@ -205,7 +210,7 @@ begin
   FGridTV.ClearItems;
 end;
 
-constructor TGridItem.Create(AGridID: Integer; AGrid: TcxGrid; AGridTV: TcxGridTableView);
+constructor TGridItem.Create(AGridID: string; AGrid: TcxGrid; AGridTV: TcxGridTableView);
 begin
   FGridID := AGridID;
   FGrid := AGrid;
@@ -229,6 +234,9 @@ begin
   FGridTV.OptionsView.GroupByBox := False; //不显示表头的分组功能
   FGridTV.OptionsBehavior.FocusCellOnCycle := True; //切换时可以循环
   FGridTV.OptionsBehavior.GoToNextCellOnEnter := True; //通过回车切换单元格
+  FGridTV.Styles.Selection := TcxStyle.Create(nil);
+  FGridTV.Styles.Selection.Color := $00C08000; //clGradientActiveCaption;
+
 
   FColCfg.AddGradItem(Self);
   FTypeClassList := TStringList.Create;
@@ -840,6 +848,55 @@ begin
   TcxGridTableSummaryItem(aFooter).Column := AColInfo.GridColumn;
 
   FGridTV.OptionsView.Footer := True;
+end;
+
+function TGridItem.AddRow: Integer;
+var
+  aRecordCount: Integer;
+begin
+  aRecordCount :=  FGridTV.DataController.RecordCount + 1;
+  if aRecordCount > MaxRowCount then
+  begin
+    raise(SysService as IExManagement).CreateSysEx('超过表格最大行数，不能在增加行！');
+  end;
+  FGridTV.DataController.RecordCount := aRecordCount;
+  Result := aRecordCount - 1;
+end;
+
+function TGridItem.RecordCount: Integer;
+begin
+  Result := FGridTV.DataController.RecordCount;
+end;
+
+procedure TGridItem.DeleteRow(ARow: Integer);
+begin
+  FGridTV.DataController.DeleteRecord(ARow);
+end;
+
+function TGridItem.AddBtnCol(AFileName, AShowCaption, ABtnCaption: string; AClickEvent: TcxEditButtonClickEvent): TColInfo;
+var
+  aCol: TcxGridColumn;
+  aColInfo: TColInfo;
+begin
+  aCol := FGridTV.CreateColumn;
+  aCol.Caption := AShowCaption;
+  aCol.PropertiesClass := TcxButtonEditProperties;
+  aCol.Options.ShowEditButtons := isebAlways;
+
+  TcxButtonEditProperties(aCol.Properties).Buttons[0].Caption := ABtnCaption;
+  TcxButtonEditProperties(aCol.Properties).Buttons[0].Kind := bkText;
+  TcxButtonEditProperties(aCol.Properties).OnButtonClick := AClickEvent;
+  
+  aColInfo := TColInfo.Create(aCol, AFileName);
+  SetLength(FColList, Length(FColList) + 1);
+  FColList[Length(FColList) - 1] := aColInfo;
+  Result := aColInfo;
+end;
+
+
+procedure TGridItem.SetReadOnly(AReadOnly: Boolean);
+begin
+  FGridTV.OptionsData.Editing := not AReadOnly;
 end;
 
 { TGridControl }

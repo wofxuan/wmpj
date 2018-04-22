@@ -9,10 +9,10 @@ interface
 uses
   Windows, Classes, Db, DBClient, SysUtils, uParamObject, uDefCom, uModelLimitIntf;
 
-procedure OpenBillFrm(AVchType, AVchCode: Integer; AOpenState: TBillOpenState); //打开单据
+procedure OpenBillFrm(AVchType, AVchCode: Integer; AOpenState: TBillOpenState); overload; //打开单据
+procedure OpenBillFrm(AVchType, AVchCode, AProcePathID: Integer; AOpenState: TBillOpenState); overload; //打开单据
 
 function CheckLimit(AMoudleNo, ALimitDo: Integer; AIsShowMsg: Boolean = True): Boolean; //权限检查
-
 
 implementation
 
@@ -42,6 +42,11 @@ begin
 end;
 
 procedure OpenBillFrm(AVchType, AVchCode: Integer; AOpenState: TBillOpenState);
+begin
+  OpenBillFrm(AVchType, AVchCode, 0, AOpenState);
+end;
+
+procedure OpenBillFrm(AVchType, AVchCode, AProcePathID: Integer; AOpenState: TBillOpenState);
 var
   aParam: TParamObject;
 begin
@@ -49,6 +54,7 @@ begin
   try
     aParam.Add('VchType', aVchType);
     aParam.Add('VchCode', aVchCode);
+    aParam.Add('ProcePathID', AProcePathID);
     aParam.Add('bosState', Ord(AOpenState));
     case AVchType of
       VchType_Order_Buy: (SysService as IMainForm).CallFormClass(fnMdlBillOrderBuy, aParam);

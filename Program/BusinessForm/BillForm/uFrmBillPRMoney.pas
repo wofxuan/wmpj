@@ -85,7 +85,7 @@ procedure TfrmBillPRMoney.BeforeFormShow;
 begin
   FModelBill := IModelBillPRMoney((SysService as IModelControl).GetModelIntf(IModelBillPRMoney));
 
-  FGridBill := TGridItem.Create(fnPRMoney, gridBill, gridTVBill);
+  FGridBill := TGridItem.Create(ClassName + IntToString(MoudleNo) + gridBill.Name, gridBill, gridTVBill);
   FGridBill.SetGridCellSelect(True);
   FGridBill.ShowMaxRow := False;
   inherited;

@@ -4,10 +4,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, uFactoryFormIntf, uParamObject, ExtCtrls,
+  Dialogs, StdCtrls, uFactoryFormIntf, uParamObject, ExtCtrls, 
   ActnList, uBaseInfoDef, uGridConfig, uDBComConfig, uDefCom, uModelFunIntf,
-  cxGridLevel, cxClasses, cxControls, cxGridCustomView,
-  cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGrid;
+  cxGridLevel, cxClasses, cxControls, cxGridCustomView, dxBar, uWmLabelEditBtn,
+  cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGrid, cxGroupBox;
 
 type
   TfrmParent = class(TForm, IFormIntf)
@@ -35,6 +35,7 @@ type
     procedure FrmFree;
     procedure FrmClose;
     procedure ResizeFrm(AParentForm: TWinControl);
+    function GetForm: TForm;
 
     procedure DoSelectBasic(Sender: TObject; ABasicType: TBasicType;
       ASelectBasicParam: TSelectBasicParam;
@@ -49,6 +50,10 @@ type
 
     procedure InitialAllComponent; virtual;
     procedure InitcxGridClass(AComp: TComponent);
+    procedure InitPanel(AComp: TComponent);
+    procedure InitdxBar(AComp: TComponent);
+    procedure InitWmLabelEditBtn(AComp: TComponent);
+    procedure InitcxGroupBox(AComp: TComponent);
   public
     { Public declarations }
     constructor CreateFrmParamList(AOwner: TComponent; AParam: TParamObject); virtual; //带参数的创建
@@ -92,6 +97,7 @@ end;
 
 procedure TfrmParent.FormShow(Sender: TObject);
 begin
+  Color := clWhite;
   FDBComItem := TFormDBComItem.Create(Self);
   FDBComItem.OnSelectBasic := DoSelectBasic;
 
@@ -124,7 +130,6 @@ end;
 
 procedure TfrmParent.FrmShow;
 begin
-  ResizeFrm((SysService as IMainForm).GetMDIShowClient);
   Self.Show;
 end;
 
@@ -198,9 +203,15 @@ end;
 procedure TfrmParent.InitialAllComponent;
 var i: Integer;
 begin
+  Font.Name := '宋体';
+  Font.Size := 10;
   for i := 0 to ComponentCount - 1 do
   begin
-    if (Components[i] is TcxGridTableView) then InitcxGridClass(Components[i]);
+    if (Components[i] is TcxGridTableView) then InitcxGridClass(Components[i])
+    else if (Components[i] is TdxBar) then InitdxBar(Components[i])
+    else if (Components[i] is TPanel) then InitPanel(Components[i])
+    else if (Components[i] is TWmLabelEditBtn) then InitWmLabelEditBtn(Components[i])
+    else if (Components[i] is TcxGroupBox) then InitcxGroupBox(Components[i]);
   end;
 end;
 
@@ -221,6 +232,39 @@ procedure TfrmParent.ResizeFrm(AParentForm: TWinControl);
 begin
   Width := AParentForm.Width;
   Height := AParentForm.Height;
+end;
+
+function TfrmParent.GetForm: TForm;
+begin
+  Result := Self;
+end;
+
+procedure TfrmParent.InitPanel(AComp: TComponent);
+begin
+  TPanel(AComp).Color := clWhite;
+end;
+
+procedure TfrmParent.InitdxBar(AComp: TComponent);
+begin
+  TdxBar(AComp).Color := clWhite;
+end;
+
+procedure TfrmParent.InitWmLabelEditBtn(AComp: TComponent);
+begin
+//  TWmLabelEditBtn(AComp).LabelFont.Name := '宋体';
+//  TWmLabelEditBtn(AComp).LabelFont.Size := 9;
+//
+//  TWmLabelEditBtn(AComp).Style.Font.Name := '宋体';
+//  TWmLabelEditBtn(AComp).Style.Font.Size := 9;
+end;
+
+procedure TfrmParent.InitcxGroupBox(AComp: TComponent);
+begin
+//  TcxGroupBox(AComp).Font.Name := '宋体';
+//  TcxGroupBox(AComp).Font.Size := 9;
+//
+//  TcxGroupBox(AComp).Style.Font.Name := '宋体';
+//  TcxGroupBox(AComp).Style.Font.Size := 9;
 end;
 
 initialization

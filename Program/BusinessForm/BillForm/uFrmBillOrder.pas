@@ -77,7 +77,7 @@ function TfrmBillOrder.CheckSaveBillData(
   ASaveState: TBillSaveState): Boolean;
 begin
   Result := inherited CheckSaveBillData(ASaveState);
-  Result := False;
+  if not Result then Exit;
   if StringEmpty(edtBtype.Text) then
   begin
     (SysService as IMsgBox).MsgBox('±ÿ–Î ‰»Î' + lblBtype.Caption + '£°');

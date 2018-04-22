@@ -1,6 +1,6 @@
-IF OBJECT_ID('dbo.pbx_Limit_Check') IS NOT NULL 
+IF OBJECT_ID('dbo.pbx_Limit_Check') IS NOT NULL
     DROP PROCEDURE dbo.pbx_Limit_Check
-go
+GO
 
 --判断某个用户是否具有某种权限点某种操作
 
@@ -11,7 +11,7 @@ CREATE PROCEDURE pbx_Limit_Check
       @UserId VARCHAR(50) ,--tbx_Limit_RU表的用户ID
       @ErrorValue VARCHAR(500) OUTPUT 
     )
-AS 
+AS
     SET NOCOUNT ON
     DECLARE @aSQL VARCHAR(8000)
     DECLARE @aRUType INT
@@ -38,9 +38,13 @@ AS
     SET @aRUType = 2 --通过用户查询
     SET @aLimitValue = 0
     
-    IF @LimitDo = 0 
+    IF @LimitDo = 0
         RETURN -1
-        
+     
+    IF ( @UserId = '00000' )--超级管理员
+        BEGIN
+            RETURN 0
+        END   
     --IF ( @LimitType = 0 ) 
     BEGIN     
         SELECT  @aLimitValue = ISNULL(MAX(ru.LimitValue), 0), @aLAType = la.LAType, @aLAName = la.LAName
@@ -61,7 +65,7 @@ AS
                   ELSE -1
                 END      
                    
-    IF ( @aRet <> 0 ) 
+    IF ( @aRet <> 0 )
         BEGIN
             IF ( @aLAType = 1 ) --0未配置，1基本信息，2单据，3报表，4数据，5其它 
                 BEGIN
@@ -78,8 +82,8 @@ AS
 				
                     SET @ErrorValue = @ErrorValue + ')]权限'
                 END	
-            ELSE 
-                IF ( @aLAType = 2 ) 
+            ELSE
+                IF ( @aLAType = 2 )
                     BEGIN
                         SET @ErrorValue = '没有功能[(' + @aLAName + ')->('	
                         SET @ErrorValue = @ErrorValue + CASE @LimitDo
@@ -92,8 +96,8 @@ AS
 				
                         SET @ErrorValue = @ErrorValue + ')]权限'
                     END	
-                ELSE 
-                    IF ( @aLAType = 3 ) 
+                ELSE
+                    IF ( @aLAType = 3 )
                         BEGIN
                             SET @ErrorValue = '没有功能[(' + @aLAName + ')->('	
                             SET @ErrorValue = @ErrorValue + CASE @LimitDo

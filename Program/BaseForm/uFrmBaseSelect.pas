@@ -104,7 +104,7 @@ end;
 procedure TfrmBaseSelect.BeforeFormShow;
 begin
   inherited;
-  FGridItem := TGridItem.Create(MoudleNo, gridMainShow, gridTVMainShow);
+  FGridItem := TGridItem.Create(ClassName + IntToString(MoudleNo) + gridMainShow.Name, gridMainShow, gridTVMainShow);
   FGridItem.SetGoToNextCellOnEnter(False);
   FGridItem.OnLoadUpDownData := DoLoadUpDownData;
   FDBAC := SysService as IDBAccess;

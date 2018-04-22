@@ -47,6 +47,7 @@ contains
   uModelBillIntf in 'uModelBillIntf.pas',
   uModelStockGoodsIntf in 'uModelStockGoodsIntf.pas',
   uModelLimitIntf in 'uModelLimitIntf.pas',
-  uMoudleNoDef in '..\Pub\uMoudleNoDef.pas';
+  uMoudleNoDef in '..\Pub\uMoudleNoDef.pas',
+  uModelFlowIntf in 'uModelFlowIntf.pas';
 
 end.

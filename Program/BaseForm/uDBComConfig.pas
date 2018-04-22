@@ -11,7 +11,12 @@ uses
   Windows, Classes, Db, DBClient, SysUtils, Controls, cxGrid, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
   cxGridDBTableView, cxGraphics, uParamObject, cxButtons, ExtCtrls, Mask, cxTextEdit, cxMaskEdit, cxButtonEdit,
   cxDropDownEdit, ComCtrls, cxStyles, cxCustomData, cxFilter, uBaseInfoDef, uModelFunIntf,
-  cxData, cxDataStorage, cxDBData, cxGridLevel, cxClasses, cxMemo, cxCalendar, Forms;
+  cxData, cxDataStorage, cxDBData, cxGridLevel, cxClasses, cxMemo, cxCalendar, Forms, uDefCom;
+
+const
+  EXPPlusInt = '[1-9]\d*|0'; //正整数(允许0)的正则表达式
+  EXPInt = '(0|-?[1-9]\d*)'; //整数
+  EXPFloat = '(-?\d+)(\.\d+)'; //浮点数
 
 type
   //记录一个界面控件和对应参数等信息
@@ -23,6 +28,7 @@ type
     BasicType: TBasicType;//是否是基本信息字段
     ShowFields: string;//显示基本信息哪个字段
     TypeId: string;//基本信息赋值取值用此字段
+    EditType: TColField;//输入的类型
   end;
 
   TDBComArray = array of PDBComItem;
@@ -46,7 +52,7 @@ type
     procedure GetDataFormParam(AParam: TParamObject); //从TParamObject中取值
     procedure SetDataToParam(AParam: TParamObject); //给ParamObject赋值
 
-    function AddItem(AControl: TControl; ASetDBNane: string; AGetDBName: string): PDBComItem; overload; //通过已有的控件添加一个数据项
+    function AddItem(AControl: TControl; ASetDBNane: string; AGetDBName: string; AEditType: TColField = cfString): PDBComItem; overload; //通过已有的控件添加一个数据项
     function AddItem(AControl: TControl; ADBName: string): PDBComItem; overload;
     function AddItem(AControl: TControl; ASetDBName, AGetDBName, AFieldsList: string; ABasicType: TBasicType): PDBComItem; overload;
     procedure ClearItemData;
@@ -69,20 +75,36 @@ uses uSysSvc, uOtherIntf, cxCheckBox, Graphics, Messages, uPubFun;
 { TFormDBComItem }
 
 function TFormDBComItem.AddItem(AControl: TControl; ASetDBNane,
-  AGetDBName: string): PDBComItem;
+  AGetDBName: string; AEditType: TColField = cfString): PDBComItem;
 var
   aLen: Integer;
   aItem: PDBComItem;
+  aEdt: TcxButtonEdit;
 begin
   aItem := New(PDBComItem);
   aItem.Component := AControl;
   aItem.SetDBName := ASetDBNane;
   aItem.GetDBName := AGetDBName;
   aItem.BasicType := btNo;
+  aItem.EditType := AEditType;
 
   if AControl is TcxButtonEdit then
   begin
-    TcxButtonEdit(AControl).OnKeyDown := EdtKeyDown;
+    aEdt := TcxButtonEdit(AControl);
+    aEdt.OnKeyDown := EdtKeyDown;
+
+    aEdt.Properties.MaskKind := emkRegExprEx;
+    case AEditType of
+      cfInt: aEdt.Properties.EditMask := EXPInt;
+      cfPlusInt: aEdt.Properties.EditMask := EXPPlusInt;
+      cfFloat: aEdt.Properties.EditMask := EXPFloat;
+    else
+
+    end;
+  end
+  else if AControl is TcxDateEdit then
+  begin
+    TcxDateEdit(AControl).OnKeyDown := EdtKeyDown;
   end;
   
   aLen := Length(FDBComList) + 1;
@@ -121,9 +143,10 @@ procedure TFormDBComItem.EdtKeyDown(Sender: TObject; var Key: Word;
 begin
   if Key = VK_RETURN then
   begin
-    TCButtonClick(Sender, 0);
+    if Sender is TcxButtonEdit then TCButtonClick(Sender, 0);
     FOwnerFrom.Perform(WM_NEXTDLGCTL, 0, 0); //焦点跳转到下一个控件
 //    FOwnerFrom.SelectNext(ActiveControl, True, True);
+//    TWinControl(FOwnerFrom).SelectNext(TcxButtonEdit(Sender), True, False);
   end;
 end;
 

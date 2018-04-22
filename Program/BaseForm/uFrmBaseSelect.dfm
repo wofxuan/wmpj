@@ -56,7 +56,7 @@ inherited frmBaseSelect: TfrmBaseSelect
     object gridMainShow: TcxGrid
       Left = 1
       Top = 1
-      Width = 503
+      Width = 519
       Height = 237
       Align = alClient
       TabOrder = 0

@@ -33,7 +33,7 @@ inherited frmLimitSet: TfrmLimitSet
       Top = 1
       Width = 819
       Height = 311
-      ActivePage = tsReport
+      ActivePage = tsBase
       Align = alClient
       Style = 10
       TabOrder = 0

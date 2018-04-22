@@ -94,7 +94,7 @@ OutputDir=..\..\Bin
 UnitOutputDir=..\..\Dcu
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\Dcp;..\Pub;..\Interfaces
+SearchPath=..\..\Dcp;..\Pub;..\Interfaces;D:\code\wmpj\DefComponent
 Packages=vcl;rtl;vclx;indy;inet;xmlrtl;vclie;inetdbbde;inetdbxpress;dbrtl;dsnap;dsnapcon;vcldb;soaprtl;VclSmp;dbexpress;dbxcds;inetdb;bdertl;vcldbx;webdsnap;websnap;adortl;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;vclshlctrls;IntrawebDB_50_70;Intraweb_50_70;Core;cxLibraryVCLD7
 Conditionals=EUREKALOG;EUREKALOG_VER6
 DebugSourceDirs=
@@ -105,6 +105,10 @@ HostApplication=
 Launcher=
 UseLauncher=0
 DebugCWD=
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
 [Version Info]
 IncludeVerInfo=0
 AutoIncBuild=0
@@ -130,14 +134,21 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
+[Excluded Packages]
+C:\Program Files (x86)\Borland\Delphi7\Projects\Bpl\dxSkinscxScheduler3PainterD7.bpl=ExpressSkins Library Painter for Scheduler 3 by Developer Express Inc.
+C:\Program Files (x86)\Borland\Delphi7\Projects\Bpl\dxSkinsdxNavBar2PainterD7.bpl=ExpressSkins Library Painter for NavBar 2 by Developer Express Inc.
+[HistoryLists\hlConditionals]
+Count=1
+Item0=EUREKALOG;EUREKALOG_VER6
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=3
-Item0=..\..\Dcp;..\Pub;..\Interfaces
-Item1=..\..\Pub;..\..\Interfaces
-Item2=..\..\Pub;..\..\Interfaces;..\..\..\Dcu
+Count=4
+Item0=..\..\Dcp;..\Pub;..\Interfaces;D:\code\wmpj\DefComponent
+Item1=..\..\Dcp;..\Pub;..\Interfaces
+Item2=..\..\Pub;..\..\Interfaces
+Item3=..\..\Pub;..\..\Interfaces;..\..\..\Dcu
 [HistoryLists\hlUnitOutputDirectory]
 Count=2
 Item0=..\..\Dcu

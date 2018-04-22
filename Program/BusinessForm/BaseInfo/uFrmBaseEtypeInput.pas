@@ -82,8 +82,8 @@ begin
   DBComItem.AddItem(deBirthday, 'Birthday', 'Birthday');
   DBComItem.AddItem(edtEMail, 'EMail', 'EMail');
   DBComItem.AddItem(edtJob, 'Job', 'Job');
-  DBComItem.AddItem(edtTopTotal, 'TopTotal', 'TopTotal');
-  DBComItem.AddItem(edtLowLimitDiscount, 'LowLimitDiscount', 'LowLimitDiscount');
+  DBComItem.AddItem(edtTopTotal, 'TopTotal', 'TopTotal', cfFloat);
+  DBComItem.AddItem(edtLowLimitDiscount, 'LowLimitDiscount', 'LowLimitDiscount', cfFloat);
   DBComItem.AddItem(edtAddress, 'Address', 'Address');
   inherited;
 end;
@@ -91,6 +91,8 @@ end;
 procedure TfrmBaseEtypeInput.ClearFrmData;
 begin
   inherited;
+  edtTopTotal.Text := '0';
+  edtLowLimitDiscount.Text := '0';
 end;
 
 procedure TfrmBaseEtypeInput.DoSelectBasic(Sender: TObject;

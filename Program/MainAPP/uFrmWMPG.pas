@@ -31,7 +31,7 @@ type
     procedure CallFormClass(AFromNo: Integer; AParam: TParamObject); //´ò¿ª´°Ìå
     function GetMDIShowClient: TWinControl;
     procedure SetWindowState(AWindowState: TWindowState);
-    
+
     procedure OnShowMDI(Sender: TObject; ACaption: string; AFormIntf: IFormIntf);
   public
     { Public declarations }
@@ -97,7 +97,8 @@ begin
   FFrmNav.Parent := Self;
   FFrmNav.Show;
   pnlMDIClient.Visible := False;
-  OperatorID := '00001';
+  statList.Panels[0].Text := OperatorID;
+//  OperatorID := '00000';
 end;
 
 procedure TFrmWMPG.FormDestroy(Sender: TObject);
@@ -195,16 +196,20 @@ var
   aIndex: Integer;
   aMsgBox: IMsgBox;
 begin
-  aIndex := tclFrmList.TabIndex;
-  if aIndex > 0 then
+//  aIndex := tclFrmList.TabIndex;
+  if Assigned(tclFrmList) then
   begin
-    TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.ResizeFrm(pnlMDIClient);
-  end
-  else
+    for aIndex := 1 to tclFrmList.Tabs.Count - 1 do
+    begin
+      TFrmObj(tclFrmList.Tabs.Objects[aIndex]).FrmMDI.ResizeFrm(pnlMDIClient);
+    end;
+  end;
+
+  if Assigned(FFrmNav) then
   begin
-    if Assigned(FFrmNav) then FFrmNav.Width := pnlMDIClient.Width;;
+    FFrmNav.Width := pnlMDIClient.Width;
+    FFrmNav.Height := pnlMDIClient.Height;
   end;
 end;
-
 end.
 

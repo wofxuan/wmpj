@@ -29,8 +29,6 @@ type
     gridLVBase: TcxGridLevel;
     tsBill: TcxTabSheet;
     tsReport: TcxTabSheet;
-    tsData: TcxTabSheet;
-    tsOther: TcxTabSheet;
     btnSave: TdxBarLargeButton;
     actSaveRoleAction: TAction;
     cdsBase: TClientDataSet;
@@ -106,23 +104,25 @@ begin
   FModelLimit := IModelLimit((SysService as IModelControl).GetModelIntf(IModelLimit));
   FModelFun := SysService as IModelFun;
 
-  FGridBase := TGridItem.Create(fnLimitSetBase, gridBase, gridTVBase);
+  FGridBase := TGridItem.Create(ClassName + gridBase.Name, gridBase, gridTVBase);
   FGridBase.SetGridCellSelect(True);
   FGridBase.ShowMaxRow := False;
 
-  FGridBill := TGridItem.Create(fnLimitSetBill, gridBill, gridTVBill);
+  FGridBill := TGridItem.Create(ClassName + gridBill.Name, gridBill, gridTVBill);
   FGridBill.SetGridCellSelect(True);
   FGridBill.ShowMaxRow := False;
 
 
-  FGridReport := TGridItem.Create(fnLimitSetReport, gridReport, gridTVReport);
+  FGridReport := TGridItem.Create(ClassName + gridReport.Name, gridReport, gridTVReport);
   FGridReport.SetGridCellSelect(True);
   FGridReport.ShowMaxRow := False;
+
+  IniGridField();
   
   LoadRoleTree();
   LoadUserTree();
-  IniGridField();
-  LoadGridData();
+
+//  LoadGridData();
 
   SetOptState(True);
 
@@ -165,7 +165,7 @@ begin
   aColInfo.GridColumn.Options.Editing := False;
   FGridReport.AddCheckBoxCol('LView', '²é¿´', 1, 0);
   FGridReport.AddCheckBoxCol('LPrint', '´òÓ¡', 1, 0);
-  FGridBill.InitGridData;
+  FGridReport.InitGridData;
 end;
 
 procedure TfrmLimitRole.InitParamList;

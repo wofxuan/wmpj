@@ -266,7 +266,7 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m10003000', '权限管理', 'm1000', '', 0, nil);
     AddMenu('m1000300010000', '角色管理', 'm10003000', '', fnMdlLimitRole, nil);
     AddMenu('m1000300020000', '用户管理', 'm10003000', '', fnDialogLimitSet, nil);
-
+    AddMenu('m10004000', '流程设置', 'm1000', '', fnFlow, nil);
     AddMenu('m10001111', '测试接口', 'm1000', '', 0, TestIntfMethod);
 
 
@@ -301,7 +301,10 @@ procedure TSysMenu.LoadMenu;
     AddMenu('m40003000', '进货单查询', 'm4000', 'Mode=B', fnMdlReportBuy, nil);
     AddMenu('m40004000', '销售订单查询', 'm4000', 'Mode=S', fnMdlReportOrderSale, nil);
     AddMenu('m40005000', '销售单查询', 'm4000', 'Mode=S', fnMdlReportSale, nil);
-    
+
+    AddMenu('m5000', '辅助功能', '', '', 0, nil);
+    AddMenu('m50000001', '我的审核', 'm5000', '', fnMdlMyFlow, nil);
+
     AddMenu('m9000', '帮助', '', '', 0, nil);
     AddMenu('m90001000', '在线帮助', 'm9000', '', fnMdlHelp_Online, nil);
     AddMenu('m90002000', '计算器', 'm9000', '', fnMdlHelp_Calc, nil, 'F5');

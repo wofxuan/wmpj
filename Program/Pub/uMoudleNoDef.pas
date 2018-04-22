@@ -1,6 +1,5 @@
 {***************************
 窗体模块编号
-在窗体中的表格也共享此编号，如果一个窗体有多个表格，这定义多个常量来对应
 mx 2014-12-03
 ****************************}
 unit uMoudleNoDef;
@@ -20,15 +19,14 @@ const
   fnReport = 3000;
   //系统配置
   fnSystem = 4000;
+  //辅助功能
+  fnAssist= 5000;
 //  查询窗口
 //  fnDlgcond = 5000;
 //  TC选择类
 //  fnTc = 6000;
   //测试时使用的， 发布时删除
   fnTest = 7000;
-
-  //当一个窗体多个表格的时候, 定义表格的ID
-  fnGrid = 100000;
 
   //基本信息-----------------------------1000------------------------
   fnMdlBasePtypeList = fnBase + 0001; //商品
@@ -65,19 +63,15 @@ const
   fnMdlCheckGoods = fnSystem + 0009; //仓库盘点
   fnMdlLimitRole = fnSystem + 0010; //权限管理-角色管理
   fnDialogLimitSet = fnSystem + 0011; //权限管理-用户管理
+  fnFlow = fnSystem + 0012; //流程设置
 
   //测试-------------------------------7000---------------------
   fnMdlTTest = fnTest + 0001; //测试
 
-
-  //表格
-  fnLimitSetBase = fnGrid + 0001;//权限设置-基本信息权限
-  fnLimitSetBill = fnGrid + 0002;//权限设置-单据权限
-  fnLimitSetReport = fnGrid + 0003;//权限设置-报表权限
-  fnLimitSetData = fnGrid + 0004;//权限设置-数据权限
-  fnLimitSetOther = fnGrid + 0005;//权限设置-其它权限
-
-  fnPRMoney = fnGrid + 0006;//收付款单下表格
+  //辅助功能
+  fnMdlMyFlow = fnAssist + 0001; //我的审批
+  fnFlowWork = fnAssist + 0002; //审批工作
+  
 implementation
 
 end.

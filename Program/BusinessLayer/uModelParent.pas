@@ -643,7 +643,12 @@ var
   aRet: Integer;
   aResultDataSet: TClientDataSet;
 begin
-  Result := -1;  
+  Result := -1;
+  if ABillData.DetailData.ChildCount <= 0 then
+  begin
+    gMFCom.ShowMsgBox('明细数据不能为空！', '错误', mbtError);
+    Exit;
+  end;
   aNewVchcode := 0;
   AOutPutData.add('NdxReturn', 0);
   AOutPutData.add('CopyAudit', 0);

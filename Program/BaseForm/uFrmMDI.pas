@@ -56,7 +56,7 @@ var
 
 implementation
 
-uses uSysSvc, uMoudleNoDef, uBaseInfoDef, uFrmApp, uMainFormIntf;
+uses uSysSvc, uMoudleNoDef, uBaseInfoDef, uFrmApp, uPubFun, uMainFormIntf;
 
 {$R *.dfm}
 
@@ -72,7 +72,7 @@ end;
 procedure TfrmMDI.BeforeFormShow;
 begin
   inherited;
-  FGridItem := TGridItem.Create(MoudleNo, gridMainShow, gridTVMainShow);
+  FGridItem := TGridItem.Create(ClassName + IntToString(MoudleNo) + gridMainShow.Name, gridMainShow, gridTVMainShow);
   FGridItem.OnSelectBasic := DoSelectBasic;
   FGridItem.OnLoadUpDownData := DoLoadUpDownData;
   FDBAC := SysService as IDBAccess;
